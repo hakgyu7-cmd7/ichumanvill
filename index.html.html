@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- 구글 애드센스 공식 스크립트 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7089453923924161"
+     crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>이천휴먼빌에듀파크시티 입주민 공식 포털</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+  body { -webkit-tap-highlight-color: transparent; }
+  .nv.text-blue-700 { font-weight: 800; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans">
+<div class="max-w-md mx-auto min-h-screen bg-slate-50 relative flex flex-col justify-between">
+
+  <!-- 상단 헤더 -->
+  <header class="sticky top-0 z-30 bg-blue-800 text-white px-4 pt-[max(12px,env(safe-area-inset-top))] pb-3 flex justify-between items-center shadow">
+    <div class="cursor-pointer" onclick="go('home')">
+      <div class="flex items-center gap-1.5">
+        <p class="text-[11px] opacity-80">입주민 자치 커뮤니티</p>
+        <span id="cloud-badge" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="클라우드 실시간 연결됨"></span>
+      </div>
+      <h1 class="font-extrabold text-base">이천휴먼빌에듀파크시티</h1>
+    </div>
+    <div id="top-right"></div>
+  </header>
+
+  <!-- 메인 본문 영역 -->
+  <main id="view" class="px-4 pt-4 pb-28 flex-grow"></main>
+
+  <!-- 하단 고정 내비게이션 바 -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t grid grid-cols-6 z-50 shadow-lg" style="padding-bottom:env(safe-area-inset-bottom)">
+    <button data-t="home" onclick="go('home')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">🏠</div>홈</button>
+    <button data-t="notice" onclick="go('notice')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">📢</div>공지</button>
+    <button data-t="community" onclick="go('community')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">🎁</div>나눔·모임</button>
+    <button data-t="shop" onclick="go('shop')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">🏪</div>이웃가게</button>
+    <button data-t="complaint" onclick="go('complaint')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">💡</div>건의</button>
+    <button data-t="more" onclick="go('more')" class="nv py-2.5 text-[11px] text-slate-400"><div class="text-lg">☰</div>더보기</button>
+  </nav>
+
+  <!-- 바텀시트 모달 -->
+  <div id="sheet" class="hidden fixed inset-0 bg-black/40 z-50 flex items-end justify-center" onclick="if(event.target===this)closeSheet()">
+    <div class="bg-white w-full max-w-md rounded-t-3xl max-h-[88vh] overflow-y-auto p-5 pb-[max(20px,env(safe-area-inset-bottom))]">
+      <div class="flex justify-between items-center mb-4 gap-2">
+        <h3 id="sheet-title" class="font-extrabold text-base"></h3>
+        <button onclick="closeSheet()" class="text-slate-400 text-xl px-2">✕</button>
+      </div>
+      <div id="sheet-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Firebase 설정
+const firebaseConfig = {
+  apiKey: "AIzaSyBc9uUkjWV2R4jbvUBk4sPOyUF-cNaCuls",
+  authDomain: "ichumanvill-app.firebaseapp.com",
+  projectId: "ichumanvill-app",
+  storageBucket: "ichumanvill-app.firebasestorage.app",
+  messagingSenderId: "1034954079323",
+  appId: "1:1034954079323:web:ae25999a2c451a18dc537e"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) {
+  console.warn("Firebase 초기화 대기:", e);
+}
+
+const $ = id => document.getElementById(id);
+const K = 'hv_';
+const load = (k, f) => { try { const v = JSON.parse(localStorage.getItem(K + k)); return v ?? f; } catch (e) { return f; } };
+const save = (k, v) => { try { localStorage.setItem(K + k, JSON.stringify(v)); } catch (e) {} };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const today = () => { const d = new Date(); return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`; };
+const hm = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const dday = s => { const [y, m, d] = s.split('-').map(Number); const t = new Date(); t.setHours(0,0,0,0); return Math.ceil((new Date(y, m-1, d) - t) / 864e5); };
+const IN = 'w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white';
+const BTN = 'w-full bg-blue-700 text-white font-bold rounded-xl py-3 text-sm';
+const ADMIN = { id: '관리사무소', pw: '0000' };
+const ROLE = { developer: ['개발자', 'bg-red-600'], admin: ['관리자', 'bg-indigo-600'], council: ['입대의', 'bg-emerald-600'], resident: ['입주민', 'bg-blue-600'] };
+
+const LAWS = [
+  ['공동주택관리법', '법률', '2026.04.23 시행', 'https://www.law.go.kr/법령/공동주택관리법'],
+  ['공동주택관리법 시행령', '대통령령', '2026.04.23 시행', 'https://www.law.go.kr/법령/공동주택관리법시행령'],
+  ['공동주택관리법 시행규칙', '국토교통부령', '2026.04.23 시행', 'https://www.law.go.kr/법령/공동주택관리법시행규칙'],
+  ['건축법', '법률', '2026.02.10 시행', 'https://www.law.go.kr/법령/건축법'],
+  ['소방시설 설치 및 관리에 관한 법률', '법률', '최신 시행', 'https://www.law.go.kr/법령/소방시설설치및관리에관한법률']
+];
+const CONTRACTS = [
+  ['지안회계법인', '외부회계감사계약서', '1,000,000', '2026-09-30'],
+  ['(주)건진소방', '소방시설작동점검업체', '3,000,000', '2026-06-30'],
+  ['메리츠화재', '커뮤니티보험가입', '472,700', '2026-11-06'],
+  ['엘림넷', '세대통신서비스', '7,800,000', '2030-11-06'],
+  ['삼성화재보험(주)', '아파트놀이터배상보험', '85,400', '2026-11-07'],
+  ['(주)트러스데이', '커뮤니티예약프로그램', '4,800,000', '2026-10-31'],
+  ['(주)샛별', '관리업무회계 전산업체', '3,267,000', '2026-11-06']
+];
+const BIDS = [
+  ['낙찰완료', '하자진단 업체 선정 입찰', '15,125,000원 · 적격심사 최고점수 낙찰', 'http://www.kg2b.com/user/bid_list/KaptBidView?bidcode=140331'],
+  ['유찰', '무인 커피머신 렌탈 재입찰', '참가업체 미달로 유찰', 'http://www.kg2b.com/user/bid_list/KaptBidView?bidcode=141275']
+];
+const QUICK = [
+  ['📢','공지','notice'],
+  ['🎁','나눔·모임','community'],
+  ['🏪','이웃가게','shop'],
+  ['💡','건의','complaint'],
+  ['💬','채팅','chat'],
+  ['📑','의결','res'],
+  ['⚖️','법령','laws'],
+  ['🗄️','K-apt','kapt']
+];
+
+let user = load('user', null);
+let approved = load('approved', []);
+let pending = load('pending', []);
+
+let notices = load('notices', [
+  { id: 101, cat: '관리사무소', title: '단지 가을철 수목 전정 및 조경 정비 안내', content: '쾌적한 주거환경 조성 및 안전사고 예방을 위해 단지 내 수목 전정 작업을 진행합니다. 작업 구역 인근 보행 시 안전사고에 유의하시기 바랍니다.', date: '2026.10.10', author: '관리사무소', comments: [] },
+  { id: 102, cat: '입주자대표회의', title: '단지 내 작은도서관 자율도서 기부 캠페인 진행', content: '입주민 자녀 및 주민들을 위해 작은도서관 도서 기부 캠페인을 진행합니다. 유아 그림책, 아동 문학, 일반 교양 도서를 관리사무소로 전달해주시면 도서관 비치 후 소중히 공유하겠습니다.', date: '2026.10.08', author: '입대의 회장', comments: [] },
+  { id: 103, cat: '관리사무소', title: '지하주차장 물청소 및 차량 이동 주차 협조 요청', content: '쾌적하고 깨끗한 주차 환경 유지를 위해 지하 1, 2층 바닥 세척 작업을 실시합니다. 해당 구역 주차 차량은 작업 일정에 맞추어 지상 및 인근 구역으로 이동 주차해 주시기 바랍니다.', date: '2026.10.05', author: '관리사무소', comments: [] }
+]);
+
+let resolutions = load('res', [
+  { id: 201, sub: '제18차 정기회의', title: '단지 수의계약 공시 및 2년차 하자진단 추진 의결', content: '입주자대표회의 제18차 정기회의에서 수의계약 결과 승인 및 2년차 법적 하자보수 청구를 위한 전문 하자진단업체 선정 안건이 만장일치 찬성 의결되었습니다.', date: '2026.09.15', author: '입대의 회장', comments: [] }
+]);
+
+let complaints = load('comp', [
+  { id: 301, title: '지하주차장 코너 유도등 시인성 개선 제안', content: '지하 2층 진입로 코너 구간의 유도등 조도가 다소 어두워 서행 표지판 보강 및 LED 조명 교체를 제안드립니다.', date: '2026.10.11', author: '에듀파커', status: '검토중', isSecret: false, comments: [] },
+  { id: 302, title: '단지 산책로 벤치 추가 설치 건의', content: '어린이놀이터 옆 산책로에 어르신들과 보호자가 쉴 수 있는 쉼터 벤치가 1~2개 더 보강되면 좋겠습니다.', date: '2026.10.09', author: '초록마을', status: '접수완료', isSecret: false, comments: [] }
+]);
+
+let communities = load('comm_posts', [
+  { id: 401, cat: '무료나눔', title: '유아 그림책 전집 30권 무료 나눔합니다', content: '아이가 다 읽어서 상태 깨끗한 창작 그림책 전집입니다. 103동 1층 로비 또는 우편함 비대면 전달 가능합니다.', date: '2026.10.12', author: '도서사랑', status: '나눔중', comments: [] },
+  { id: 402, cat: '소모임', title: '주말 단지 둘레길 러닝/조깅 소모임 모집', content: '매주 토요일 아침 7시 단지 중앙광장에서 가볍게 30분 산책 및 조깅하실 주민분들을 모십니다. 초보자 누구나 환영합니다!', date: '2026.10.11', author: '러너스', status: '모집중', comments: [] },
+  { id: 403, cat: '재능기부', title: '어린이 주말 기초 축구/풋살 재능기부 안내', content: '초등학생 자녀를 둔 주민들을 위해 주말 오전 다목적구장에서 기초 드리블 및 패스 무료 레슨을 진행합니다.', date: '2026.10.10', author: '체육선생님', status: '진행중', comments: [] },
+  { id: 404, cat: '무료나눔', title: '원목 아기 식탁의자 비대면 나눔해요', content: '원목 하이체어 나눔합니다. 사용감은 조금 있지만 튼튼합니다. 필요하신 세대 편하게 댓글 남겨주세요.', date: '2026.10.08', author: '해피하우스', status: '나눔완료', comments: [] }
+]);
+
+let shops = load('shop_posts', [
+  { id: 501, cat: '식당/카페', title: '단지 앞 [휴먼카페] 입주민 전 메뉴 10% 상시 할인', content: '휴먼빌 입주민 여러분 안녕하세요! 매장 방문 시 입주민 인증 화면을 보여주시면 제조 음료 10% 상시 할인해 드립니다.', date: '2026.10.12', author: '휴먼카페사장', comments: [] },
+  { id: 502, cat: '인테리어/시공', title: '입주민 전용 친환경 에어컨 분해세척 공동구매 혜택', content: '같은 단지 주민으로서 꼼꼼하게 작업해 드립니다. 2대 이상 신청 시 세대당 1만원 추가 할인 진행합니다.', date: '2026.10.10', author: '클린홈케어', comments: [] },
+  { id: 503, cat: '생활/세탁', title: '비대면 모바일 세탁수거 [이천세탁] 문앞 수거 안내', content: '무거운 이불빨래나 정장, 패딩을 밤 11시까지 문 앞에 내놓으시면 수거 후 깨끗하게 세탁하여 문 앞 배송해 드립니다.', date: '2026.10.07', author: '이천세탁', comments: [] }
+]);
+
+let chat = load('chat', [{ id: 1, nick: '관리사무소', text: '입주민 공식 포털에 오신 것을 환영합니다.', time: '10:00', ts: 0, reply: null }]);
+let tab = 'home', replyId = null, pt = null;
+
+const isAdmin = () => !!user && (user.role === 'admin' || user.role === 'developer');
+const isCouncil = () => isAdmin() || (!!user && user.role === 'council');
+const ARR = { notice: () => notices, res: () => resolutions, comp: () => complaints, comm: () => communities, shop: () => shops };
+const TITLE = { notice: '공지 등록', res: '의결사항 등록', comp: '단지발전 건의 접수', comm: '나눔·소모임 글 작성', shop: '이웃가게 홍보 등록' };
+const arr = t => ARR[t]();
+
+function initCloudSync() {
+  if (!db) return;
+  db.collection('pending').onSnapshot(s => {
+    pending = s.docs.map(d => ({ docId: d.id, ...d.data() }));
+    save('pending', pending);
+    if (tab === 'admin') go('admin', false);
+  }, err => console.log(err));
+
+  db.collection('approved').onSnapshot(s => {
+    approved = s.docs.map(d => ({ docId: d.id, ...d.data() }));
+    save('approved', approved);
+    if (user) {
+      const me = approved.find(u => u.nick === user.nick);
+      if (me && me.role !== user.role) {
+        user.role = me.role;
+        save('user', user);
+        renderTop();
+      }
+    }
+  }, err => console.log(err));
+
+  db.collection('chat').orderBy('ts', 'asc').limitToLast(100).onSnapshot(s => {
+    if (!s.empty) {
+      chat = s.docs.map(d => ({ docId: d.id, ...d.data() }));
+      save('chat', chat);
+      if (tab === 'chat') {
+        const c = $('chatlog');
+        if (c) { c.innerHTML = chat.map(bubble).join(''); c.scrollTop = c.scrollHeight; }
+      }
+    }
+  }, err => console.log(err));
+
+  const syncBoard = (col, localArr, key) => {
+    db.collection(col).orderBy('id', 'desc').limit(50).onSnapshot(s => {
+      if (!s.empty) {
+        const list = s.docs.map(d => ({ docId: d.id, ...d.data() }));
+        if (col === 'notices') notices = list;
+        else if (col === 'res') resolutions = list;
+        else if (col === 'comp') complaints = list;
+        else if (col === 'comm') communities = list;
+        else if (col === 'shop') shops = list;
+        save(key, list);
+        if (tab === 'home' || tab === col || (col==='comm' && tab==='community')) go(tab, false);
+      }
+    }, err => console.log(err));
+  };
+
+  syncBoard('notices', notices, 'notices');
+  syncBoard('res', resolutions, 'res');
+  syncBoard('comp', complaints, 'comp');
+  syncBoard('comm', communities, 'comm_posts');
+  syncBoard('shop', shops, 'shop_posts');
+}
+
+const canReadComplaint = p => !p.isSecret || isCouncil() || (!!user && user.nick === p.author);
+const head = (t, a = '') => `<div class="flex justify-between items-center mb-4 gap-2"><h2 class="text-lg font-extrabold">${t}</h2>${a}</div>`;
+const btnSm = (txt, fn) => `<button onclick="${fn}" class="px-3 py-2 rounded-xl bg-blue-700 text-white text-xs font-bold shadow-sm">${txt}</button>`;
+const more = t => `<button onclick="go('${t}')" class="text-xs font-bold text-blue-700">더보기</button>`;
+const empty = '<p class="text-center text-sm text-slate-400 py-12">등록된 글이 없습니다.</p>';
+
+const card = (t, p) => {
+  const allowed = (t !== 'comp') || canReadComplaint(p);
+  const secretBadge = p.isSecret ? '<span class="text-amber-600 font-bold mr-1">🔒 비공개</span>' : '';
+  const statusBadge = p.status ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded font-bold ${p.status === '완료' || p.status === '나눔완료' ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-800'}">${p.status}</span>` : '';
+  const contentPreview = allowed ? esc(p.content) : '<span class="text-slate-400">비밀글입니다. 작성자와 관리자만 볼 수 있습니다.</span>';
+  return `<button onclick="detail('${t}',${p.id})" class="w-full text-left bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-3 active:bg-slate-50">
+    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+      <div class="flex items-center"><span class="font-bold text-blue-700">${secretBadge}${esc(p.cat || p.sub || '')}</span>${statusBadge}</div>
+      <span>${esc(p.date)}</span>
+    </div>
+    <h3 class="font-bold text-sm text-slate-900 mb-1">${esc(p.title)}</h3>
+    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">${contentPreview}</p>
+    <p class="text-[11px] text-slate-400 mt-2">${esc(p.author)} · 댓글 ${(p.comments || []).length}</p>
+  </button>`;
+};
+
+const list = t => { const it = arr(t); return it.length ? it.map(p => card(t, p)).join('') : empty; };
+
+function openSheet(title, html) {
+  $('sheet-title').innerHTML = title;
+  $('sheet-body').innerHTML = html;
+  $('sheet').classList.remove('hidden');
+  history.pushState({ sheet: true }, '');
+}
+
+function closeSheet(byBack = false) {
+  if (!$('sheet').classList.contains('hidden')) {$('sheet').classList.add('hidden');
+    if (!byBack && history.state && history.state.sheet) history.back();
+  }
+}
+
+window.addEventListener('popstate', e => {
+  if (!$('sheet').classList.contains('hidden')) { closeSheet(true); return; }
+  if (e.state && e.state.t) go(e.state.t, false);
+  else go('home', false);
+});
+
+function readImg(f, cb) {
+  if (!f) return cb(null);
+  const r = new FileReader();
+  r.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const s = Math.min(1, 600 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = im.width * s; c.height = im.height * s;
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      cb(c.toDataURL('image/jpeg', 0.6));
+    };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+
+const V = {
+  home() {
+    const ex = CONTRACTS.map(c => ({ c, d: dday(c[3]) })).filter(x => x.d >= 0 && x.d <= 90);
+    const mini = (t, p) => `<button onclick="detail('${t}',${p.id})" class="w-full text-left py-2.5 border-b last:border-0 text-sm flex justify-between gap-2"><span class="truncate">${p.isSecret ? '🔒 ' : ''}${esc(p.title)}</span><span class="text-[11px] text-slate-400 shrink-0">${esc(p.date)}</span></button>`;
+    return `
+    <div class="bg-gradient-to-br from-blue-800 to-indigo-900 text-white rounded-3xl p-5 mb-4 shadow-lg">
+      <p class="text-xs opacity-80">관리사무소 031-632-3335</p>
+      <h2 class="text-xl font-extrabold mt-1">${user ? esc(user.nick) + '님, 반갑습니다!' : '이천휴먼빌에듀파크시티 포털'}</h2>
+      <p class="text-xs opacity-80 mt-1">8개동 605세대 따뜻한 이웃 자치 커뮤니티</p>
+    </div>
+    
+    <div class="grid grid-cols-4 gap-2 mb-5">${QUICK.map(([i, n, t]) => `<button onclick="go('${t}')" class="bg-white rounded-2xl py-3 shadow-sm border border-slate-100 active:bg-slate-50"><div class="text-2xl">${i}</div><div class="text-[11px] font-bold mt-1">${n}</div></button>`).join('')}</div>
+
+    <div class="bg-white rounded-2xl p-2.5 border border-slate-200 text-center my-4 overflow-hidden shadow-xs">
+      <span class="text-[9px] text-slate-400 block mb-1">스폰서 광고</span>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-7089453923924161"
+           data-ad-slot="default"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+
+    <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
+      <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">📢 최신 단지 공지사항</h3>${more('notice')}</div>
+      ${notices.slice(0, 3).map(p => mini('notice', p)).join('')}
+    </section>
+
+    <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
+      <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">🎁 이웃 무료나눔 & 소모임</h3>${more('community')}</div>
+      ${communities.slice(0, 3).map(p => mini('comm', p)).join('')}
+    </section>
+
+    <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
+      <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">🏪 입주민 상가·소상공인 홍보</h3>${more('shop')}</div>
+      ${shops.slice(0, 3).map(p => mini('shop', p)).join('')}
+    </section>
+
+    <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
+      <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">💡 단지발전 건의함</h3>${more('complaint')}</div>
+      ${complaints.slice(0, 3).map(p => mini('comp', p)).join('')}
+    </section>
+
+    <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
+      <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">⏳ 수의계약 만료 현황 (D-90)</h3>${more('kapt')}</div>
+      ${ex.map(({ c, d }) => `<div class="flex justify-between text-sm py-2 border-b last:border-0"><span>${esc(c[0])}</span><b class="text-red-600">D-${d}</b></div>`).join('') || '<p class="text-xs text-slate-400 py-2">90일 이내 만료 계약이 없습니다.</p>'}
+    </section>
+
+    <div class="bg-white rounded-2xl p-2.5 border border-slate-200 text-center my-4 overflow-hidden shadow-xs">
+      <span class="text-[9px] text-slate-400 block mb-1">스폰서 광고</span>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-7089453923924161"
+           data-ad-slot="default"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+
+    <footer class="mt-6 pt-6 border-t border-slate-200 text-[11px] text-slate-500 space-y-2 pb-6">
+      <div class="flex justify-center gap-3 font-bold text-slate-700">
+        <button onclick="openPrivacyModal()" class="hover:underline text-blue-700">개인정보처리방침</button>
+        <span>|</span>
+        <button onclick="openTermsModal()" class="hover:underline">이용약관</button>
+        <span>|</span>
+        <button onclick="openAboutModal()" class="hover:underline">포털 소개</button>
+      </div>
+      <p class="text-center leading-relaxed">
+        이천휴먼빌에듀파크시티 입주민 공식 자치 포털<br>
+        소재지: 경기도 이천시 대월면 대산로208번길 93-8 | 관리사무소: 031-632-3335
+      </p>
+      <p class="text-center text-[10px] text-slate-400">
+        본 사이트는 Google AdSense 정책 및 개인정보보호 규정을 준수합니다. © 2026 이천휴먼빌에듀파크시티. All rights reserved.
+      </p>
+    </footer>`;
+  },
+
+  notice() {
+    return head('단지 공지사항', isAdmin() ? btnSm('+ 공지 등록', "openWrite('notice')") : '') + list('notice');
+  },
+
+  community() {
+    return head('나눔 & 공동체', btnSm('+ 나눔·모임 글쓰기', "openWrite('comm')")) + `
+      <div class="p-3 bg-blue-50 border border-blue-200 rounded-2xl mb-4 text-xs text-blue-900 leading-relaxed">
+        🤝 <strong>문앞/우편함 비대면 무료나눔</strong>, 재능기부, 취미 소모임, 환경 봉사를 자유롭게 제안해보세요!
+      </div>` + list('comm');
+  },
+
+  shop() {
+    return head('이웃가게 무료 홍보', btnSm('+ 내 가게 홍보', "openWrite('shop')")) + `
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl mb-4 text-xs text-amber-900 leading-relaxed">
+        🏪 입주민이 직접 운영하는 식당, 카페, 인테리어, 청소, 과외 등 <strong>무료 홍보 공간</strong>입니다.
+      </div>` + list('shop');
+  },
+
+  complaint() {
+    return head('단지발전 건의함', btnSm('+ 건의 제안', "openWrite('comp')")) + `
+      <div class="p-3 bg-slate-100 rounded-2xl mb-4 text-xs text-slate-600 leading-relaxed">
+        * 단순 세대 하자/방문차량 등록은 <strong>노크타운</strong>을 이용해주시고, <strong>단지 운영 개선 및 입대의 안건</strong>을 자유롭게 남겨주세요.
+      </div>` + list('comp');
+  },
+
+  res() {
+    return head('입대의 의결사항', isCouncil() ? btnSm('+ 의결 등록', "openWrite('res')") : '') + list('res');
+  },
+
+  chat() {
+    if (!user) {
+      return `<div class="text-center py-16 space-y-3"><div class="text-4xl">🔒</div><p class="font-bold text-slate-700">입주민 실시간 채팅은 로그인 후 참여 가능합니다</p><button onclick="login()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold">로그인하기</button></div>`;
+    }
+    const rp = replyId && chat.find(m => m.id === replyId);
+    return `
+    <div id="chatlog" class="space-y-3 overflow-y-auto pr-1" style="height:calc(100vh - 290px)">${chat.map(bubble).join('')}</div>
+    <div class="fixed bottom-16 left-0 right-0 max-w-md mx-auto bg-white border-t p-2.5 z-20">
+      ${rp ? `<div class="flex justify-between items-center text-xs bg-slate-100 rounded-lg px-3 py-1.5 mb-2"><span class="truncate">↪ ${esc(rp.nick)}:${esc(rp.text)}</span><button onclick="replyId=null;go('chat')" class="ml-2">✕</button></div>` : ''}
+      <form onsubmit="sendChat(event)" class="flex gap-2">
+        <input name="m" required autocomplete="off" class="${IN} rounded-2xl" placeholder="메시지 입력">
+        <button class="px-4 rounded-2xl bg-blue-700 text-white text-sm font-bold shrink-0">전송</button>
+      </form>
+    </div>`;
+  },
+
+  laws() {
+    return head('법령정보') + LAWS.map(([n, t, e, l]) => `<a href="${l}" target="_blank" rel="noopener" class="block bg-white rounded-2xl p-4 mb-3 shadow-sm border"><span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">${t}</span><h3 class="font-bold text-sm mt-2">${n}</h3><p class="text-xs text-emerald-600 mt-1">${e}</p><p class="text-xs text-indigo-600 font-bold mt-2">법령 전문 보기 ↗</p></a>`).join('') + '<p class="text-[11px] text-slate-400 text-center mt-2">출처: 국가법령정보센터</p>';
+  },
+
+  kapt() {
+    return head('K-apt 공시') + '<h3 class="text-sm font-bold mb-2">수의계약 현황</h3>' + CONTRACTS.map(([c, t, p, e]) => {
+      const d = dday(e);
+      const b = d < 0 ? '<span class="text-slate-400">종료</span>' : d <= 90 ? `<span class="text-red-600 font-bold">D-${d}</span>` : `<span class="text-emerald-700">D-${d}</span>`;
+      return `<div class="bg-white rounded-2xl p-4 mb-2 shadow-sm border"><div class="flex justify-between text-xs"><b>${esc(c)}</b>${b}</div><p class="text-sm mt-1">${esc(t)}</p><p class="text-xs text-slate-500 mt-1">${p}원 · ~${e}</p></div>`;
+    }).join('') + '<h3 class="text-sm font-bold mt-5 mb-2">전자입찰 현황</h3>' + BIDS.map(([s, t, r, u]) => `<a href="${u}" target="_blank" rel="noopener" class="block bg-white rounded-2xl p-4 mb-2 shadow-sm border"><span class="text-[11px] font-bold px-2 py-0.5 rounded ${s === '낙찰완료' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">${s}</span><p class="text-sm font-bold mt-1">${esc(t)}</p><p class="text-xs text-slate-500">${esc(r)}</p></a>`).join('');
+  },
+
+  more() {
+    const items = [
+      ['💬', '입주민 실시간 채팅', 'chat'],
+      ['📑', '입대의 의결사항', 'res'],
+      ['⚖️', '국가 법령정보', 'laws'],
+      ['🗄️', 'K-apt 공시 정보', 'kapt'],
+      ['👤', '내 정보 및 설정', 'me']
+    ];
+    if (isAdmin()) items.push(['🛡️', '관리자 승인·등급 관리', 'admin']);
+    return head('더보기') + `<div class="bg-white rounded-2xl shadow-sm border divide-y">${items.map(([i, n, t]) => `<button onclick="go('${t}')" class="w-full text-left px-4 py-3.5 text-sm font-bold flex justify-between"><span>${i}${n}</span><span class="text-slate-300">›</span></button>`).join('')}</div>
+    <div class="mt-4 p-4 bg-white rounded-2xl border space-y-2 text-xs">
+      <p class="font-bold text-slate-800">단지 공식 정책 및 정보</p>
+      <div class="flex gap-3 text-blue-700 font-bold">
+        <button onclick="openPrivacyModal()">개인정보처리방침</button>
+        <button onclick="openTermsModal()">이용약관</button>
+        <button onclick="openAboutModal()">포털소개</button>
+      </div>
+    </div>
+    <a href="tel:031-632-3335" class="block mt-4 text-center text-sm font-bold text-blue-700 bg-white rounded-2xl py-3 border">📞 관리사무소 031-632-3335</a>`;
+  },
+
+  me() {
+    if (!user) {
+      return `<div class="text-center py-16 space-y-3"><div class="text-4xl">👤</div><p class="font-bold text-slate-700">로그인 후 내 정보 조회가 가능합니다</p><button onclick="login()" class="px-6 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold">로그인하기</button></div>`;
+    }
+    const r = ROLE[user.role] || ROLE.resident;
+    return head('내 정보') + `<div class="bg-white rounded-2xl p-5 shadow-sm border space-y-2 text-sm"><p>닉네임 <b>${esc(user.nick)}</b></p><p>등급 <b>${r[0]}</b></p>${user.dongHo ? `<p>세대 <b>${esc(user.dongHo)}</b></p>` : ''}</div>
+    <button onclick="logout()" class="${BTN} mt-4 bg-slate-700">로그아웃</button>
+    ${user.nick === ADMIN.id ? '' : '<button onclick="withdraw()" class="w-full text-xs text-red-600 font-bold mt-4 py-2">회원탈퇴 (정보 영구 삭제)</button>'}`;
+  },
+
+  admin() {
+    if (!isAdmin()) return '<p class="text-center py-12 text-sm text-slate-400">관리자만 이용할 수 있습니다.</p>';
+    const pendHtml = pending.map((u, i) => `<div class="bg-white rounded-2xl p-4 mb-2 shadow-sm border text-sm"><p><b>${esc(u.dongHo)}</b> · ${esc(u.name)} · ${esc(u.nick)}</p>${u.img ? `<img src="${u.img}" class="w-full rounded-lg my-2 max-h-48 object-contain bg-slate-100">` : ''}<button onclick="approve(${i})" class="${BTN} py-2 mt-1">승인</button></div>`).join('') || '<p class="text-xs text-slate-400 mb-4">대기 중인 신청이 없습니다.</p>';
+    const roleHtml = approved.map((u, i) => `<div class="bg-white rounded-2xl p-3 mb-2 shadow-sm border flex justify-between items-center text-sm"><span>${esc(u.dongHo)} ${esc(u.nick)}</span><select onchange="changeRole(${i},this.value)" class="border rounded-lg text-xs p-1">${['resident', 'council', 'admin'].map(r => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${ROLE[r][0]}</option>`).join('')}</select></div>`).join('');
+    return head('관리자 전용') + `<h3 class="text-sm font-bold mb-2">가입 승인 대기 (${pending.length})</h3>${pendHtml}<h3 class="text-sm font-bold mt-5 mb-2">회원 등급 관리 (${approved.length})</h3>${roleHtml}`;
+  }
+};
+
+function openPrivacyModal() {
+  openSheet('개인정보처리방침', `
+    <div class="text-xs text-slate-700 space-y-3 leading-relaxed">
+      <p class="font-bold text-slate-900">제1조 (목적 및 수집 항목)</p>
+      <p>본 포털(이천휴먼빌에듀파크시티 입주민 공식 포털)은 단지 내 입주민의 원활한 소통 및 실거주 인증을 위해 최소한의 정보(성명, 닉네임, 동·호수, 연락처, 월패드 인증 캡처본)를 수집합니다.</p>
+      
+      <p class="font-bold text-slate-900">제2조 (Google 및 제3자 광고 사업자의 쿠키 사용 고지)</p>
+      <p>1. 본 웹사이트는 구글(Google)이 제공하는 웹 로그 분석 및 광고 서비스(Google AdSense)를 이용하고 있습니다.<br>
+      2. Google 및 제3자 광고 사업자는 사용자가 본 사이트 또는 다른 웹사이트를 방문한 기록을 바탕으로 맞춤형 광고를 게재하기 위해 쿠키(Cookie)를 사용합니다.<br>
+      3. 사용자는 Google 광고 설정(https://adssettings.google.com)을 방문하여 개인 맞춤 광고 게재에 사용되는 쿠키 설정을 거부하거나 조정할 수 있습니다.</p>
+      
+      <p class="font-bold text-slate-900">제3조 (개인정보의 보유 및 파기)</p>
+      <p>수집된 개인정보는 회원 탈퇴 시 지체 없이 영구 파기되며, 제3자에게 무단 제공되지 않습니다.</p>
+    </div>
+  `);
+}
+
+function openTermsModal() {
+  openSheet('서비스 이용약관', `
+    <div class="text-xs text-slate-700 space-y-3 leading-relaxed">
+      <p class="font-bold text-slate-900">제1조 (목적)</p>
+      <p>본 약관은 이천휴먼빌에듀파크시티 입주민 간의 자치 소통, 무료 나눔, 이웃가게 홍보 및 단지 공지 서비스의 이용 조건을 규정함을 목적으로 합니다.</p>
+      
+      <p class="font-bold text-slate-900">제2조 (회원의 의무 및 이용 제한)</p>
+      <p>1. 타 세대를 사칭하거나 허위 월패드 인증을 제출할 경우 이용이 영구 정지될 수 있습니다.<br>
+      2. 욕설, 비방, 허위사실 유포, 상업적 스팸 게시물은 관리자에 의해 사전 통보 없이 삭제될 수 있습니다.</p>
+    </div>
+  `);
+}
+
+function openAboutModal() {
+  openSheet('포털 소개 및 연락처', `
+    <div class="text-xs text-slate-700 space-y-3 leading-relaxed">
+      <p class="font-bold text-slate-900">이천휴먼빌에듀파크시티 공식 포털</p>
+      <p>본 웹 포털은 8개동 605세대 입주민의 자치 커뮤니티 활성화, 단지 공식 공지 공유, 투명한 K-apt 공시 열람 및 이웃 간 무료 나눔을 지원하기 위해 운영됩니다.</p>
+      <p>• 관리사무소: 031-632-3335<br>
+      • 단지 위치: 경기도 이천시 대월면 대산로208번길 93-8</p>
+    </div>
+  `);
+}
+
+function bubble(m) {
+  const me = user && user.nick === m.nick;
+  return `<div class="flex flex-col ${me ? 'items-end' : 'items-start'}">
+    <span class="text-[10px] text-slate-400 px-1">${esc(m.nick)}</span>
+    <div class="flex items-end gap-1 ${me ? 'flex-row-reverse' : ''}">
+      <div onpointerdown="pressStart(${m.id})" onpointerup="pressEnd()" onpointerleave="pressEnd()" oncontextmenu="event.preventDefault();msgMenu(${m.id})" style="-webkit-touch-callout:none;user-select:none" class="max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${me ? 'bg-blue-600 text-white' : 'bg-white border'}">
+        ${m.reply ? `<div class="text-[11px] opacity-70 border-l-2 pl-2 mb-1">${esc(m.reply.nick)}:${esc(m.reply.text)}</div>` : ''}${esc(m.text)}
+      </div>
+      <span class="text-[10px] text-slate-400">${m.time}</span>
+    </div></div>`;
+}
+function pressStart(id) { pt = setTimeout(() => msgMenu(id), 500); }
+function pressEnd() { clearTimeout(pt); }
+
+function msgMenu(id) {
+  const m = chat.find(x => x.id === id); if (!m) return;
+  const mine = user && user.nick === m.nick;
+  const canDel = isCouncil() || (mine && Date.now() - m.ts <= 10 * 60 * 1000);
+  openSheet('메시지 메뉴', `<div class="space-y-2">
+    <button onclick="replyId=${id};closeSheet();go('chat')" class="w-full py-3 rounded-xl bg-slate-100 font-bold text-sm">↪ 답장</button>
+    <button onclick="copyMsg(${id})" class="w-full py-3 rounded-xl bg-slate-100 font-bold text-sm">📋 복사</button>
+    ${canDel ? `<button onclick="delMsg(${id})" class="w-full py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm">🗑 삭제</button>` : ''}
+  </div>`);
+}
+function copyMsg(id) { const m = chat.find(x => x.id === id); navigator.clipboard?.writeText(m.text); closeSheet(); }
+function delMsg(id) {
+  if (!confirm('이 메시지를 삭제할까요?')) return;
+  const m = chat.find(x => x.id === id);
+  if (db && m && m.docId) db.collection('chat').doc(m.docId).delete();
+  chat = chat.filter(x => x.id !== id); save('chat', chat); closeSheet(); go('chat');
+}
+function sendChat(e) {
+  e.preventDefault();
+  const txt = e.target.elements.m.value.trim(); if (!txt) return false;
+  const rp = replyId && chat.find(m => m.id === replyId);
+  const newMsg = { id: Date.now(), nick: user.nick, text: txt, time: hm(), ts: Date.now(), reply: rp ? { nick: rp.nick, text: rp.text } : null };
+  if (db) db.collection('chat').add(newMsg);
+  chat.push(newMsg); if (chat.length > 200) chat = chat.slice(-200);
+  replyId = null; save('chat', chat); go('chat');
+  return false;
+}
+
+function detail(t, id) {
+  const p = arr(t).find(x => x.id === id); if (!p) return;
+  if (t === 'comp' && !canReadComplaint(p)) {
+    alert('비공개 건의글입니다. 작성자와 관리자만 볼 수 있습니다.');
+    return;
+  }
+  const cm = p.comments || [];
+  const mine = user && (isAdmin() || user.nick === p.author);
+  let st = '';
+  if (t === 'comm' && mine) {
+    st = `<select onchange="setCommStatus(${id},this.value)" class="${IN} mb-3 font-bold text-xs">
+      <option ${p.status === '진행중' ? 'selected' : ''}>진행중</option>
+      <option ${p.status === '나눔완료' ? 'selected' : ''}>나눔완료</option>
+      <option ${p.status === '모집완료' ? 'selected' : ''}>모집완료</option>
+    </select>`;
+  } else if (t === 'comp' && isCouncil()) {
+    st = `<select onchange="setStatus(${id},this.value)" class="${IN} mb-3 font-bold text-xs">${['접수완료', '검토중', '반영완료'].map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select>`;
+  }
+
+  openSheet(esc(p.title), `
+    <div class="flex justify-between items-center text-xs text-slate-400 mb-3">
+      <span>${esc(p.date)} · ${esc(p.author)} ${p.isSecret ? '· 🔒 비공개' : ''}</span>
+      ${p.status ? `<span class="px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800 text-[11px]">${p.status}</span>` : ''}
+    </div>
+    ${p.img ? `<img src="${p.img}" class="w-full rounded-xl mb-3">` : ''}
+    <p class="text-sm whitespace-pre-wrap leading-relaxed mb-4">${esc(p.content)}</p>
+    ${st}
+    ${mine ? `<button onclick="delPost('${t}',${id})" class="text-xs text-red-600 font-bold mb-4">이 글 삭제</button>` : ''}
+    <h4 class="text-xs font-bold mb-2">댓글 ${cm.length}</h4>
+    <div class="space-y-2 mb-3">${cm.map(c => `<div class="bg-slate-50 rounded-xl p-2.5 text-xs"><b>${esc(c.author)}</b> <span class="text-slate-400">${esc(c.time)}</span><p class="mt-1">${esc(c.text)}</p></div>`).join('') || '<p class="text-xs text-slate-400">등록된 댓글이 없습니다.</p>'}</div>
+    ${user ? `<form onsubmit="return addComment(event,'${t}',${id})" class="flex gap-2"><input name="c" required class="${IN}" placeholder="댓글 입력"><button class="px-4 rounded-xl bg-blue-700 text-white text-sm font-bold shrink-0">등록</button></form>` : '<button onclick="login()" class="w-full py-2.5 rounded-xl bg-slate-100 text-xs font-bold text-blue-700">로그인하고 댓글 남기기</button>'}`);
+}
+
+function addComment(e, t, id) {
+  e.preventDefault();
+  const v = e.target.elements.c.value.trim(); if (!v) return false;
+  const p = arr(t).find(x => x.id === id);
+  const newCm = { author: user.nick, text: v, time: today() + ' ' + hm() };
+  p.comments = (p.comments || []).concat(newCm);
+  if (db && p.docId) db.collection(t === 'comm' ? 'comm' : (t === 'shop' ? 'shop' : t)).doc(p.docId).update({ comments: p.comments });
+  save(t === 'comm' ? 'comm_posts' : (t === 'shop' ? 'shop_posts' : t), arr(t));
+  detail(t, id);
+  return false;
+}
+
+function delPost(t, id) {
+  if (!confirm('삭제하시겠습니까? 복구할 수 없습니다.')) return;
+  const a = arr(t);
+  const p = a.find(x => x.id === id);
+  if (db && p && p.docId) db.collection(t === 'comm' ? 'comm' : (t === 'shop' ? 'shop' : t)).doc(p.docId).delete();
+  a.splice(a.findIndex(x => x.id === id), 1);
+  save(t === 'comm' ? 'comm_posts' : (t === 'shop' ? 'shop_posts' : t), a);
+  closeSheet(); go(tab);
+}
+
+function setStatus(id, v) {
+  const c = complaints.find(x => x.id === id);
+  if (c) { c.status = v; if (db && c.docId) db.collection('comp').doc(c.docId).update({ status: v }); save('comp', complaints); }
+}
+function setCommStatus(id, v) {
+  const c = communities.find(x => x.id === id);
+  if (c) { c.status = v; if (db && c.docId) db.collection('comm').doc(c.docId).update({ status: v }); save('comm_posts', communities); }
+}
+
+function openWrite(t) {
+  if (!user) {
+    alert('게시글 작성은 입주민 로그인 후 이용 가능합니다.');
+    return login();
+  }
+  let extra = '';
+  if (t === 'notice') extra = `<select name="cat" class="${IN}"><option>관리사무소</option><option>입주자대표회의</option></select>`;
+  else if (t === 'res') extra = `<input name="sub" required class="${IN}" placeholder="회차 (예: 제24차 정기회의)">`;
+  else if (t === 'comm') extra = `<select name="cat" class="${IN}"><option>무료나눔</option><option>소모임</option><option>재능기부</option><option>공동체봉사</option></select>`;
+  else if (t === 'shop') extra = `<select name="cat" class="${IN}"><option>식당/카페</option><option>생활/세탁/마트</option><option>인테리어/시공/청소</option><option>학원/과외/예체능</option><option>기타서비스</option></select>`;
+
+  const secretOpt = t === 'comp' ? `<label class="flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200"><input type="checkbox" name="secret"> 🔒 비공개로 접수 (작성자와 관리자만 열람)</label>` : '';
+  const img = `<label class="text-xs font-bold block">사진 첨부 (선택)</label><input type="file" name="img" accept="image/*" class="text-xs">`;
+  openSheet(TITLE[t], `<form onsubmit="return submitWrite(event,'${t}')" class="space-y-3">${extra}<input name="ttl" required class="${IN}" placeholder="제목"><textarea name="body" rows="5" required class="${IN}" placeholder="내용을 작성해주세요."></textarea>${secretOpt}${img}<button class="${BTN}">등록</button></form>`);
+}
+
+function submitWrite(e, t) {
+  e.preventDefault();
+  const g = n => e.target.elements[n];
+  const rec = { id: Date.now(), title: g('ttl').value.trim(), content: g('body').value.trim(), date: today(), author: user.nick, comments: [] };
+  if (t === 'notice' || t === 'comm' || t === 'shop') rec.cat = g('cat').value;
+  if (t === 'res') rec.sub = g('sub').value.trim();
+  if (t === 'comp') { rec.status = '접수완료'; rec.isSecret = !!g('secret')?.checked; }
+  if (t === 'comm') rec.status = '진행중';
+
+  readImg(g('img')?.files[0], img => {
+    if (img) rec.img = img;
+    const col = (t === 'comm') ? 'comm' : (t === 'shop' ? 'shop' : t);
+    if (db) db.collection(col).add(rec);
+    arr(t).unshift(rec);
+    save(t === 'comm' ? 'comm_posts' : (t === 'shop' ? 'shop_posts' : t), arr(t));
+    closeSheet(); go(tab);
+  });
+  return false;
+}
+
+function login() {
+  openSheet('로그인', `<form onsubmit="return doLogin(event)" class="space-y-3">
+    <input name="uid" required class="${IN}" placeholder="닉네임 또는 관리사무소">
+    <input name="upw" type="password" required class="${IN}" placeholder="비밀번호">
+    <button class="${BTN}">로그인</button></form>
+    <button onclick="register()" class="w-full mt-3 text-sm font-bold text-blue-700 py-2">입주민 가입신청 →</button>`);
+}
+
+function doLogin(e) {
+  e.preventDefault();
+  const g = n => e.target.elements[n];
+  const id = g('uid').value.trim(), pw = g('upw').value.trim();
+  if (id === ADMIN.id && pw === ADMIN.pw) {
+    user = { role: 'admin', nick: ADMIN.id, name: '관리사무소', dongHo: '관리본부' };
+  } else {
+    const f = approved.find(u => u.nick === id && u.pw === pw);
+    if (!f) {
+      alert(pending.some(u => u.nick === id) ? '승인 대기 중인 계정입니다.' : '아이디 또는 비밀번호가 맞지 않습니다.');
+      return false;
+    }
+    user = { nick: f.nick, name: f.name, dongHo: f.dongHo, phone: f.phone, role: f.role };
+  }
+  save('user', user); closeSheet(); renderTop(); go(tab);
+  return false;
+}
+
+function register() {
+  openSheet('입주민 가입신청', `<form onsubmit="return submitRegister(event)" class="space-y-3 text-sm">
+    <input name="nick" required class="${IN}" placeholder="활동 닉네임 (실명 대신 표시)">
+    <div class="grid grid-cols-2 gap-2"><select name="dong" class="${IN}">${[101,102,103,104,105,106,107,108].map(d => `<option>${d}동</option>`).join('')}</select><input name="ho" required class="${IN}" placeholder="호수 (예: 1204)"></div>
+    <input name="name" required class="${IN}" placeholder="실거주자 성함">
+    <input name="phone" type="tel" required class="${IN}" placeholder="연락처 010-0000-0000">
+    <input name="pw" type="password" required minlength="4" class="${IN}" placeholder="비밀번호 (4자리 이상)">
+    <label class="text-xs font-bold block">세대 월패드 인증화면 사진 (필수)</label>
+    <input name="img" type="file" accept="image/*" required class="text-xs">
+    <label class="flex items-center gap-2 text-xs"><input name="agree" type="checkbox" required> 개인정보 수집·이용 동의 (목적: 실거주 승인)</label>
+    <button class="${BTN}">가입 신청</button></form>`);
+}
+
+function submitRegister(e) {
+  e.preventDefault();
+  const g = n => e.target.elements[n];
+  const nick = g('nick').value.trim();
+  if (nick === ADMIN.id || [...approved, ...pending].some(u => u.nick === nick)) { alert('이미 사용 중인 닉네임입니다.'); return false; }
+  readImg(g('img').files[0], img => {
+    const newReg = { nick, pw: g('pw').value, name: g('name').value.trim(), phone: g('phone').value.trim(), dongHo: `${g('dong').value} ${g('ho').value.trim()}호`, img, role: 'resident', date: today() };
+    if (db) db.collection('pending').add(newReg);
+    pending.push(newReg); save('pending', pending); closeSheet();
+    alert('가입 신청이 클라우드에 정상 접수되었습니다. 관리사무소 승인 후 로그인할 수 있습니다.');
+  });
+  return false;
+}
+
+function approve(i) {
+  const u = pending[i];
+  if (db && u.docId) db.collection('pending').doc(u.docId).delete();
+  const approvedUser = { nick: u.nick, pw: u.pw, name: u.name, phone: u.phone, dongHo: u.dongHo, role: 'resident' };
+  if (db) db.collection('approved').add(approvedUser);
+  pending.splice(i, 1); approved.push(approvedUser);
+  save('approved', approved); save('pending', pending); go('admin');
+}
+
+function changeRole(i, v) {
+  const u = approved[i];
+  u.role = v;
+  if (db && u.docId) db.collection('approved').doc(u.docId).update({ role: v });
+  save('approved', approved);
+  if (user && user.nick === u.nick) { user.role = v; save('user', user); renderTop(); }
+  go('admin');
+}
+
+function logout() { user = null; save('user', null); renderTop(); go('home'); }
+function withdraw() {
+  if (!confirm('탈퇴하시면 등록된 실명, 동·호수 등 모든 정보가 삭제됩니다. 진행할까요?')) return;
+  const me = approved.find(u => u.nick === user.nick);
+  if (db && me && me.docId) db.collection('approved').doc(me.docId).delete();
+  approved = approved.filter(u => u.nick !== user.nick); save('approved', approved); logout();
+}
+
+function renderTop() {
+  $('top-right').innerHTML = user
+    ? `<button onclick="go('me')" class="text-xs bg-white/15 rounded-full px-3 py-1.5 font-bold">${esc(user.nick)} <span class="${(ROLE[user.role] || ROLE.resident)[1]} rounded px-1 text-[10px]">${(ROLE[user.role] || ROLE.resident)[0]}</span></button>`
+    : `<button onclick="login()" class="text-xs bg-white text-blue-800 rounded-full px-3 py-1.5 font-bold">로그인</button>`;
+}
+
+function updNav() {
+  const map = { res: 'more', laws: 'more', kapt: 'more', me: 'more', admin: 'more', chat: 'more' };
+  const cur = map[tab] || tab;
+  document.querySelectorAll('.nv').forEach(b => {
+    const on = b.dataset.t === cur;
+    b.classList.toggle('text-blue-700', on);
+    b.classList.toggle('text-slate-400', !on);
+  });
+}
+
+function go(t, push = true) {
+  tab = t;
+  if (push) history.pushState({ t }, '');
+  $('view').innerHTML = (V[t] || V.home)();
+  window.scrollTo(0, 0);
+  updNav();
+  const c = $('chatlog'); if (c) c.scrollTop = c.scrollHeight;
+  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+}
+
+history.replaceState({ t: 'home' }, '');
+renderTop();
+initCloudSync();
+go('home', false);
+</script>
+</body>
+</html>
