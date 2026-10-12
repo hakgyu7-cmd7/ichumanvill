@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<!-- 구글 애드센스 공식 스크립트 -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7089453923924161"
-     crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>이천휴먼빌에듀파크시티 입주민 공식 포털</title>
@@ -290,16 +287,6 @@ const V = {
     
     <div class="grid grid-cols-4 gap-2 mb-5">${QUICK.map(([i, n, t]) => `<button onclick="go('${t}')" class="bg-white rounded-2xl py-3 shadow-sm border border-slate-100 active:bg-slate-50"><div class="text-2xl">${i}</div><div class="text-[11px] font-bold mt-1">${n}</div></button>`).join('')}</div>
 
-    <div class="bg-white rounded-2xl p-2.5 border border-slate-200 text-center my-4 overflow-hidden shadow-xs">
-      <span class="text-[9px] text-slate-400 block mb-1">스폰서 광고</span>
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-7089453923924161"
-           data-ad-slot="default"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-    </div>
-
     <section class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
       <div class="flex justify-between items-center mb-1"><h3 class="font-bold text-sm">📢 최신 단지 공지사항</h3>${more('notice')}</div>
       ${notices.slice(0, 3).map(p => mini('notice', p)).join('')}
@@ -325,16 +312,6 @@ const V = {
       ${ex.map(({ c, d }) => `<div class="flex justify-between text-sm py-2 border-b last:border-0"><span>${esc(c[0])}</span><b class="text-red-600">D-${d}</b></div>`).join('') || '<p class="text-xs text-slate-400 py-2">90일 이내 만료 계약이 없습니다.</p>'}
     </section>
 
-    <div class="bg-white rounded-2xl p-2.5 border border-slate-200 text-center my-4 overflow-hidden shadow-xs">
-      <span class="text-[9px] text-slate-400 block mb-1">스폰서 광고</span>
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-7089453923924161"
-           data-ad-slot="default"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-    </div>
-
     <footer class="mt-6 pt-6 border-t border-slate-200 text-[11px] text-slate-500 space-y-2 pb-6">
       <div class="flex justify-center gap-3 font-bold text-slate-700">
         <button onclick="openPrivacyModal()" class="hover:underline text-blue-700">개인정보처리방침</button>
@@ -348,7 +325,7 @@ const V = {
         소재지: 경기도 이천시 대월면 대산로208번길 93-8 | 관리사무소: 031-632-3335
       </p>
       <p class="text-center text-[10px] text-slate-400">
-        본 사이트는 Google AdSense 정책 및 개인정보보호 규정을 준수합니다. © 2026 이천휴먼빌에듀파크시티. All rights reserved.
+        본 사이트는 개인정보보호 규정을 준수합니다. © 2026 이천휴먼빌에듀파크시티. All rights reserved.
       </p>
     </footer>`;
   },
@@ -454,13 +431,7 @@ function openPrivacyModal() {
     <div class="text-xs text-slate-700 space-y-3 leading-relaxed">
       <p class="font-bold text-slate-900">제1조 (목적 및 수집 항목)</p>
       <p>본 포털(이천휴먼빌에듀파크시티 입주민 공식 포털)은 단지 내 입주민의 원활한 소통 및 실거주 인증을 위해 최소한의 정보(성명, 닉네임, 동·호수, 연락처, 월패드 인증 캡처본)를 수집합니다.</p>
-      
-      <p class="font-bold text-slate-900">제2조 (Google 및 제3자 광고 사업자의 쿠키 사용 고지)</p>
-      <p>1. 본 웹사이트는 구글(Google)이 제공하는 웹 로그 분석 및 광고 서비스(Google AdSense)를 이용하고 있습니다.<br>
-      2. Google 및 제3자 광고 사업자는 사용자가 본 사이트 또는 다른 웹사이트를 방문한 기록을 바탕으로 맞춤형 광고를 게재하기 위해 쿠키(Cookie)를 사용합니다.<br>
-      3. 사용자는 Google 광고 설정(https://adssettings.google.com)을 방문하여 개인 맞춤 광고 게재에 사용되는 쿠키 설정을 거부하거나 조정할 수 있습니다.</p>
-      
-      <p class="font-bold text-slate-900">제3조 (개인정보의 보유 및 파기)</p>
+      <p class="font-bold text-slate-900">제2조 (개인정보의 보유 및 파기)</p>
       <p>수집된 개인정보는 회원 탈퇴 시 지체 없이 영구 파기되며, 제3자에게 무단 제공되지 않습니다.</p>
     </div>
   `);
@@ -471,10 +442,9 @@ function openTermsModal() {
     <div class="text-xs text-slate-700 space-y-3 leading-relaxed">
       <p class="font-bold text-slate-900">제1조 (목적)</p>
       <p>본 약관은 이천휴먼빌에듀파크시티 입주민 간의 자치 소통, 무료 나눔, 이웃가게 홍보 및 단지 공지 서비스의 이용 조건을 규정함을 목적으로 합니다.</p>
-      
       <p class="font-bold text-slate-900">제2조 (회원의 의무 및 이용 제한)</p>
       <p>1. 타 세대를 사칭하거나 허위 월패드 인증을 제출할 경우 이용이 영구 정지될 수 있습니다.<br>
-      2. 욕설, 비방, 허위사실 유포, 상업적 스팸 게시물은 관리자에 의해 사전 통보 없이 삭제될 수 있습니다.</p>
+      2. 욕설, 비방, 허위사실 유포, 상업적 스팸 게시물은 사전 통보 없이 삭제될 수 있습니다.</p>
     </div>
   `);
 }
@@ -734,7 +704,6 @@ function go(t, push = true) {
   window.scrollTo(0, 0);
   updNav();
   const c = $('chatlog'); if (c) c.scrollTop = c.scrollHeight;
-  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
 }
 
 history.replaceState({ t: 'home' }, '');
