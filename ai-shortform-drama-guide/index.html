@@ -1,0 +1,2332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 숏드라마 제작 교실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="기획부터 업로드까지 12단계로 따라 하며 60초 AI 숏폼 드라마를 완성하는 개인 실습 코스 (2026년 10월 기준)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 편집실 매뉴얼. 슬레이트(클래퍼보드) 머리말, 왼쪽에 12단계 타임라인 레일, 오른쪽에 읽기 칼럼 하나.
+   트랙 색 네 가지가 단계의 성격을 표시한다: 이야기(텍스트 트랙·호박색), 그림(비디오 트랙·파랑), 소리(오디오 트랙·초록), 완성(REC·빨강). */
+:root {
+  --bg: #F1F2F5;
+  --surface: #FFFFFF;
+  --sunken: #E7E9EF;
+  --ink: #15171D;
+  --ink-2: #474D5F;
+  --ink-3: #686F83;
+  --line: #D4D8E1;
+  --rec: #C9302C;
+  --on-rec: #FFFFFF;
+  --story: #9A5A00;
+  --story-wash: #FAEEDA;
+  --pic: #3352CC;
+  --pic-wash: #E4EAFC;
+  --sound: #0B7A5E;
+  --sound-wash: #DCF1EA;
+  --out: #BE3229;
+  --out-wash: #FBE5E2;
+  --focus: #3352CC;
+  --code: #1B1E26;
+  --on-code: #E8EBF2;
+  --code-dim: #A3ACC0;
+  --code-line: #30364A;
+  --slate: #17191F;
+  --on-slate: #F4F5F8;
+  --slate-dim: #A9AFBF;
+  --slate-line: #3A3F4D;
+  --slate-rec: #D7312A;
+  --slate-dot: #FF4B3E;
+  --seg-story: #F0A640;
+  --seg-pic: #8399FF;
+  --seg-sound: #3FCB9F;
+  --seg-out: #FF6F62;
+  --shadow: 0 1px 2px rgba(20, 24, 36, .06), 0 8px 24px rgba(20, 24, 36, .07);
+  --font-display: "Black Han Sans", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, "IBM Plex Sans KR", monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1116; --surface: #171A21; --sunken: #1F232C; --ink: #E9EBF1; --ink-2: #B5BBC9; --ink-3: #8E95A8; --line: #2C313D;
+    --rec: #FF5B4D; --on-rec: #1A0B09;
+    --story: #F0A640; --story-wash: #2A2114; --pic: #8399FF; --pic-wash: #1B2242; --sound: #3FCB9F; --sound-wash: #112A21; --out: #FF6F62; --out-wash: #2F1815;
+    --focus: #8399FF; --code: #0B0D12; --on-code: #E8EBF2; --code-dim: #8F98AD; --code-line: #262B38;
+    --slate: #0A0B0F; --slate-line: #2E3340;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px rgba(0, 0, 0, .3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1116; --surface: #171A21; --sunken: #1F232C; --ink: #E9EBF1; --ink-2: #B5BBC9; --ink-3: #8E95A8; --line: #2C313D;
+  --rec: #FF5B4D; --on-rec: #1A0B09;
+  --story: #F0A640; --story-wash: #2A2114; --pic: #8399FF; --pic-wash: #1B2242; --sound: #3FCB9F; --sound-wash: #112A21; --out: #FF6F62; --out-wash: #2F1815;
+  --focus: #8399FF; --code: #0B0D12; --on-code: #E8EBF2; --code-dim: #8F98AD; --code-line: #262B38;
+  --slate: #0A0B0F; --slate-line: #2E3340;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px rgba(0, 0, 0, .3);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.72;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
+a { color: var(--pic); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.3; text-wrap: balance; }
+p, figure, dl, dd { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+b, strong { font-weight: 700; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+[data-track="story"] { --track: var(--story); --wash: var(--story-wash); --seg: var(--seg-story); }
+[data-track="pic"] { --track: var(--pic); --wash: var(--pic-wash); --seg: var(--seg-pic); }
+[data-track="sound"] { --track: var(--sound); --wash: var(--sound-wash); --seg: var(--seg-sound); }
+[data-track="out"] { --track: var(--out); --wash: var(--out-wash); --seg: var(--seg-out); }
+
+/* page frame */
+.page { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 120px; }
+.shell { max-width: 1160px; margin: 0 auto; display: grid; gap: 24px; }
+.main { min-width: 0; max-width: 780px; display: grid; gap: 72px; }
+@media (min-width: 1100px) { .shell { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; align-items: start; } }
+
+/* desktop rail */
+.rail { display: none; }
+@media (min-width: 1100px) {
+  .rail { display: grid; gap: 4px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); max-height: calc(100vh - 40px); overflow-y: auto; padding-block: 4px 24px; }
+  .jumpbar { display: none !important; }
+}
+.rail-prog { display: grid; gap: 6px; padding: 10px 10px 14px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.rail-prog .mono { font-size: 12.5px; color: var(--ink-2); }
+.mini-bar { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }
+.mini-bar i { display: block; height: 100%; width: 0; background: var(--rec); transition: width .3s ease; }
+.rail-group { font-size: 12px; font-weight: 700; color: var(--ink-3); padding: 12px 10px 2px; letter-spacing: .02em; }
+.rail ul { list-style: none; padding: 0; gap: 1px; }
+.rail a { display: grid; grid-template-columns: 24px minmax(0, 1fr) 10px; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 8px; color: var(--ink-2); text-decoration: none; font-size: 14px; line-height: 1.4; }
+.rail a:hover { background: var(--sunken); color: var(--ink); }
+.rail a.current { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); font-weight: 600; }
+.rail .num { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); }
+.rail .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--track, var(--ink-3)); }
+.rail a.done .dot { background: var(--track, var(--ink-3)); }
+
+/* mobile jump bar */
+.jumpbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+}
+.jumpbar .mono { flex: none; font-size: 12.5px; color: var(--ink-2); }
+.jb-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; padding-block: 2px; }
+.jb-chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; display: inline-grid; place-items: center; min-width: 34px; height: 32px; padding-inline: 10px; border-radius: 16px; border: 1.5px solid var(--track, var(--line)); color: var(--ink); background: var(--surface); text-decoration: none; font: 600 13px/1 var(--font-mono); }
+.chip.done { background: var(--track); color: var(--surface); }
+.chip.current { box-shadow: 0 0 0 3px var(--wash, var(--sunken)); }
+
+/* slate hero */
+.slate { background: var(--slate); color: var(--on-slate); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.slate-stripes { height: 20px; background: repeating-linear-gradient(-55deg, var(--on-slate) 0 15px, var(--slate) 15px 30px); }
+.slate-body { padding: 26px clamp(18px, 4vw, 40px) 30px; display: grid; gap: 20px; }
+.eyebrow { font: 500 12.5px/1.5 var(--font-mono); letter-spacing: .06em; color: var(--slate-dim); display: flex; align-items: flex-start; gap: 10px; }
+.rec-dot { flex: none; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: var(--slate-dot); box-shadow: 0 0 0 4px rgba(255, 75, 62, .2); }
+.slate h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(42px, 7.5vw, 68px); line-height: 1.06; letter-spacing: -.005em; }
+.slate .lead { font-size: 17px; line-height: 1.75; color: #D9DCE5; max-width: 60ch; }
+.slate-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--slate-line); border-left: 1px solid var(--slate-line); }
+.slate-grid > div { border-right: 1px solid var(--slate-line); border-bottom: 1px solid var(--slate-line); padding: 9px 12px 10px; min-width: 0; }
+.slate-grid dt { font: 500 11px/1.4 var(--font-mono); letter-spacing: .1em; color: var(--slate-dim); }
+.slate-grid dd { font-weight: 600; font-size: 15px; margin-top: 2px; }
+@media (max-width: 640px) { .slate-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.prog { display: grid; gap: 8px; }
+.prog-bar { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; }
+.prog-bar span { height: 9px; border-radius: 2px; background: var(--slate-line); transition: background .3s ease; }
+.prog-bar span.done { background: var(--seg); }
+.prog-text { font: 500 13px/1.5 var(--font-mono); color: var(--slate-dim); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.prog-text b { color: var(--on-slate); }
+.save { display: inline-flex; align-items: center; gap: 6px; font: 500 12px/1 var(--font-body); padding: 5px 9px; border-radius: 999px; border: 1px solid var(--slate-line); color: var(--slate-dim); }
+.save::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--slate-dim); }
+.save[data-state="ok"]::before { background: var(--seg-sound); }
+.save[data-state="busy"]::before { background: var(--seg-story); }
+.save[data-state="warn"]::before { background: var(--seg-out); }
+.howto { display: grid; gap: 6px; font-size: 14.5px; color: #CDD1DC; padding-left: 1.25em; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding-inline: 18px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px/1.2 var(--font-body); text-decoration: none; cursor: pointer; }
+.btn:hover { border-color: var(--ink-3); }
+.btn:disabled { opacity: .55; cursor: progress; }
+.btn.primary { background: var(--rec); border-color: var(--rec); color: var(--on-rec); }
+.btn.small { min-height: 36px; padding-inline: 12px; font-size: 14px; }
+.slate .btn { background: transparent; color: var(--on-slate); border-color: var(--slate-line); }
+.slate .btn:hover { border-color: var(--slate-dim); }
+.slate .btn.primary { background: var(--slate-rec); border-color: var(--slate-rec); color: #FFFFFF; }
+
+/* sections */
+.sec { display: grid; gap: 18px; scroll-margin-top: 72px; min-width: 0; }
+.kicker { font: 600 12.5px/1.4 var(--font-mono); letter-spacing: .08em; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.sec h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 4.4vw, 38px); line-height: 1.22; }
+.sec h3 { font-size: 18.5px; font-weight: 700; margin-top: 10px; }
+.sec h4 { font-size: 16px; font-weight: 700; }
+.sec > p, .sec .body-text { color: var(--ink); max-width: 66ch; }
+.muted { color: var(--ink-3); font-size: 14px; }
+.part { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: baseline; padding: 16px 0 6px; border-top: 3px solid var(--track); margin-bottom: -40px; }
+.part .mono { font-size: 12.5px; letter-spacing: .1em; color: var(--track); font-weight: 600; }
+.part b { font-family: var(--font-display); font-weight: 400; font-size: 24px; color: var(--track); }
+.part span:last-child { grid-column: 1 / -1; color: var(--ink-3); font-size: 14.5px; }
+
+/* step */
+.step-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font: 500 12.5px/1.4 var(--font-mono); color: var(--ink-3); }
+.track-tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--wash); color: var(--track); font: 700 12.5px/1.4 var(--font-body); }
+.track-tag::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--track); }
+.step-state { margin-left: auto; padding: 2px 9px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink-2); }
+.step-state.done { background: var(--track); border-color: var(--track); color: var(--surface); }
+.step-title { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; }
+.step-no { font-family: var(--font-display); font-size: clamp(40px, 6vw, 54px); line-height: .95; color: var(--track); }
+.goal { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; font-size: 15.5px; }
+.goal strong { color: var(--track); margin-right: 6px; }
+
+/* notes, formulas */
+.note { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; padding: 12px 14px; border-radius: var(--radius); background: var(--sunken); font-size: 15px; }
+.note > b { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--ink-2); white-space: nowrap; margin-top: 2px; }
+.note.tip > b { background: var(--sound); color: var(--surface); }
+.note.warn > b { background: var(--out); color: var(--surface); }
+.formula { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 12px 14px; border-radius: var(--radius); border: 1.5px dashed var(--track, var(--line)); background: var(--surface); font-size: 14.5px; }
+.formula span { padding: 3px 9px; border-radius: 6px; background: var(--wash, var(--sunken)); color: var(--ink); font-weight: 600; }
+.formula i { font-style: normal; color: var(--ink-3); font-family: var(--font-mono); }
+.pill-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; list-style: none; }
+.pill-list li { padding: 5px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 14.5px; }
+
+/* prompt blocks */
+.prompt { border-radius: var(--radius); background: var(--code); color: var(--on-code); overflow: hidden; min-width: 0; }
+.prompt figcaption { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; padding: 7px 8px 7px 14px; font-size: 13px; color: var(--code-dim); border-bottom: 1px solid var(--code-line); }
+.prompt figcaption strong { color: var(--on-code); font-weight: 600; }
+.prompt .where { font: 500 11.5px/1.4 var(--font-mono); }
+.prompt pre { margin: 0; padding: 13px 16px 15px; font: 400 13.5px/1.68 var(--font-mono); white-space: pre-wrap; word-break: normal; overflow-wrap: anywhere; max-height: 440px; overflow: auto; }
+.prompt.mini pre { font-size: 12.8px; max-height: 300px; }
+.copy { margin-left: auto; min-height: 32px; padding-inline: 12px; border-radius: 7px; border: 1px solid var(--code-line); background: transparent; color: var(--on-code); font: 600 13px/1 var(--font-body); cursor: pointer; }
+.copy:hover { border-color: var(--code-dim); }
+.copy.ok { background: var(--seg-sound); border-color: var(--seg-sound); color: #0B0D12; }
+.copy.fail { background: var(--seg-story); border-color: var(--seg-story); color: #0B0D12; }
+
+/* tables */
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; line-height: 1.6; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 12.5px; font-weight: 600; color: var(--ink-3); background: var(--sunken); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.nw, th.nw { white-space: nowrap; }
+.wide-table { min-width: 680px; }
+
+/* checklist */
+.checklist { border: 1.5px dashed var(--track, var(--line)); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 8px; background: var(--surface); }
+.checklist h3, .checklist h4 { font-size: 15px; margin: 0; }
+.checklist ul { list-style: none; padding: 0; gap: 2px; }
+.checklist li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; padding: 5px 4px; border-radius: 8px; }
+.checklist li:hover { background: var(--sunken); }
+.checklist input { width: 20px; height: 20px; margin: 3px 0 0; accent-color: var(--track, var(--rec)); cursor: pointer; }
+.checklist label { cursor: pointer; }
+.checklist input:checked + label { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--track, var(--ink-3)); }
+
+/* route cards */
+.routes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 820px) { .routes { grid-template-columns: 1fr; } }
+.route { position: relative; display: grid; align-content: start; gap: 8px; padding: 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; min-width: 0; }
+.route input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.route.selected { border-color: var(--rec); box-shadow: 0 0 0 3px var(--out-wash); }
+.route:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.route .r-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.route .r-name { font-weight: 700; font-size: 17px; }
+.route .r-badge { font: 600 11.5px/1 var(--font-mono); padding: 4px 7px; border-radius: 5px; background: var(--sunken); color: var(--ink-2); }
+.route.selected .r-badge { background: var(--rec); color: var(--on-rec); }
+.route .r-price { font: 600 20px/1.2 var(--font-mono); }
+.route .r-for { color: var(--ink-2); font-size: 14.5px; }
+.route .r-list { display: grid; gap: 4px; font-size: 14px; }
+.route .r-list > span { display: block; padding-left: 12px; position: relative; }
+.route .r-list > span::before { content: ""; position: absolute; left: 0; top: .72em; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
+.route > span { display: block; }
+.route .r-catch { font-size: 13.5px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 8px; }
+
+/* per-step tools */
+.tools { display: grid; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.tools > p { padding: 9px 14px; font-size: 12.5px; font-weight: 700; color: var(--ink-3); background: var(--sunken); }
+.tool-row { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 14.5px; }
+.tool-row .r { font-weight: 700; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+body[data-route="free"] .tool-row[data-r="free"], body[data-route="value"] .tool-row[data-r="value"], body[data-route="pro"] .tool-row[data-r="pro"] { background: var(--out-wash); }
+body[data-route="free"] .tool-row[data-r="free"] .r::after, body[data-route="value"] .tool-row[data-r="value"] .r::after, body[data-route="pro"] .tool-row[data-r="pro"] .r::after { content: "내 방식"; font: 600 11px/1 var(--font-body); padding: 3px 6px; border-radius: 5px; background: var(--rec); color: var(--on-rec); }
+
+/* shot size frames */
+.ss-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .ss-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ss { display: grid; gap: 6px; justify-items: center; text-align: center; }
+.ss svg { width: 100%; max-width: 72px; height: auto; }
+.ss .fr { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.ss .fig { fill: var(--ink-3); }
+.ss .eye { fill: var(--surface); }
+.ss .bg { fill: var(--sunken); }
+.ss figcaption { font-size: 13px; line-height: 1.35; }
+.ss figcaption span { display: block; font: 500 11px/1.4 var(--font-mono); color: var(--ink-3); }
+
+/* timeline */
+.tl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.tl { min-width: 720px; padding: 12px 14px 14px; display: grid; gap: 6px; }
+.tl-row { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; align-items: center; }
+.tl-label { font: 600 11.5px/1.2 var(--font-mono); color: var(--ink-3); }
+.tl-lane { position: relative; height: 26px; background: var(--sunken); border-radius: 4px; }
+.tl-ruler { position: relative; height: 16px; }
+.tl-ruler span { position: absolute; left: calc(var(--s) / 60 * 100%); transform: translateX(-50%); font: 500 10.5px/16px var(--font-mono); color: var(--ink-3); }
+.tl-ruler span:first-child { transform: none; }
+.tl-ruler span:last-child { transform: translateX(-100%); }
+.tl-clip { position: absolute; top: 3px; bottom: 3px; left: calc(var(--s) / 60 * 100%); width: calc((var(--e) - var(--s)) / 60 * 100%); border-radius: 3px; display: flex; align-items: center; padding-inline: 4px; overflow: hidden; white-space: nowrap; font: 600 11px/1 var(--font-mono); }
+.tl-clip.v { background: var(--pic); color: var(--surface); box-shadow: inset -1px 0 0 var(--surface); }
+.tl-clip.a { background: var(--sound); color: var(--surface); }
+.tl-clip.t { background: var(--story); color: var(--surface); }
+.tl-clip.s { background: var(--surface); border: 1.5px solid var(--ink-3); color: var(--ink); font-family: var(--font-body); }
+.tl-clip.s.hot { border-color: var(--rec); color: var(--rec); }
+
+/* safe zone figure */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 20px; align-items: start; }
+@media (max-width: 640px) { .split { grid-template-columns: 1fr; } .split .safe { max-width: 200px; } }
+.safe svg { width: 100%; height: auto; }
+.safe .frame { fill: var(--surface); stroke: var(--ink-3); stroke-width: 1.5; }
+.safe .ui { fill: var(--out-wash); }
+.safe .hook { fill: var(--story-wash); stroke: var(--story); stroke-dasharray: 4 3; }
+.safe .cap { fill: var(--pic-wash); stroke: var(--pic); stroke-dasharray: 4 3; }
+.safe .face { fill: var(--sunken); }
+.safe text { fill: var(--ink-2); font: 600 10.5px var(--font-body); }
+.safe figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; }
+
+/* example package */
+.ex-sum { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.ex-sum > div { padding: 10px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
+.ex-sum > div:nth-child(odd) { border-right: 1px solid var(--line); }
+.ex-sum dt { font: 600 11.5px/1.4 var(--font-mono); color: var(--ink-3); }
+.ex-sum dd { font-size: 15px; }
+@media (max-width: 560px) { .ex-sum { grid-template-columns: 1fr; } .ex-sum > div:nth-child(odd) { border-right: 0; } }
+.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: thin; }
+.tabs button { flex: none; min-height: 44px; padding-inline: 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--ink-2); font: 600 15px/1.2 var(--font-body); cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--rec); }
+.panel { display: grid; gap: 16px; padding-top: 6px; min-width: 0; }
+.shot-list { display: grid; gap: 14px; }
+.shot { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; }
+.shot-head { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.shot-no { font-size: 13px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: var(--pic); color: var(--surface); }
+.chip-s { font-size: 12.5px; padding: 3px 8px; border-radius: 6px; background: var(--sunken); color: var(--ink-2); }
+.shot-scene { font-weight: 600; }
+.shot-line { padding-left: 12px; border-left: 3px solid var(--sound); color: var(--ink); }
+.shot-sfx, .shot-note { font-size: 14px; color: var(--ink-3); }
+.fixed-list { display: grid; gap: 10px; }
+
+/* worksheet */
+.ws-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.confirm { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--out-wash); font-size: 14px; }
+.ws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+@media (max-width: 640px) { .ws-grid { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field label { font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+input[type="text"], select, textarea { width: 100%; font: 400 15px/1.5 var(--font-body); color: var(--ink); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+textarea { resize: vertical; min-height: 64px; }
+input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px var(--pic-wash); }
+::placeholder { color: var(--ink-3); opacity: .85; }
+.logline { display: grid; gap: 4px; padding: 12px 16px; border-radius: var(--radius); background: var(--story-wash); }
+.logline span { font: 600 12px/1.4 var(--font-mono); color: var(--story); }
+.ws-step { display: grid; gap: 12px; padding-top: 6px; }
+.ws-step h3 { display: flex; gap: 10px; align-items: baseline; }
+.ws-step h3 .mono { color: var(--rec); font-size: 14px; }
+.ai-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-radius: var(--radius); background: var(--pic-wash); }
+.ai-status { font-size: 14px; color: var(--ink-2); }
+.out-label { font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+#out-script { min-height: 260px; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.65; }
+.empty { padding: 18px; border: 1.5px dashed var(--line); border-radius: 12px; color: var(--ink-3); font-size: 14.5px; text-align: center; }
+.titles-out { display: grid; gap: 10px; }
+
+/* plan */
+.weeks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .weeks { grid-template-columns: 1fr; } }
+.weeks .checklist li label b { font-family: var(--font-mono); margin-right: 6px; color: var(--track, var(--rec)); }
+.weeks .checklist li label span { display: block; font-size: 13px; color: var(--ink-3); }
+
+/* faq */
+.faq { display: grid; gap: 8px; }
+.faq details { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.faq summary { cursor: pointer; padding: 13px 16px; font-weight: 600; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font: 600 18px/1 var(--font-mono); color: var(--ink-3); }
+.faq details[open] summary::after { content: "−"; }
+.faq .ans { padding: 0 16px 14px; display: grid; gap: 8px; font-size: 15px; }
+
+/* rules */
+.rules { display: grid; gap: 10px; counter-reset: rule; list-style: none; padding: 0; }
+.rules > li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.rules > li::before { counter-increment: rule; content: counter(rule, decimal-leading-zero); font: 600 14px/1.6 var(--font-mono); color: var(--rec); }
+.rules h3 { font-size: 16px; margin: 0 0 4px; }
+.rules p { font-size: 15px; color: var(--ink-2); }
+
+/* glossary */
+.az { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .az { grid-template-columns: 1fr; } }
+.az > div { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.az .L { font-family: var(--font-display); font-size: 30px; line-height: 1; color: var(--rec); }
+.az dt { font-weight: 700; font-size: 15px; }
+.az dt span { font: 500 12px/1.4 var(--font-mono); color: var(--ink-3); margin-left: 6px; }
+.az dd { font-size: 14px; color: var(--ink-2); }
+
+/* sources & footer */
+.sources { font-size: 14px; gap: 6px; }
+.foot { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13.5px; }
+.foot .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* coach */
+.coach-fab { position: fixed; z-index: 50; right: calc(env(safe-area-inset-right, 0px) + 16px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); min-height: 50px; padding-inline: 18px 20px; border-radius: 25px; border: 0; background: var(--rec); color: var(--on-rec); font: 700 15px/1 var(--font-body); box-shadow: var(--shadow); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.coach-fab::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.coach { position: fixed; z-index: 60; right: calc(env(safe-area-inset-right, 0px) + 16px); bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); width: min(410px, calc(100vw - 32px)); height: min(640px, calc(100vh - 120px)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 20px 60px rgba(10, 12, 20, .28); overflow: hidden; }
+.coach[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  .coach { left: 0; right: 0; bottom: 0; width: auto; height: min(82vh, 680px); border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+.coach-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.coach-head h2 { font-size: 16px; font-weight: 700; }
+.coach-head .btn { margin-left: auto; }
+.coach-log { overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 92%; padding: 10px 12px; border-radius: 12px; font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.ai { align-self: flex-start; background: var(--sunken); }
+.msg.me { align-self: flex-end; background: var(--pic); color: var(--surface); }
+.msg.thinking { color: var(--ink-3); font-style: italic; }
+.coach-quick { display: flex; gap: 6px; overflow-x: auto; padding: 8px 14px; border-top: 1px solid var(--line); scrollbar-width: none; }
+.q-chip { flex: none; min-height: 34px; padding-inline: 12px; border-radius: 17px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 500 13px/1 var(--font-body); cursor: pointer; }
+.coach-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 10px 14px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); border-top: 1px solid var(--line); }
+.coach-form textarea { min-height: 44px; max-height: 120px; }
+.coach-form .actions { display: grid; gap: 6px; align-content: end; }
+.coach-note { padding: 0 14px 10px; font-size: 12px; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="page">
+<div class="shell">
+
+<aside class="rail" aria-label="교실 목차">
+  <div class="rail-prog"><span class="mono" id="rail-prog">0/12 단계 완료</span><div class="mini-bar" aria-hidden="true"><i id="rail-bar"></i></div></div>
+  <p class="rail-group">시작</p>
+  <ul>
+    <li><a href="#now"><span class="num">·</span><span>지금 알아 둘 것</span><span></span></a></li>
+    <li><a href="#route"><span class="num">·</span><span>제작 방식 고르기</span><span></span></a></li>
+    <li><a href="#prep"><span class="num">·</span><span>준비물과 폴더</span><span></span></a></li>
+    <li><a href="#structure"><span class="num">·</span><span>60초 황금 구조</span><span></span></a></li>
+  </ul>
+  <p class="rail-group">이야기</p>
+  <ul>
+    <li><a href="#step1" data-nav="1" data-track="story"><span class="num">01</span><span>벤치마킹</span><span class="dot"></span></a></li>
+    <li><a href="#step2" data-nav="2" data-track="story"><span class="num">02</span><span>기획</span><span class="dot"></span></a></li>
+    <li><a href="#step3" data-nav="3" data-track="story"><span class="num">03</span><span>대본</span><span class="dot"></span></a></li>
+    <li><a href="#step4" data-nav="4" data-track="story"><span class="num">04</span><span>콘티·샷리스트</span><span class="dot"></span></a></li>
+  </ul>
+  <p class="rail-group">그림</p>
+  <ul>
+    <li><a href="#step5" data-nav="5" data-track="pic"><span class="num">05</span><span>캐릭터 고정</span><span class="dot"></span></a></li>
+    <li><a href="#step6" data-nav="6" data-track="pic"><span class="num">06</span><span>장면 이미지</span><span class="dot"></span></a></li>
+    <li><a href="#step7" data-nav="7" data-track="pic"><span class="num">07</span><span>영상 만들기</span><span class="dot"></span></a></li>
+  </ul>
+  <p class="rail-group">소리</p>
+  <ul>
+    <li><a href="#step8" data-nav="8" data-track="sound"><span class="num">08</span><span>목소리</span><span class="dot"></span></a></li>
+    <li><a href="#step9" data-nav="9" data-track="sound"><span class="num">09</span><span>음악·효과음</span><span class="dot"></span></a></li>
+  </ul>
+  <p class="rail-group">완성·공개</p>
+  <ul>
+    <li><a href="#step10" data-nav="10" data-track="out"><span class="num">10</span><span>편집·자막</span><span class="dot"></span></a></li>
+    <li><a href="#step11" data-nav="11" data-track="out"><span class="num">11</span><span>제목·AI 표시</span><span class="dot"></span></a></li>
+    <li><a href="#step12" data-nav="12" data-track="out"><span class="num">12</span><span>업로드·분석</span><span class="dot"></span></a></li>
+  </ul>
+  <p class="rail-group">실습과 도움말</p>
+  <ul>
+    <li><a href="#example"><span class="num">·</span><span>예제 패키지</span><span></span></a></li>
+    <li><a href="#mywork"><span class="num">·</span><span>내 작품 기획서</span><span></span></a></li>
+    <li><a href="#plan"><span class="num">·</span><span>2주 완성 플랜</span><span></span></a></li>
+    <li><a href="#faq"><span class="num">·</span><span>막힐 때</span><span></span></a></li>
+    <li><a href="#rules"><span class="num">·</span><span>꼭 지킬 규칙</span><span></span></a></li>
+    <li><a href="#glossary"><span class="num">·</span><span>A–Z 용어 사전</span><span></span></a></li>
+  </ul>
+</aside>
+
+<nav class="jumpbar" aria-label="단계 바로가기">
+  <span class="mono" id="jb-prog">0/12</span>
+  <div class="jb-chips">
+    <a class="chip" href="#prep">준비</a>
+    <a class="chip" href="#step1" data-nav="1" data-track="story">1</a>
+    <a class="chip" href="#step2" data-nav="2" data-track="story">2</a>
+    <a class="chip" href="#step3" data-nav="3" data-track="story">3</a>
+    <a class="chip" href="#step4" data-nav="4" data-track="story">4</a>
+    <a class="chip" href="#step5" data-nav="5" data-track="pic">5</a>
+    <a class="chip" href="#step6" data-nav="6" data-track="pic">6</a>
+    <a class="chip" href="#step7" data-nav="7" data-track="pic">7</a>
+    <a class="chip" href="#step8" data-nav="8" data-track="sound">8</a>
+    <a class="chip" href="#step9" data-nav="9" data-track="sound">9</a>
+    <a class="chip" href="#step10" data-nav="10" data-track="out">10</a>
+    <a class="chip" href="#step11" data-nav="11" data-track="out">11</a>
+    <a class="chip" href="#step12" data-nav="12" data-track="out">12</a>
+    <a class="chip" href="#example">예제</a>
+    <a class="chip" href="#mywork">기획서</a>
+    <a class="chip" href="#faq">막힐 때</a>
+  </div>
+</nav>
+
+<main class="main" id="top">
+
+<header class="slate">
+  <div class="slate-stripes" aria-hidden="true"></div>
+  <div class="slate-body">
+    <p class="eyebrow"><span class="rec-dot" aria-hidden="true"></span><span>REC · 2026년 10월 23일 기준 · 초보자 실습 코스</span></p>
+    <h1>AI 숏드라마<br>제작 교실</h1>
+    <p class="lead">유튜브 쇼츠와 인스타그램 릴스에서 보던 AI 숏폼 드라마를 직접 만들어 봐요. 기획부터 업로드까지 12단계로 나눴어요. 예제 작품 「알바생의 정체」를 그대로 따라 하면 60초짜리 첫 편이 완성되고, 두 번째 편은 내 이야기로 만듭니다.</p>
+    <dl class="slate-grid">
+      <div><dt>작품</dt><dd>나의 첫 AI 숏드라마</dd></div>
+      <div><dt>분량</dt><dd>60초 · 12컷</dd></div>
+      <div><dt>화면</dt><dd>9:16 세로</dd></div>
+      <div><dt>첫 편 소요</dt><dd>8~12시간</dd></div>
+    </dl>
+    <div class="prog">
+      <div class="prog-bar" id="prog-seg" aria-hidden="true">
+        <span data-seg="1" data-track="story"></span><span data-seg="2" data-track="story"></span><span data-seg="3" data-track="story"></span><span data-seg="4" data-track="story"></span>
+        <span data-seg="5" data-track="pic"></span><span data-seg="6" data-track="pic"></span><span data-seg="7" data-track="pic"></span>
+        <span data-seg="8" data-track="sound"></span><span data-seg="9" data-track="sound"></span>
+        <span data-seg="10" data-track="out"></span><span data-seg="11" data-track="out"></span><span data-seg="12" data-track="out"></span>
+      </div>
+      <p class="prog-text"><span><b id="prog-steps">0</b>/12 단계 완료</span><span>체크 <b id="prog-checks">0</b>/<span id="prog-total">67</span></span><span class="save" id="save-status" data-state="local">진행 상황 저장 준비 중</span></p>
+    </div>
+    <ol class="howto">
+      <li>아래에서 예산에 맞는 <b>제작 방식</b>을 고르면, 단계마다 맞는 도구가 ‘내 방식’으로 표시돼요.</li>
+      <li>단계 끝의 <b>체크리스트</b>를 체크하면 진행 상황이 저장돼요.</li>
+      <li>검은 상자의 프롬프트는 <b>[복사]</b>해서 AI 도구에 그대로 붙여 넣으면 돼요.</li>
+      <li>막히면 ‘막힐 때’ 모음을 보세요. Claude 앱에서 열었다면 오른쪽 아래 <b>AI 코치</b>에게 물어볼 수 있어요.</li>
+    </ol>
+    <div class="cta-row">
+      <a class="btn primary" href="#step1">STEP 1부터 시작</a>
+      <a class="btn" href="#example">예제 패키지 보기</a>
+      <a class="btn" href="#plan">2주 플랜 보기</a>
+    </div>
+  </div>
+</header>
+
+<section class="sec" id="now" aria-labelledby="h-now">
+  <p class="kicker">시작하기 전에 · 3분</p>
+  <h2 id="h-now">2026년 10월, AI 숏드라마는 여기까지 왔어요</h2>
+  <p>AI 숏드라마는 9:16 세로 화면에 1~3분짜리 이야기를 담은 영상이에요. 첫 3초에 시선을 잡고, 갈등과 반전을 빠르게 지나, 다음 화가 궁금하게 끝나는 게 공식이에요. 배우와 촬영 대신 이미지·영상 생성 AI로 장면을 만들고, AI 음성으로 대사를 입혀요.</p>
+  <ul class="body-text">
+    <li><b>만들기는 쉬워졌어요.</b> 2026년 10월 전 세계에 출시된 Kling 4.0은 한 번에 최대 30초를 만들고, 키프레임 10장과 참고 자료 15개를 넣을 수 있어요. 한국어를 포함한 여러 언어의 립싱크도 지원한다고 발표했어요.</li>
+    <li><b>그만큼 경쟁도 치열해요.</b> 중국에서는 2026년 1분기에 공개된 숏드라마 약 12만 8천 편 가운데 95% 이상이 AI 작품이었어요. 그런데 춘제 기간 분석을 보면 AI 작품이 실사 작품보다 50배 많았는데도 전체 조회수는 실사가 25배 많았어요. 승부는 도구보다 이야기와 감정에서 나요. 이 교실이 기획과 대본에 시간을 많이 쓰는 이유예요.</li>
+    <li><b>국내도 움직이고 있어요.</b> 숏드라마 플랫폼 비글루는 2026년 7월 AI 숏드라마 제작 플랫폼 ‘비글루 스튜디오’ 베타를 공개했고, SNS 피드에서도 AI 숏폼이 빠르게 늘고 있어요.</li>
+  </ul>
+  <h3>예전 강의를 볼 때 주의할 변화</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>바뀐 것</th><th>내용</th><th>이 교실에서는</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><b>Sora 종료</b></td><td>OpenAI의 Sora 앱은 2026년 4월 서비스를 끝냈어요.</td><td>Sora가 나오는 강의는 건너뛰세요.</td></tr>
+        <tr><td class="nw"><b>Kling 4.0</b> (10월)</td><td>30초 생성, 키프레임·참고 자료 확대, 한국어 립싱크 지원 발표</td><td>기본 영상 도구</td></tr>
+        <tr><td class="nw"><b>Veo 3.1 · Gemini Omni</b></td><td>Google Flow에서 Veo 3.1(Lite·Fast·Quality)과 5월에 공개된 Gemini Omni Flash를 써요.</td><td>보조 영상 도구</td></tr>
+        <tr><td class="nw"><b>나노바나나 2 · Pro</b></td><td>Gemini 앱의 이미지 생성·편집 기능. 인물 일관성은 Pro가 더 좋아요.</td><td>캐릭터·장면 이미지</td></tr>
+        <tr><td class="nw"><b>CapCut 유료화</b></td><td>자동 자막 같은 AI 기능 상당수가 유료 요금제로 옮겨 갔어요.</td><td>자막은 Vrew 무료 범위로</td></tr>
+        <tr><td class="nw"><b>YouTube 기준</b> (7월)</td><td>틀만 바꾼 대량 반복 영상, 불쾌·충격 영상, 민감 주제를 말하는 AI 인물 영상은 수익을 낼 수 없다고 명확히 했어요.</td><td>STEP 12와 ‘꼭 지킬 규칙’에서 설명</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="route" aria-labelledby="h-route">
+  <p class="kicker">시작 1 · 2분</p>
+  <h2 id="h-route">내 제작 방식 고르기</h2>
+  <p>고른 방식에 맞는 도구가 단계마다 ‘내 방식’으로 표시돼요. 언제든 바꿀 수 있어요.</p>
+  <div class="routes" role="radiogroup" aria-label="제작 방식">
+    <label class="route" for="route-free">
+      <input type="radio" name="route" id="route-free" value="free">
+      <span class="r-top"><span class="r-name">무료 체험</span><span class="r-badge">FREE</span></span>
+      <span class="r-price">0원</span>
+      <span class="r-for">일단 한 편 만들어 보고 싶을 때</span>
+      <span class="r-list">
+        <span>이미지: Gemini 무료(나노바나나)</span>
+        <span>영상: Kling 무료 크레딧, Google Flow 무료 하루 50크레딧</span>
+        <span>음성: Kling 영상 속 대사, Typecast 무료 범위</span>
+        <span>편집: CapCut 기본 기능, Vrew 자막</span>
+        <span>음악: YouTube 오디오 보관함</span>
+      </span>
+      <span class="r-catch">워터마크가 붙고 하루 생성량이 적어 완성까지 4~7일 걸려요. 무료 결과물은 대부분 상업적으로 쓸 수 없어요.</span>
+    </label>
+    <label class="route" for="route-value">
+      <input type="radio" name="route" id="route-value" value="value">
+      <span class="r-top"><span class="r-name">가성비</span><span class="r-badge">추천</span></span>
+      <span class="r-price">월 2.5만 원 안팎</span>
+      <span class="r-for">꾸준히 올리면서 수익화를 준비할 때</span>
+      <span class="r-list">
+        <span>Google AI Plus 월 11,000원 (나노바나나 Pro, Flow 포함)</span>
+        <span>Kling Standard 월 $8.80 (660크레딧, 첫 달 할인)</span>
+        <span>음성: Kling 대사 + 필요한 컷만 Typecast</span>
+        <span>편집: CapCut + Vrew</span>
+      </span>
+      <span class="r-catch">한 편에 영상을 20~30번 생성하면 Kling 크레딧이 빠듯할 수 있어요. 시안은 Flow로 만들어 아끼세요.</span>
+    </label>
+    <label class="route" for="route-pro">
+      <input type="radio" name="route" id="route-pro" value="pro">
+      <span class="r-top"><span class="r-name">본격 연재</span><span class="r-badge">PRO</span></span>
+      <span class="r-price">월 7만 원부터</span>
+      <span class="r-for">주 2~3편씩 시리즈를 올릴 때</span>
+      <span class="r-list">
+        <span>Google AI Pro 월 29,000원 (Veo 3.1·Omni 한도 확대)</span>
+        <span>Kling Pro 월 $32.56 (3,000크레딧)</span>
+        <span>음성: Typecast·ElevenLabs 유료로 인물 목소리 통일</span>
+        <span>음악: Suno Pro 월 $10 (상업적 이용)</span>
+        <span>필요하면 CapCut 유료</span>
+      </span>
+      <span class="r-catch">쓰지 않는 달은 해지하세요. 결제 전 약관의 상업적 이용 조항을 꼭 확인하세요.</span>
+    </label>
+  </div>
+  <p class="note"><b>가격</b><span>2026년 10월에 확인한 가격이에요. Kling은 달러로 결제하고 첫 달 할인가가 따로 있어요. Google AI Plus는 11월 중순에 혜택이 바뀐다는 보도가 있으니 결제 전에 공식 요금 페이지를 확인하세요.</span></p>
+</section>
+
+<section class="sec" id="prep" aria-labelledby="h-prep">
+  <p class="kicker">시작 2 · 30분</p>
+  <h2 id="h-prep">준비물과 작업 폴더</h2>
+  <p>계정을 한 번에 만들어 두면 작업 흐름이 끊기지 않아요. 모두 무료 가입으로 시작할 수 있어요.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>용도</th><th>도구</th><th>주소</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">대본</td><td>AI 챗봇 하나 (ChatGPT, Gemini, Claude)</td><td>평소 쓰는 것</td></tr>
+        <tr><td class="nw">이미지</td><td>Gemini (나노바나나)</td><td><a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a></td></tr>
+        <tr><td class="nw">영상</td><td>Kling AI</td><td><a href="https://klingai.com" target="_blank" rel="noopener">klingai.com</a></td></tr>
+        <tr><td class="nw">영상 (보조)</td><td>Google Flow</td><td><a href="https://labs.google/flow" target="_blank" rel="noopener">labs.google/flow</a></td></tr>
+        <tr><td class="nw">음성</td><td>Typecast 또는 ElevenLabs</td><td><a href="https://typecast.ai" target="_blank" rel="noopener">typecast.ai</a> · <a href="https://elevenlabs.io" target="_blank" rel="noopener">elevenlabs.io</a></td></tr>
+        <tr><td class="nw">편집·자막</td><td>CapCut, Vrew</td><td><a href="https://www.capcut.com" target="_blank" rel="noopener">capcut.com</a> · <a href="https://vrew.ai" target="_blank" rel="noopener">vrew.ai</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="prompt">
+    <figcaption><strong>작업 폴더 구조</strong><span class="where">컴퓨터나 클라우드 드라이브</span></figcaption>
+<pre>알바생의정체/
+├─ 01_기획      기획서 · 대본 · 샷리스트
+├─ 02_캐릭터    인물별 레퍼런스 3장 + 장소 1장
+├─ 03_장면      컷01.png ~ 컷12.png
+├─ 04_영상      컷01_v1.mp4 …
+├─ 05_음성      컷03_서윤.wav …
+├─ 06_사운드    배경음악 · 효과음
+├─ 07_편집      편집 프로젝트 · 완성본
+└─ 08_업로드    제목 · 설명 · 커버</pre>
+  </figure>
+  <div class="checklist">
+    <h3>준비 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-p1" data-check="p1"><label for="c-p1">Google 계정으로 Gemini에 들어가 보기</label></li>
+      <li><input type="checkbox" id="c-p2" data-check="p2"><label for="c-p2">Kling AI에 가입하고 무료 크레딧 확인하기</label></li>
+      <li><input type="checkbox" id="c-p3" data-check="p3"><label for="c-p3">대본용 AI 챗봇 하나 정하기</label></li>
+      <li><input type="checkbox" id="c-p4" data-check="p4"><label for="c-p4">음성 서비스(Typecast 또는 ElevenLabs) 가입하기</label></li>
+      <li><input type="checkbox" id="c-p5" data-check="p5"><label for="c-p5">CapCut과 Vrew 설치하기</label></li>
+      <li><input type="checkbox" id="c-p6" data-check="p6"><label for="c-p6">작업 폴더 8개 만들기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="structure" aria-labelledby="h-structure">
+  <p class="kicker">시작 3 · 이 그림 하나만 기억하세요</p>
+  <h2 id="h-structure">60초 황금 구조</h2>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>구간</th><th>할 일</th><th>예제 「알바생의 정체」</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><b>0~3초 훅</b></td><td>가장 센 장면이나 대사로 시작해 스크롤을 멈추게 해요.</td><td>커피잔이 쾅, “이걸 커피라고 준 거야?!”</td></tr>
+        <tr><td class="nw"><b>3~15초 상황</b></td><td>누가, 어디서, 무슨 일인지 보여 줘요.</td><td>진상 손님 오 부장의 갑질</td></tr>
+        <tr><td class="nw"><b>15~30초 갈등</b></td><td>주인공이 몰리는 순간. 시청자의 분노와 궁금증이 가장 커져요.</td><td>“사장 나오라 그래!”, 손님들의 수군거림</td></tr>
+        <tr><td class="nw"><b>30~45초 반전</b></td><td>숨겨진 정체나 진실을 공개해요.</td><td>비서: “대표님, 이사회 십 분 전입니다.”</td></tr>
+        <tr><td class="nw"><b>45~60초 사이다·떡밥</b></td><td>통쾌한 한마디로 마무리하고, 다음 화가 궁금하게 끝내요.</td><td>“곧 또 뵙겠네요, 부장님.” → 2화에서 계속</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>예제의 편집 타임라인 (실제 길이 비율)</h3>
+  <div class="tl-scroll">
+    <div class="tl" role="img" aria-label="60초 편집 타임라인. 구조: 훅 0~3초, 상황 3~15초, 갈등 15~30초, 반전 30~45초, 사이다와 떡밥 45~60초. 영상 12컷, 대사 9곳, 음악은 긴장 3~30초, 정적, 반전 테마 35~53초, 엔딩 53~60초. 효과음과 자막 위치 포함.">
+      <div class="tl-row"><span class="tl-label">초</span><div class="tl-ruler"><span style="--s:0">0s</span><span style="--s:10">10</span><span style="--s:20">20</span><span style="--s:30">30</span><span style="--s:40">40</span><span style="--s:50">50</span><span style="--s:60">60s</span></div></div>
+      <div class="tl-row"><span class="tl-label">구조</span><div class="tl-lane"><span class="tl-clip s hot" style="--s:0;--e:3">훅</span><span class="tl-clip s" style="--s:3;--e:15">상황</span><span class="tl-clip s" style="--s:15;--e:30">갈등 고조</span><span class="tl-clip s hot" style="--s:30;--e:45">반전</span><span class="tl-clip s" style="--s:45;--e:60">사이다 · 떡밥</span></div></div>
+      <div class="tl-row"><span class="tl-label">V1 영상</span><div class="tl-lane"><span class="tl-clip v" style="--s:0;--e:3">1</span><span class="tl-clip v" style="--s:3;--e:8">2</span><span class="tl-clip v" style="--s:8;--e:12">3</span><span class="tl-clip v" style="--s:12;--e:17">4</span><span class="tl-clip v" style="--s:17;--e:21">5</span><span class="tl-clip v" style="--s:21;--e:26">6</span><span class="tl-clip v" style="--s:26;--e:30">7</span><span class="tl-clip v" style="--s:30;--e:35">8</span><span class="tl-clip v" style="--s:35;--e:40">9</span><span class="tl-clip v" style="--s:40;--e:45">10</span><span class="tl-clip v" style="--s:45;--e:53">11</span><span class="tl-clip v" style="--s:53;--e:60">12</span></div></div>
+      <div class="tl-row"><span class="tl-label">A1 대사</span><div class="tl-lane"><span class="tl-clip a" style="--s:0.5;--e:2.8">오</span><span class="tl-clip a" style="--s:3.6;--e:7.6">오</span><span class="tl-clip a" style="--s:8.5;--e:11.7">서윤</span><span class="tl-clip a" style="--s:12.8;--e:16">오</span><span class="tl-clip a" style="--s:22;--e:25.6">서윤</span><span class="tl-clip a" style="--s:26.3;--e:29.7">오</span><span class="tl-clip a" style="--s:36;--e:39.5">강</span><span class="tl-clip a" style="--s:41.3;--e:44">오</span><span class="tl-clip a" style="--s:45.6;--e:52.7">서윤</span></div></div>
+      <div class="tl-row"><span class="tl-label">A2 음악</span><div class="tl-lane"><span class="tl-clip a" style="--s:3;--e:30">긴장 BGM</span><span class="tl-clip s" style="--s:30;--e:35">정적</span><span class="tl-clip a" style="--s:35;--e:53">반전 테마</span><span class="tl-clip a" style="--s:53;--e:60">엔딩</span></div></div>
+      <div class="tl-row"><span class="tl-label">A3 효과음</span><div class="tl-lane"><span class="tl-clip a" style="--s:0;--e:2.5">쾅</span><span class="tl-clip a" style="--s:13;--e:15.5">톡톡</span><span class="tl-clip a" style="--s:17;--e:21">웅성</span><span class="tl-clip a" style="--s:30;--e:34.5">딸랑·발소리</span><span class="tl-clip a" style="--s:40.5;--e:43.5">두둥</span><span class="tl-clip a" style="--s:56;--e:59">딸랑</span></div></div>
+      <div class="tl-row"><span class="tl-label">T 자막</span><div class="tl-lane"><span class="tl-clip t" style="--s:0;--e:3">훅</span><span class="tl-clip t" style="--s:3;--e:55">대사 자막</span><span class="tl-clip t" style="--s:55;--e:60">2화 예고</span></div></div>
+    </div>
+  </div>
+  <p class="muted">파란 칸이 컷, 초록 칸이 소리, 호박색 칸이 화면 글자예요. 반전(30초) 직전에 음악을 끊고 문 종소리만 들리게 한 부분을 눈여겨보세요.</p>
+</section>
+
+<div class="part" data-track="story"><span class="mono">PART 1</span><b>이야기</b><span>STEP 1~4 · 무엇을 보여 줄지 정해요</span></div>
+
+<section class="sec step" id="step1" data-step="1" data-track="story" aria-labelledby="h-step1">
+  <p class="step-meta"><span class="track-tag">이야기</span><span>STEP 01</span><span>약 40분</span><span class="step-state" data-state-for="1">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">01</span><h2 id="h-step1">잘 되는 AI 숏드라마 10편 뜯어보기</h2></div>
+  <p class="goal"><strong>끝나면</strong>인기 작품의 공식이 눈에 들어오고, 내가 만들 장르가 정해져요.</p>
+  <p>유튜브에서 ‘AI 드라마’, ‘AI 숏드라마’, ‘AI 쇼츠 드라마’를 검색하고 필터를 ‘Shorts’로 바꿔 보세요. 인스타그램은 #ai드라마 #숏드라마 해시태그를 보면 돼요. 끝까지 본 영상과 넘긴 영상을 나눠 적으면 내가 무엇에 끌리는지 보여요.</p>
+  <h3>볼 때 체크할 것</h3>
+  <ul>
+    <li>길이와 컷 수: 몇 초마다 화면이 바뀌나요?</li>
+    <li>첫 3초에 나온 장면과 대사</li>
+    <li>인물 수와 장소 수</li>
+    <li>반전이 나온 시점 (몇 초쯤?)</li>
+    <li>마지막 장면이 다음 화를 어떻게 부르나요?</li>
+    <li>댓글에 많이 나온 말</li>
+  </ul>
+  <h3>자주 보이는 인기 공식</h3>
+  <ul class="pill-list">
+    <li>신분 반전 “알고 보니 ○○”</li><li>참교육·사이다</li><li>계약·재벌 로맨스</li><li>회귀·환생 복수</li><li>1분 미스터리</li><li>AI 사극 “조선에 ○○가 있었다면”</li><li>동물·아기 시점 코미디</li>
+  </ul>
+  <figure class="prompt">
+    <figcaption><strong>벤치마킹 노트</strong><span class="where">메모 앱에 붙여 넣고 영상마다 채우기</span></figcaption>
+<pre>[벤치마킹 노트]
+영상 제목 / 링크:
+길이:       초 / 컷 수:
+첫 3초에 나온 것:
+인물 수 / 장소 수:
+갈등:
+반전 시점(몇 초) / 내용:
+마지막 장면(다음 화 유도):
+댓글에 많이 나온 말:
+내가 가져올 점 한 가지:</pre>
+  </figure>
+  <div class="checklist">
+    <h3>STEP 1 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s1a" data-check="s1a"><label for="c-s1a">AI 숏드라마 10편 보기 (끝까지 본 것과 넘긴 것 구분)</label></li>
+      <li><input type="checkbox" id="c-s1b" data-check="s1b"><label for="c-s1b">벤치마킹 노트 5편 이상 쓰기</label></li>
+      <li><input type="checkbox" id="c-s1c" data-check="s1c"><label for="c-s1c">따라 하고 싶은 훅 3개 메모하기</label></li>
+      <li><input type="checkbox" id="c-s1d" data-check="s1d"><label for="c-s1d">내가 만들 장르 하나 고르기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step2" data-step="2" data-track="story" aria-labelledby="h-step2">
+  <p class="step-meta"><span class="track-tag">이야기</span><span>STEP 02</span><span>약 30분</span><span class="step-state" data-state-for="2">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">02</span><h2 id="h-step2">장르·인물·반전 정하기</h2></div>
+  <p class="goal"><strong>끝나면</strong>한 줄 요약(로그라인)과 인물 2~3명이 정해져요.</p>
+  <p class="note tip"><b>3·2·1 규칙</b><span>인물은 3명 이하, 장소는 2곳 이하, 반전은 1개. 인물과 장소가 늘수록 AI가 얼굴과 배경을 헷갈려요.</span></p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>AI가 잘하는 장면</th><th>아직 어려운 장면</th></tr></thead>
+      <tbody>
+        <tr><td>클로즈업 감정 연기 (분노, 충격, 미소)</td><td>격투·액션, 빠른 몸싸움</td></tr>
+        <tr><td>두 사람의 대화</td><td>요리·악기·타이핑 같은 빠른 손동작</td></tr>
+        <tr><td>고급스러운 공간 (재벌집, 사무실, 카페)</td><td>여러 사람이 동시에 주고받는 장면</td></tr>
+        <tr><td>사극·판타지 배경</td><td>간판·문서처럼 정확해야 하는 글자</td></tr>
+        <tr><td>천천히 걷기, 돌아보기, 문 열고 들어오기</td><td>스포츠, 자동차 추격</td></tr>
+        <tr><td>비·눈·노을 같은 분위기 연출</td><td>소품 위치가 컷마다 똑같아야 하는 장면</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>로그라인 공식</h3>
+  <p class="formula" data-track="story"><span>[주인공]</span><i>이</i><span>[상황]</span><i>에서</i><span>[갈등]</span><i>을 겪는데, 사실은</i><span>[반전]</span><i>이었다.</i></p>
+  <p><b>예제:</b> 카페 알바생 서윤이 진상 손님에게 갑질을 당하는데, 사실 그녀는 그 손님의 회사를 인수하는 그룹의 대표였다.</p>
+  <figure class="prompt">
+    <figcaption><strong>아이디어 10개 받기</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption>
+<pre>AI 숏드라마 아이디어 10개를 표로 정리해 줘.
+조건: 장르는 [원하는 장르], 길이 60초, 인물 3명 이하, 장소 2곳 이하, 마지막에 반전, 격한 액션 없음, 실존 인물·브랜드 없음.
+칸: 제목 / 로그라인(한 줄) / 첫 3초 훅 / 반전 / 2화 떡밥</pre>
+  </figure>
+  <p>정한 내용은 <a href="#mywork">내 작품 기획서</a>에 적어 두세요. 칸을 채우면 대본 프롬프트가 자동으로 만들어져요. 첫 편을 예제로 만든다면 이 단계는 예제 기획을 읽는 것으로 충분해요.</p>
+  <div class="checklist">
+    <h3>STEP 2 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s2a" data-check="s2a"><label for="c-s2a">장르와 분위기 정하기</label></li>
+      <li><input type="checkbox" id="c-s2b" data-check="s2b"><label for="c-s2b">로그라인 한 줄 쓰기</label></li>
+      <li><input type="checkbox" id="c-s2c" data-check="s2c"><label for="c-s2c">인물 2~3명의 이름·나이·성격 정하기</label></li>
+      <li><input type="checkbox" id="c-s2d" data-check="s2d"><label for="c-s2d">반전과 마지막 한 줄(다음 화 떡밥) 정하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step3" data-step="3" data-track="story" aria-labelledby="h-step3">
+  <p class="step-meta"><span class="track-tag">이야기</span><span>STEP 03</span><span>약 60분</span><span class="step-state" data-state-for="3">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">03</span><h2 id="h-step3">AI와 함께 60초 대본 쓰기</h2></div>
+  <p class="goal"><strong>끝나면</strong>컷 번호·시간·대사가 정리된 60초 대본이 생겨요.</p>
+  <h3>대본 규칙 4가지</h3>
+  <ol>
+    <li>한 컷에 대사는 한 문장, 20자 안팎. 사람은 1초에 4~5글자쯤 말해서 5초 컷에는 20자가 한계예요.</li>
+    <li>설명하는 대사 대신 표정과 행동으로 보여 주세요. “나 화났어” 대신 커피잔을 쾅.</li>
+    <li>첫 컷에는 이야기에서 가장 센 순간을 놓으세요.</li>
+    <li>컷은 10~12개, 컷 하나는 3~8초.</li>
+  </ol>
+  <figure class="prompt">
+    <figcaption><strong>대본 요청 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption>
+<pre>너는 조회수 높은 세로형(9:16) AI 숏드라마 작가야. 아래 기획으로 60초 분량의 대본을 써 줘.
+
+[기획]
+제목: [작품 제목]
+장르·분위기: [장르] / [분위기]
+주인공: [이름, 나이, 직업, 성격] (외모·의상: [머리, 얼굴 특징, 옷])
+상대역: [이름, 나이, 직업, 성격] (외모·의상: [머리, 얼굴 특징, 옷])
+장소: [1~2곳]
+시작 상황: [처음 벌어지는 일]
+갈등: [주인공이 몰리는 상황]
+반전: [숨겨진 진실]
+마지막 한 줄(다음 화 떡밥): [다음 화가 궁금해지는 대사나 장면]
+
+[규칙]
+1) 첫 3초는 이야기에서 가장 강렬한 장면이나 대사(훅)로 시작
+2) 구조: 훅 → 상황 → 갈등 고조 → 반전 → 통쾌한 마무리와 다음 화 떡밥
+3) 총 10~12컷, 컷당 3~8초, 합계 60초
+4) 대사는 한 컷에 한 문장, 20자 안팎의 자연스러운 구어체
+5) 인물 3명 이하, 장소 2곳 이하. 격한 액션·복잡한 손동작 대신 표정·시선·짧은 동작 위주
+6) 실존 인물·실제 브랜드·기존 작품 캐릭터는 쓰지 않기
+
+[출력 형식] 마크다운 기호 없이 컷마다 아래처럼 써 줘.
+[컷 1] 0:00–0:03 | 샷 크기
+화면: 보이는 장면
+대사: 인물: "대사" (없으면 없음)
+소리: 효과음·음악
+
+마지막에 '2화 예고 한 줄'과 '제목 후보 3개'를 붙여 줘.</pre>
+  </figure>
+  <p class="muted">대괄호 [ ] 부분을 내 기획으로 바꿔 쓰세요. <a href="#mywork">내 작품 기획서</a>에 적으면 칸이 채워진 프롬프트가 자동으로 만들어져요.</p>
+  <h3>다듬기 프롬프트</h3>
+  <figure class="prompt"><figcaption><strong>훅을 더 세게</strong></figcaption><pre>첫 컷을 서로 다른 3가지 버전으로 다시 써 줘. 버전마다 무엇이 시선을 잡는지 한 줄로 설명해 줘.</pre></figure>
+  <figure class="prompt"><figcaption><strong>대사를 자연스럽게</strong></figcaption><pre>대사를 실제 사람이 말하듯 더 짧고 자연스럽게 고쳐 줘. 대사 하나는 20자 이내로.</pre></figure>
+  <figure class="prompt"><figcaption><strong>반전을 예상 밖으로</strong></figcaption><pre>시청자가 반전을 쉽게 예상하지 못하도록, 반전 두 컷 앞에 작은 복선을 하나 심어 줘.</pre></figure>
+  <figure class="prompt"><figcaption><strong>시간 맞추기</strong></figcaption><pre>소리 내어 읽어 보니 75초가 나와. 60초에 맞게 컷을 줄여 줘. 뺀 컷은 따로 표시해 줘.</pre></figure>
+  <p class="note tip"><b>팁</b><span>대본을 소리 내어 읽으며 스톱워치로 재 보세요. 65초가 넘으면 대사를 빨리 읽기보다 컷을 빼는 편이 나아요.</span></p>
+  <div class="checklist">
+    <h3>STEP 3 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s3a" data-check="s3a"><label for="c-s3a">대본 프롬프트로 초안 받기</label></li>
+      <li><input type="checkbox" id="c-s3b" data-check="s3b"><label for="c-s3b">다듬기 프롬프트로 2번 이상 고치기</label></li>
+      <li><input type="checkbox" id="c-s3c" data-check="s3c"><label for="c-s3c">소리 내어 읽으며 60초(±5초) 맞추기</label></li>
+      <li><input type="checkbox" id="c-s3d" data-check="s3d"><label for="c-s3d">최종 대본을 01_기획 폴더에 저장하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step4" data-step="4" data-track="story" aria-labelledby="h-step4">
+  <p class="step-meta"><span class="track-tag">이야기</span><span>STEP 04</span><span>약 40분</span><span class="step-state" data-state-for="4">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">04</span><h2 id="h-step4">콘티와 샷리스트 만들기</h2></div>
+  <p class="goal"><strong>끝나면</strong>컷마다 화면 크기·카메라 움직임·대사·길이가 정해진 표가 생겨요.</p>
+  <h3>샷 크기 6가지</h3>
+  <div class="ss-row">
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><defs><clipPath id="ssc1"><rect x="0.5" y="0.5" width="44" height="79" rx="3"/></clipPath></defs><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><g clip-path="url(#ssc1)"><circle class="fig" cx="22.5" cy="42" r="36"/><ellipse class="eye" cx="12" cy="36" rx="5" ry="2.6"/><ellipse class="eye" cx="33" cy="36" rx="5" ry="2.6"/></g></svg>
+      <figcaption><b>익스트림 클로즈업</b><span>ECU · 눈빛, 손끝</span></figcaption>
+    </figure>
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><defs><clipPath id="ssc2"><rect x="0.5" y="0.5" width="44" height="79" rx="3"/></clipPath></defs><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><g clip-path="url(#ssc2)"><circle class="fig" cx="22.5" cy="36" r="15"/><path class="fig" d="M-2 80 C2 62 12 56 22.5 56 C33 56 43 62 47 80 Z"/></g></svg>
+      <figcaption><b>클로즈업</b><span>CU · 감정</span></figcaption>
+    </figure>
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><circle class="fig" cx="22.5" cy="30" r="10"/><path class="fig" d="M3 79.5 C5 56 13 47 22.5 47 C32 47 40 56 42 79.5 Z"/></svg>
+      <figcaption><b>바스트샷</b><span>MCU · 대화</span></figcaption>
+    </figure>
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><circle class="fig" cx="22.5" cy="24" r="6.5"/><path class="fig" d="M8 79.5 L10 46 C11 38 16 34 22.5 34 C29 34 34 38 35 46 L37 79.5 Z"/></svg>
+      <figcaption><b>미디엄샷</b><span>MS · 행동</span></figcaption>
+    </figure>
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><rect class="bg" x="1" y="70" width="43" height="9.5"/><circle class="fig" cx="22.5" cy="17" r="4"/><path class="fig" d="M17.5 70 L18.5 29 C18.5 24.5 20.5 22.5 22.5 22.5 C24.5 22.5 26.5 24.5 26.5 29 L27.5 70 Z"/></svg>
+      <figcaption><b>풀샷</b><span>FS · 등장, 걸음</span></figcaption>
+    </figure>
+    <figure class="ss">
+      <svg viewBox="0 0 45 80" aria-hidden="true"><rect class="fr" x="0.5" y="0.5" width="44" height="79" rx="3"/><rect class="bg" x="4" y="28" width="11" height="34"/><rect class="bg" x="30" y="20" width="11" height="42"/><rect class="bg" x="1" y="62" width="43" height="17.5"/><circle class="fig" cx="22.5" cy="51" r="2.2"/><rect class="fig" x="21" y="53.5" width="3" height="8.5" rx="1"/></svg>
+      <figcaption><b>와이드</b><span>WS · 공간, 분위기</span></figcaption>
+    </figure>
+  </div>
+  <h3>카메라 움직임</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>움직임</th><th>프롬프트에 쓰는 말</th><th>이럴 때 써요</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">고정</td><td class="nw mono">static camera</td><td>대사와 표정에 집중할 때</td></tr>
+        <tr><td class="nw">천천히 다가가기</td><td class="nw mono">slow push-in</td><td>긴장, 깨달음, 결심</td></tr>
+        <tr><td class="nw">천천히 물러나기</td><td class="nw mono">slow pull-out</td><td>고립감, 여운</td></tr>
+        <tr><td class="nw">좌우로 훑기</td><td class="nw mono">slow pan left to right</td><td>공간 소개, 주변 사람들의 반응</td></tr>
+        <tr><td class="nw">손에 든 카메라</td><td class="nw mono">handheld, slight shake</td><td>다툼, 혼란, 다급함</td></tr>
+        <tr><td class="nw">따라가기</td><td class="nw mono">tracking shot</td><td>걷거나 들어오는 인물</td></tr>
+        <tr><td class="nw">주위를 돌기</td><td class="nw mono">slow orbit around</td><td>주인공의 멋진 등장</td></tr>
+        <tr><td class="nw">급줌</td><td class="nw mono">fast push-in, crash zoom</td><td>반전 순간 (막장 드라마 감성)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>샷리스트는 이런 모양이에요 (예제 앞부분)</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>컷</th><th>길이</th><th>샷 크기</th><th>카메라</th><th>화면</th><th>대사</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td class="nw">3초</td><td class="nw">익스트림 클로즈업</td><td class="nw">고정</td><td>커피잔이 쾅, 커피가 튐</td><td>오 부장(화면 밖): “이걸 커피라고 준 거야?!”</td></tr>
+        <tr><td class="mono">2</td><td class="nw">5초</td><td class="nw">미디엄 (시점샷)</td><td class="nw">핸드헬드</td><td>카운터 너머 삿대질</td><td>오 부장: “연하게 달라고 했잖아! 귀가 없어?”</td></tr>
+        <tr><td class="mono">3</td><td class="nw">4초</td><td class="nw">클로즈업</td><td class="nw">천천히 다가가기</td><td>서윤이 침착하게 고개 숙임</td><td>서윤: “죄송합니다. 다시 만들어 드릴게요.”</td></tr>
+        <tr><td class="mono">4</td><td class="nw">5초</td><td class="nw">바스트샷</td><td class="nw">고정</td><td>비웃으며 명함을 톡톡</td><td>오 부장: “됐고, 사장 나오라 그래!”</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">12컷 전체는 <a href="#example" data-tab-go="script">예제 패키지의 대본</a>에 있어요.</p>
+  <figure class="prompt">
+    <figcaption><strong>대본 → 샷리스트 변환 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption>
+<pre>아래 대본을 AI 영상 제작용 샷리스트로 바꿔 줘.
+
+1) 등장인물마다 '캐릭터 고정 문장'을 영어 한 문장으로 만들어 줘. 나이, 성별, 머리 모양·색, 얼굴 특징, 의상 색, 소품을 넣어.
+2) 장소 고정 문장과 스타일 고정 문장도 영어로 하나씩 만들어 줘. 스타일 문장에는 vertical 9:16, no text, no watermark를 넣어.
+3) 컷마다 이미지 프롬프트(영어)를 써 줘: 샷 크기 + 캐릭터 고정 문장 + 행동·표정 + 장소 고정 문장 + 스타일 고정 문장. 고정 문장은 글자 하나 바꾸지 말고 그대로 넣어.
+4) 컷마다 영상 프롬프트(영어)를 써 줘: 카메라 움직임 + 인물 동작 하나 + 표정 변화 + 배경 움직임. 대사가 있으면 끝에 She says in Korean, calm: "대사" 처럼 한국어 대사를 따옴표로 넣어.
+5) 한국어 대사와 효과음도 컷마다 적어 줘.
+
+출력: 맨 위에 고정 문장들, 그 아래 컷마다 '컷 번호 / 길이 / 샷 크기 / 이미지 프롬프트 / 영상 프롬프트 / 대사 / 효과음' 순서로.
+
+[대본]
+(여기에 대본을 붙여 넣으세요)</pre>
+  </figure>
+  <p class="note tip"><b>팁</b><span>같은 크기의 샷이 세 번 넘게 이어지면 지루해져요. 대화는 말하는 사람 클로즈업과 듣는 사람 반응을 번갈아 쓰고, 반전 순간에는 급줌이나 1초 정적을 넣어 보세요.</span></p>
+  <div class="checklist">
+    <h3>STEP 4 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s4a" data-check="s4a"><label for="c-s4a">컷마다 샷 크기 정하기</label></li>
+      <li><input type="checkbox" id="c-s4b" data-check="s4b"><label for="c-s4b">컷마다 카메라 움직임 정하기</label></li>
+      <li><input type="checkbox" id="c-s4c" data-check="s4c"><label for="c-s4c">샷리스트 표 완성하기 (컷·길이·대사)</label></li>
+      <li><input type="checkbox" id="c-s4d" data-check="s4d"><label for="c-s4d">총 길이가 60초인지 확인하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<div class="part" data-track="pic"><span class="mono">PART 2</span><b>그림</b><span>STEP 5~7 · 얼굴을 고정하고, 장면을 그리고, 움직여요</span></div>
+
+<section class="sec step" id="step5" data-step="5" data-track="pic" aria-labelledby="h-step5">
+  <p class="step-meta"><span class="track-tag">그림</span><span>STEP 05</span><span>약 60분</span><span class="step-state" data-state-for="5">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">05</span><h2 id="h-step5">캐릭터 만들기: 얼굴 고정이 생명</h2></div>
+  <p class="goal"><strong>끝나면</strong>인물마다 ‘캐릭터 고정 문장’과 레퍼런스 이미지 3장이 생겨요.</p>
+  <p>AI 숏드라마에서 가장 흔한 실패는 컷마다 주인공 얼굴이 달라지는 거예요. 영상을 만들기 전에 얼굴과 의상을 고정해 두면 뒤 단계가 훨씬 쉬워져요.</p>
+  <h3>캐릭터 고정 문장 공식</h3>
+  <p class="formula"><span>[이름]</span><i>,</i><span>a [나이]-year-old Korean [woman/man]</span><i>,</i><span>[머리 모양·색]</span><i>,</i><span>[얼굴 특징]</span><i>,</i><span>[의상과 색]</span><i>,</i><span>[소품]</span></p>
+  <figure class="prompt">
+    <figcaption><strong>예: 서윤의 고정 문장</strong><span class="where">모든 프롬프트에 그대로 복사</span></figcaption>
+<pre>Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag</pre>
+  </figure>
+  <h3>Gemini에서 캐릭터 시트 만들기</h3>
+  <ol>
+    <li>Gemini 앱이나 gemini.google.com에서 새 대화를 열어요.</li>
+    <li>아래 캐릭터 시트 프롬프트를 붙여 넣고 이미지를 만들어 달라고 해요. 나노바나나가 이미지를 그려요.</li>
+    <li>마음에 안 들면 “얼굴은 그대로 두고 머리만 조금 더 짧게”처럼 고칠 부분만 말해요.</li>
+    <li>정면 클로즈업, 3/4 측면, 전신 3장을 확보해 02_캐릭터 폴더에 ‘서윤_정면.png’처럼 저장해요.</li>
+    <li>장소도 사람 없이 한 장 만들어 두면 컷마다 배경이 덜 바뀌어요.</li>
+  </ol>
+  <figure class="prompt">
+    <figcaption><strong>캐릭터 시트 프롬프트</strong><span class="where">Gemini (나노바나나)</span></figcaption>
+<pre>Character reference sheet of [캐릭터 고정 문장]. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.</pre>
+  </figure>
+  <p class="muted">영어가 부담스러우면 한국어로 써도 돼요. Gemini는 한국어 이미지 요청도 잘 알아들어요. 다만 같은 인물은 끝까지 같은 문장을 쓰는 게 핵심이에요.</p>
+  <div class="tools" data-track="pic">
+    <p>내 방식별 이미지 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>Gemini 무료: 나노바나나로 생성하고 대화로 고쳐요. 하루 생성 한도가 적어요.</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>Google AI Plus: 나노바나나 Pro를 더 넉넉하게 써요. 인물 일관성이 좋아요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>Google AI Pro: 나노바나나 Pro 한도가 더 많아요. 컷마다 여러 버전을 뽑아 고르세요.</span></div>
+  </div>
+  <h3>얼굴을 지키는 습관 6가지</h3>
+  <ul>
+    <li>고정 문장은 글자 하나 바꾸지 말고 매번 복사해서 붙여 넣기</li>
+    <li>의상은 단순하게, 색은 정확하게 (베이지 앞치마, 회색 정장)</li>
+    <li>레퍼런스 이미지(정면 클로즈업)를 매번 첨부하기</li>
+    <li>한 인물은 한 대화창에서 이어서 작업하기</li>
+    <li>이상한 결과는 고치려 애쓰지 말고 버리고 다시 만들기</li>
+    <li>연예인이나 지인의 사진·이름은 넣지 않기</li>
+  </ul>
+  <div class="checklist">
+    <h3>STEP 5 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s5a" data-check="s5a"><label for="c-s5a">인물별 고정 문장 쓰기</label></li>
+      <li><input type="checkbox" id="c-s5b" data-check="s5b"><label for="c-s5b">인물별 레퍼런스 3장 만들기</label></li>
+      <li><input type="checkbox" id="c-s5c" data-check="s5c"><label for="c-s5c">장소 레퍼런스 1장 만들기</label></li>
+      <li><input type="checkbox" id="c-s5d" data-check="s5d"><label for="c-s5d">02_캐릭터 폴더에 이름 붙여 저장하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step6" data-step="6" data-track="pic" aria-labelledby="h-step6">
+  <p class="step-meta"><span class="track-tag">그림</span><span>STEP 06</span><span>약 90분</span><span class="step-state" data-state-for="6">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">06</span><h2 id="h-step6">장면 이미지(키프레임) 만들기</h2></div>
+  <p class="goal"><strong>끝나면</strong>컷마다 영상의 첫 화면이 될 9:16 이미지가 1장씩 생겨요.</p>
+  <p>글만 넣어 바로 영상을 만드는 것보다, 먼저 이미지를 만들고 그 이미지를 움직이는 쪽이 얼굴과 구도를 훨씬 잘 지켜요. 이 이미지를 키프레임이라고 불러요.</p>
+  <h3>이미지 프롬프트 공식</h3>
+  <p class="formula"><span>[샷 크기]</span><i>+</i><span>[캐릭터 고정 문장]</span><i>+</i><span>[행동·표정]</span><i>+</i><span>[장소]</span><i>+</i><span>[조명·시간]</span><i>+</i><span>[스타일]</span><i>+</i><span>vertical 9:16, no text</span></p>
+  <h3>작업 순서</h3>
+  <ol>
+    <li>그 컷에 나오는 인물의 레퍼런스 이미지를 첨부해요. 두 명이 나오면 두 명 다.</li>
+    <li>컷의 이미지 프롬프트를 붙여 넣어요.</li>
+    <li>가장 좋은 결과를 고르고 “표정을 더 화나게”, “카메라를 조금 더 가까이”처럼 대화로 고쳐요.</li>
+    <li>03_장면 폴더에 ‘컷01.png’처럼 번호로 저장해요.</li>
+  </ol>
+  <h3>좋은 키프레임의 조건</h3>
+  <ul>
+    <li>동작이 시작되기 직전의 자세 (손을 들기 직전, 고개를 숙이기 직전)</li>
+    <li>손은 단순하게, 가능하면 화면 밖에</li>
+    <li>배경이 깔끔하고 인물이 화면 가운데 근처에</li>
+    <li>얼굴이 레퍼런스와 같은 사람으로 보일 것</li>
+  </ul>
+  <div class="tools" data-track="pic">
+    <p>내 방식별 이미지 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>Gemini 무료. 하루 한도가 적으니 컷 3~4개씩 나눠서 만드세요.</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>Google AI Plus의 나노바나나 Pro로 12컷을 하루에 끝낼 수 있어요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>Google AI Pro. 컷마다 2~4개 버전을 뽑아 가장 좋은 것을 고르세요.</span></div>
+  </div>
+  <p class="note"><b>예제</b><span>「알바생의 정체」 12컷의 이미지 프롬프트는 <a href="#example" data-tab-go="shots">예제 패키지 › 컷별 프롬프트</a>에 모두 있어요.</span></p>
+  <div class="checklist">
+    <h3>STEP 6 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s6a" data-check="s6a"><label for="c-s6a">공식대로 첫 컷 이미지 만들기</label></li>
+      <li><input type="checkbox" id="c-s6b" data-check="s6b"><label for="c-s6b">나머지 컷 이미지 완성하기</label></li>
+      <li><input type="checkbox" id="c-s6c" data-check="s6c"><label for="c-s6c">모든 컷을 나란히 놓고 얼굴·의상·조명 비교하기</label></li>
+      <li><input type="checkbox" id="c-s6d" data-check="s6d"><label for="c-s6d">혼자 튀는 컷 다시 만들기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step7" data-step="7" data-track="pic" aria-labelledby="h-step7">
+  <p class="step-meta"><span class="track-tag">그림</span><span>STEP 07</span><span>2~3시간</span><span class="step-state" data-state-for="7">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">07</span><h2 id="h-step7">이미지를 영상으로 움직이기</h2></div>
+  <p class="goal"><strong>끝나면</strong>컷마다 3~10초짜리 영상 클립이 생겨요.</p>
+  <h3>어떤 도구를 쓸까</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>도구</th><th>잘하는 것</th><th>알아 둘 점</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><b>Kling 4.0</b><br>(Kling AI)</td><td>한 번에 최대 30초. 키프레임 10장, 참고 자료 15개. 한국어를 포함한 여러 언어의 립싱크 지원을 발표했어요.</td><td>무료는 하루 크레딧, 워터마크, 비상업. 초기 체험판은 720p였어요.</td></tr>
+        <tr><td class="nw"><b>Google Flow</b><br>(Veo 3.1, Gemini Omni Flash)</td><td>사실적인 화질과 주변 소리. 비구독자도 하루 50크레딧 (Veo 3.1 Lite 10크레딧, Fast 20크레딧).</td><td>클립이 짧아요 (Veo 3.1 Lite 4~8초, Omni 3~10초). 한국어 대사는 직접 테스트해 보세요. 나라별 제공 여부도 확인하세요.</td></tr>
+        <tr><td class="nw"><b>Hailuo</b><br>(MiniMax H3)</td><td>감정 연기, 인물 레퍼런스 최대 9장, 5~15초.</td><td>2026년 7월 출시라 사용 후기가 아직 적어요.</td></tr>
+        <tr><td class="nw"><b>Dreamina</b><br>(Seedance 2.0)</td><td>참고 자료를 활용한 멀티샷, 최대 15초.</td><td>실제 사람 얼굴이 담긴 이미지는 쓸 수 없어요. 지역별로 순차 제공 중이에요.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Kling으로 따라 하기</h3>
+  <ol>
+    <li>Kling AI에 로그인해 오늘 받은 크레딧을 확인해요.</li>
+    <li>영상 만들기에서 ‘이미지로 영상 만들기(Image to Video)’를 골라요.</li>
+    <li>03_장면 폴더의 ‘컷01.png’를 올리고 비율이 9:16인지 확인해요.</li>
+    <li>모델과 길이를 골라요. 첫 테스트는 5초로, 무료라면 크레딧이 적게 드는 모델로 해요.</li>
+    <li>컷의 영상 프롬프트를 붙여 넣어요. 대사를 넣을지는 STEP 8의 A안·B안을 보고 정해요.</li>
+    <li>생성한 뒤 결과를 비교해 가장 자연스러운 것을 04_영상 폴더에 ‘컷01_v1.mp4’로 저장해요.</li>
+  </ol>
+  <p class="muted">메뉴 이름은 업데이트에 따라 조금씩 달라질 수 있어요.</p>
+  <h3>모션 프롬프트 공식</h3>
+  <p class="formula"><span>[카메라 움직임]</span><i>+</i><span>[인물 동작 하나]</span><i>+</i><span>[표정 변화]</span><i>+</i><span>[배경 움직임]</span><i>+</i><span>(대사)</span></p>
+  <figure class="prompt">
+    <figcaption><strong>예: 컷 3 영상 프롬프트</strong><span class="where">Kling · 이미지로 영상 만들기</span></figcaption>
+<pre>Slow push-in. She blinks once, keeps her composure and bows her head slightly. She says in Korean, polite and calm: "죄송합니다. 다시 만들어 드릴게요."</pre>
+  </figure>
+  <ul>
+    <li>한 컷에는 동작 하나만</li>
+    <li>slowly, subtle 같은 말로 움직임을 작게</li>
+    <li>처음에는 5초로 만들고 편집에서 자르기</li>
+    <li>카메라와 인물을 동시에 크게 움직이지 않기</li>
+  </ul>
+  <h3>크레딧 아끼는 법</h3>
+  <ul>
+    <li>이미지 단계에서 충분히 고르고, 영상은 확정된 컷만 만들기</li>
+    <li>시안은 가벼운 모델(Flow의 Veo 3.1 Lite 등)로, 확정 컷만 고품질로</li>
+    <li>무료 크레딧은 이월되지 않으니 매일 조금씩 쓰기</li>
+    <li>한 번에 여러 개를 생성하는 옵션은 꺼 두기</li>
+  </ul>
+  <div class="tools" data-track="pic">
+    <p>내 방식별 영상 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>Kling 무료 일일 크레딧(크레딧이 적게 드는 모델) + Google Flow 비구독자 하루 50크레딧. 워터마크가 붙고 상업적으로 쓸 수 없어요.</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>Kling Standard 660크레딧으로 확정 컷을 만들고, 시안은 Flow(AI Plus 크레딧)로 만들어요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>Kling Pro 3,000크레딧으로 Kling 4.0을 넉넉히, Flow에서 Veo 3.1 Quality와 Gemini Omni Flash까지 써요.</span></div>
+  </div>
+  <p class="note tip"><b>다음 단계</b><span>익숙해지면 Kling 4.0의 다중 키프레임(최대 10장)으로 여러 컷을 한 번에 최대 30초까지 이어 만들 수 있어요. 첫 편은 컷별로 만드는 쪽이 실패가 적어요.</span></p>
+  <div class="checklist">
+    <h3>STEP 7 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s7a" data-check="s7a"><label for="c-s7a">첫 컷으로 테스트하며 설정 익히기</label></li>
+      <li><input type="checkbox" id="c-s7b" data-check="s7b"><label for="c-s7b">모든 컷 영상 만들기 (컷당 1~3회)</label></li>
+      <li><input type="checkbox" id="c-s7c" data-check="s7c"><label for="c-s7c">컷별로 가장 좋은 클립을 04_영상 폴더에 저장하기</label></li>
+      <li><input type="checkbox" id="c-s7d" data-check="s7d"><label for="c-s7d">얼굴이 변하거나 손이 깨진 컷 다시 만들기</label></li>
+    </ul>
+  </div>
+</section>
+
+<div class="part" data-track="sound"><span class="mono">PART 3</span><b>소리</b><span>STEP 8~9 · 목소리와 음악으로 감정을 완성해요</span></div>
+
+<section class="sec step" id="step8" data-step="8" data-track="sound" aria-labelledby="h-step8">
+  <p class="step-meta"><span class="track-tag">소리</span><span>STEP 08</span><span>약 60분</span><span class="step-state" data-state-for="8">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">08</span><h2 id="h-step8">목소리 입히기</h2></div>
+  <p class="goal"><strong>끝나면</strong>모든 대사가 인물마다 일관된 목소리로 들어가요.</p>
+  <h3>두 가지 방법</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th></th><th>A안: 영상과 함께 대사 생성</th><th>B안: AI 음성(TTS)으로 따로</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><b>방법</b></td><td>모션 프롬프트 끝에 <span class="mono">She says in Korean: "대사"</span>를 넣어, 영상을 만들 때 목소리까지 같이 생성해요.</td><td>Typecast·ElevenLabs·클로바더빙에서 대사 파일을 만들어 편집할 때 붙여요.</td></tr>
+        <tr><td class="nw"><b>장점</b></td><td>입 모양이 자동으로 맞고 가장 간단해요.</td><td>인물 목소리가 끝까지 같아요. 감정과 속도를 세밀하게 조절해요.</td></tr>
+        <tr><td class="nw"><b>단점</b></td><td>컷마다 목소리가 조금씩 달라질 수 있어요. 한국어 발음은 도구마다 차이가 있어요.</td><td>입 모양을 따로 맞춰야 해요 (립싱크 기능이나 입이 안 보이는 컷).</td></tr>
+        <tr><td class="nw"><b>추천</b></td><td>첫 편, 무료·가성비</td><td>시리즈, 본격 연재</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>먼저 A안으로 해 보고, 목소리가 거슬리는 인물만 B안으로 바꾸는 게 가장 효율적이에요. 같은 인물의 목소리 묘사(예: <span class="mono">deep, arrogant male voice in his late 40s</span>)를 모든 컷에 똑같이 넣으면 A안도 꽤 일정해져요.</p>
+  <h3>Typecast로 대사 만들기 (B안)</h3>
+  <ol>
+    <li>typecast.ai에서 새 프로젝트를 만들어요.</li>
+    <li>인물에 맞는 목소리(캐릭터)를 골라요.</li>
+    <li>대사를 한 줄씩 붙여 넣고 감정과 속도를 정해요.</li>
+    <li>미리 들어 보고, 어색한 곳은 쉼표나 말줄임표로 호흡을 바꿔요.</li>
+    <li>05_음성 폴더에 ‘컷03_서윤.wav’처럼 컷 번호로 내려받아요.</li>
+  </ol>
+  <h3>발음이 자연스러워지는 팁</h3>
+  <ul>
+    <li>숫자와 영어는 한글로 풀어 쓰기 (10분 → 십 분, CEO → 대표)</li>
+    <li>쉼표와 말줄임표로 호흡 넣기</li>
+    <li>긴 문장은 두 개로 끊기</li>
+    <li>같은 인물은 끝까지 같은 목소리, 같은 설정</li>
+  </ul>
+  <h3>입 모양 맞추기</h3>
+  <ul>
+    <li>영상 도구의 립싱크 기능(Kling 등)에 영상과 음성 파일을 함께 넣기</li>
+    <li>입이 잘 안 보이는 컷(옆모습, 뒷모습, 듣는 사람의 반응)에 대사 깔기</li>
+    <li>대사 길이를 컷 길이에 맞추기</li>
+  </ul>
+  <div class="tools" data-track="sound">
+    <p>내 방식별 음성 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>A안(Kling 영상 속 대사) 위주로 하고, Typecast 무료 범위에서 몇 줄만 보충해요.</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>A안을 기본으로, 목소리가 거슬리는 인물만 Typecast로 바꿔요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>B안: Typecast나 ElevenLabs 유료 플랜으로 인물별 목소리를 통일해요.</span></div>
+  </div>
+  <div class="checklist">
+    <h3>STEP 8 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s8a" data-check="s8a"><label for="c-s8a">A안과 B안 중 정하기</label></li>
+      <li><input type="checkbox" id="c-s8b" data-check="s8b"><label for="c-s8b">인물별 목소리 정하기</label></li>
+      <li><input type="checkbox" id="c-s8c" data-check="s8c"><label for="c-s8c">대사 파일 만들기 (컷 번호로 저장)</label></li>
+      <li><input type="checkbox" id="c-s8d" data-check="s8d"><label for="c-s8d">입 모양을 맞추거나 컷 배치 조정하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step9" data-step="9" data-track="sound" aria-labelledby="h-step9">
+  <p class="step-meta"><span class="track-tag">소리</span><span>STEP 09</span><span>약 40분</span><span class="step-state" data-state-for="9">0/3</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">09</span><h2 id="h-step9">음악과 효과음</h2></div>
+  <p class="goal"><strong>끝나면</strong>배경음악 1곡과 효과음 5개 이상이 준비돼요.</p>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>구하는 곳</th><th>특징</th><th>쓸 때 주의</th></tr></thead>
+      <tbody>
+        <tr><td class="nw"><b>YouTube 오디오 보관함</b></td><td>YouTube 스튜디오 안에 있는 무료 음악·효과음</td><td>수익화 영상에도 쓸 수 있어요. 일부 곡은 출처 표기가 필요해요.</td></tr>
+        <tr><td class="nw"><b>Suno</b></td><td>원하는 분위기를 글로 써서 음악 생성</td><td>무료 플랜 곡은 개인·비상업용이에요. 상업적으로 쓰려면 Pro(월 $10부터) 구독 중에 만든 곡이어야 해요.</td></tr>
+        <tr><td class="nw"><b>CapCut 음악·효과음</b></td><td>편집하면서 바로 넣기</td><td>상업적 이용 가능 표시가 있는 것만 쓰세요.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="prompt">
+    <figcaption><strong>Suno 프롬프트 (예제용)</strong><span class="where">Suno · Instrumental 켜기</span></figcaption>
+<pre>Instrumental only. Tense K-drama underscore: pizzicato strings, low cello pulses and a soft ticking clock, slowly building suspense, a sudden stop, then a powerful reveal theme with taiko drums and rising strings, cinematic, cold and confident ending.</pre>
+  </figure>
+  <h3>예제에 필요한 효과음</h3>
+  <ul class="pill-list">
+    <li>도자기 컵 ‘쾅’</li><li>손가락으로 카운터 ‘톡톡’</li><li>카페 웅성거림</li><li>출입문 종소리 ‘딸랑’</li><li>구두 발소리</li><li>반전 임팩트 ‘두둥’</li>
+  </ul>
+  <h3>소리 크기 규칙</h3>
+  <ul>
+    <li>대사, 효과음, 음악 순서로 크게</li>
+    <li>대사가 나오는 동안은 음악을 한 단계 더 낮추기</li>
+    <li>반전 직전 1초 정적이 ‘두둥’보다 셀 때가 있어요</li>
+    <li>이어폰과 스마트폰 스피커 둘 다로 들어 보기</li>
+  </ul>
+  <div class="tools" data-track="sound">
+    <p>내 방식별 음악 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>YouTube 오디오 보관함 음악 + CapCut 기본 효과음</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>위와 같아요. Suno 무료로 분위기를 연습해 볼 수 있지만, 공개 영상에는 오디오 보관함 음악을 쓰세요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>Suno Pro로 작품 전용 테마곡을 만들어 시리즈 내내 써요.</span></div>
+  </div>
+  <div class="checklist">
+    <h3>STEP 9 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s9a" data-check="s9a"><label for="c-s9a">배경음악 고르기 (라이선스 확인)</label></li>
+      <li><input type="checkbox" id="c-s9b" data-check="s9b"><label for="c-s9b">효과음 5개 이상 모으기</label></li>
+      <li><input type="checkbox" id="c-s9c" data-check="s9c"><label for="c-s9c">06_사운드 폴더에 저장하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<div class="part" data-track="out"><span class="mono">PART 4</span><b>완성·공개</b><span>STEP 10~12 · 편집하고, 올리고, 키워요</span></div>
+
+<section class="sec step" id="step10" data-step="10" data-track="out" aria-labelledby="h-step10">
+  <p class="step-meta"><span class="track-tag">완성·공개</span><span>STEP 10</span><span>약 2시간</span><span class="step-state" data-state-for="10">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">10</span><h2 id="h-step10">편집하고 자막 넣기</h2></div>
+  <p class="goal"><strong>끝나면</strong>1080×1920 크기의 60초 완성본이 생겨요.</p>
+  <h3>CapCut으로 따라 하기</h3>
+  <ol>
+    <li>새 프로젝트를 만들고 04_영상의 클립을 컷 순서대로 불러와요. 비율은 9:16.</li>
+    <li>클립마다 앞뒤를 다듬어요. AI 영상은 시작 0.2~0.5초와 끝부분이 어색할 때가 많아요.</li>
+    <li>B안이라면 대사 파일을 해당 컷 아래에 놓아요. A안이면 영상 속 대사를 그대로 써요.</li>
+    <li>배경음악을 깔고, 대사가 나오는 구간은 볼륨을 낮춰요.</li>
+    <li>효과음을 <a href="#structure">타임라인</a>처럼 배치해요. (쾅, 웅성, 딸랑, 두둥)</li>
+    <li>자막을 넣어요. 자동 자막이 유료로 막혀 있으면 Vrew를 쓰세요.</li>
+    <li>첫 3초 위쪽에 훅 문구를, 마지막 컷에 ‘2화에서 계속’을 넣어요.</li>
+    <li>필터 하나를 전체 클립에 약하게 걸어 색감을 맞춰요.</li>
+    <li>1080×1920, 30fps로 내보내요. AI 클립이 24fps라면 24fps도 괜찮아요.</li>
+  </ol>
+  <div class="split">
+    <div class="body-text">
+      <h3>자막 스타일</h3>
+      <ul>
+        <li>굵은 고딕, 흰 글자에 검은 테두리나 반투명 상자</li>
+        <li>한 줄 14자 안팎, 최대 두 줄</li>
+        <li>화면 가운데에서 아래 1/3 사이</li>
+        <li>맨 아래 20%와 오른쪽 끝은 앱의 버튼과 제목이 가려요</li>
+        <li>훅 문구는 위쪽에, 첫 3초 동안</li>
+      </ul>
+    </div>
+    <figure class="safe">
+      <svg viewBox="0 0 180 320" role="img" aria-label="9:16 화면 안전 구역. 위쪽 10%와 아래쪽 22%, 오른쪽 버튼 영역은 앱 화면이 가리고, 훅 문구는 위쪽, 자막은 가운데 아래에 둔다.">
+        <rect class="frame" x="1" y="1" width="178" height="318" rx="12"/>
+        <rect class="ui" x="2" y="2" width="176" height="30" rx="10"/>
+        <text x="90" y="21" text-anchor="middle">앱 상단 메뉴</text>
+        <rect class="hook" x="16" y="42" width="128" height="34" rx="6"/>
+        <text x="80" y="63" text-anchor="middle">훅 문구</text>
+        <ellipse class="face" cx="80" cy="140" rx="34" ry="42"/>
+        <text x="80" y="144" text-anchor="middle">인물 얼굴</text>
+        <rect class="ui" x="148" y="120" width="30" height="128" rx="6"/>
+        <text x="163" y="188" text-anchor="middle">버튼</text>
+        <rect class="cap" x="16" y="196" width="128" height="48" rx="6"/>
+        <text x="80" y="224" text-anchor="middle">자막 안전 구역</text>
+        <rect class="ui" x="2" y="250" width="176" height="68" rx="10"/>
+        <text x="90" y="288" text-anchor="middle">제목 · 설명 · 음악 정보</text>
+      </svg>
+      <figcaption>빨간 부분은 쇼츠·릴스 화면에서 가려져요.</figcaption>
+    </figure>
+  </div>
+  <p class="note tip"><b>Vrew 자막</b><span>완성본을 Vrew로 불러와 언어를 한국어로 정하고 자동 자막을 만든 뒤, 오타를 고치고 스타일을 정해 내보내면 돼요.</span></p>
+  <h3>내보내기 전 최종 점검</h3>
+  <ul>
+    <li>소리를 꺼도 이야기가 이해되나요?</li>
+    <li>첫 1초에 손가락이 멈출 만한가요?</li>
+    <li>길이가 60초 안팎인가요?</li>
+    <li>자막 오타와 타이밍이 맞나요?</li>
+    <li>얼굴이 튀는 컷은 없나요?</li>
+    <li>대사가 음악에 묻히지 않나요?</li>
+  </ul>
+  <div class="tools" data-track="out">
+    <p>내 방식별 편집 도구</p>
+    <div class="tool-row" data-r="free"><span class="r">무료</span><span>CapCut 기본 편집 + Vrew 무료 범위 자동 자막</span></div>
+    <div class="tool-row" data-r="value"><span class="r">가성비</span><span>위와 같아요. 자막 작업이 많아지면 Vrew 유료를 검토하세요.</span></div>
+    <div class="tool-row" data-r="pro"><span class="r">본격</span><span>CapCut 유료(자동 자막, AI 보정) 또는 Vrew 유료</span></div>
+  </div>
+  <div class="checklist">
+    <h3>STEP 10 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s10a" data-check="s10a"><label for="c-s10a">클립 배치하고 다듬기</label></li>
+      <li><input type="checkbox" id="c-s10b" data-check="s10b"><label for="c-s10b">대사·음악·효과음 배치하기</label></li>
+      <li><input type="checkbox" id="c-s10c" data-check="s10c"><label for="c-s10c">자막과 훅 문구 넣기</label></li>
+      <li><input type="checkbox" id="c-s10d" data-check="s10d"><label for="c-s10d">1080×1920으로 내보내기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step11" data-step="11" data-track="out" aria-labelledby="h-step11">
+  <p class="step-meta"><span class="track-tag">완성·공개</span><span>STEP 11</span><span>약 30분</span><span class="step-state" data-state-for="11">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">11</span><h2 id="h-step11">제목·커버·AI 표시</h2></div>
+  <p class="goal"><strong>끝나면</strong>업로드에 필요한 제목, 설명, 해시태그, 커버, AI 표시가 준비돼요.</p>
+  <h3>제목 공식 5가지</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>공식</th><th>예시</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">정체 공개형</td><td>카페 알바생의 정체</td></tr>
+        <tr><td class="nw">결과 궁금형</td><td>알바생에게 갑질한 부장의 최후</td></tr>
+        <tr><td class="nw">조건형</td><td>사장 나오라고 소리쳤더니 벌어진 일</td></tr>
+        <tr><td class="nw">대사 인용형</td><td>“대표님, 이사회 십 분 전입니다”</td></tr>
+        <tr><td class="nw">시리즈형</td><td>[알바생의 정체 1화] 진상 손님</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="prompt">
+    <figcaption><strong>설명란 템플릿</strong><span class="where">YouTube · Instagram · TikTok</span></figcaption>
+<pre>진상 손님에게 갑질을 당한 카페 알바생, 그녀의 진짜 정체는?
+2화는 [요일]에 공개돼요.
+이 영상은 AI 도구로 제작한 창작 드라마이며 등장인물과 단체는 모두 허구입니다.
+#AI드라마 #숏드라마 #사이다 #반전 #shorts</pre>
+  </figure>
+  <h3>커버(썸네일)</h3>
+  <p>쇼츠는 영상 속 한 장면을 커버로 골라요. 표정이 가장 센 컷이 좋아요. 예제라면 10번, 얼어붙은 부장의 얼굴이에요. 릴스는 커버 이미지를 따로 올릴 수 있고, 프로필 격자에서는 위아래가 잘려 보이니 얼굴을 가운데에 두세요.</p>
+  <h3>AI로 만든 영상이라고 표시하기</h3>
+  <ul>
+    <li><b>YouTube:</b> 업로드 화면 ‘세부정보’의 ‘변경되거나 합성된 콘텐츠’ 항목에서 ‘예’를 골라요. 실제처럼 보이는 인물이나 장면이면 꼭 표시해야 해요.</li>
+    <li><b>Instagram:</b> 게시 전 ‘고급 설정’에서 AI 레이블을 켜요. 앱 버전에 따라 이름이 조금 달라요.</li>
+    <li><b>TikTok:</b> 게시 화면의 추가 옵션에서 ‘AI 생성 콘텐츠’를 켜요.</li>
+    <li><b>설명란:</b> 마지막 줄에 AI로 만든 창작물이라고 적어요.</li>
+  </ul>
+  <p class="note"><b>걱정 마세요</b><span>AI 표시를 했다고 해서 수익 창출이 막히지는 않아요. 문제가 되는 건 표시를 하지 않아 시청자를 속이는 경우예요.</span></p>
+  <figure class="prompt">
+    <figcaption><strong>제목·설명·해시태그 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption>
+<pre>아래 숏드라마 대본으로 업로드 정보를 만들어 줘.
+1) 유튜브 쇼츠 제목 5개: 30자 이내, 궁금증을 남기되 내용과 다른 낚시는 금지
+2) 설명란 3줄: 마지막 줄은 "이 영상은 AI 도구로 제작한 창작 드라마이며 등장인물과 단체는 모두 허구입니다."
+3) 해시태그 5개: #AI드라마 #숏드라마 포함
+4) 고정 댓글 1개: 다음 화를 기다리게 만드는 질문
+
+[대본]
+(여기에 대본을 붙여 넣으세요)</pre>
+  </figure>
+  <div class="checklist">
+    <h3>STEP 11 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s11a" data-check="s11a"><label for="c-s11a">제목 후보 5개 중 하나 고르기</label></li>
+      <li><input type="checkbox" id="c-s11b" data-check="s11b"><label for="c-s11b">설명란과 해시태그 쓰기</label></li>
+      <li><input type="checkbox" id="c-s11c" data-check="s11c"><label for="c-s11c">커버로 쓸 장면 고르기</label></li>
+      <li><input type="checkbox" id="c-s11d" data-check="s11d"><label for="c-s11d">플랫폼별 AI 표시 설정 확인하기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec step" id="step12" data-step="12" data-track="out" aria-labelledby="h-step12">
+  <p class="step-meta"><span class="track-tag">완성·공개</span><span>STEP 12</span><span>30분 + 꾸준히</span><span class="step-state" data-state-for="12">0/4</span></p>
+  <div class="step-title"><span class="step-no" aria-hidden="true">12</span><h2 id="h-step12">올리고, 숫자 보고, 시리즈로 키우기</h2></div>
+  <p class="goal"><strong>끝나면</strong>첫 작품이 공개되고, 48시간 데이터로 2화 계획이 생겨요.</p>
+  <h3>업로드 순서</h3>
+  <ol>
+    <li><b>YouTube 쇼츠:</b> YouTube 앱의 ‘+’에서 동영상을 올려요. 세로 영상이 3분 이하면 쇼츠로 분류돼요.</li>
+    <li><b>릴스·틱톡:</b> 같은 원본 파일로 올려요. 다른 앱의 워터마크가 찍힌 파일은 쓰지 마세요.</li>
+    <li><b>고정 댓글:</b> 다음 화 질문을 남겨요. 예: “2화에서 부장님은 어떻게 될까요? 댓글로 예상해 주세요!”</li>
+  </ol>
+  <h3>48시간 뒤에 볼 숫자 3개</h3>
+  <div class="tw">
+    <table class="wide-table">
+      <thead><tr><th>숫자</th><th>어디서 보나</th><th>낮으면 이렇게</th></tr></thead>
+      <tbody>
+        <tr><td><b>‘시청함 vs 스와이프’ 비율</b></td><td>YouTube 스튜디오 › 분석 › 쇼츠 피드 지표</td><td>첫 1초를 바꾸세요. 가장 센 장면을 맨 앞으로 옮기고 훅 문구를 더 짧게.</td></tr>
+        <tr><td><b>시청 지속 그래프</b></td><td>콘텐츠별 분석 › 시청 지속시간</td><td>그래프가 뚝 떨어지는 지점의 컷을 줄이거나 빼세요.</td></tr>
+        <tr><td><b>댓글·공유·구독</b></td><td>참여도</td><td>마지막 한 줄과 고정 댓글 질문을 바꿔 보세요.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>시리즈로 키우기</h3>
+  <ul>
+    <li>캐릭터 고정 문장과 레퍼런스를 계속 재사용하기</li>
+    <li>제목에 [작품명 N화]를 붙이고 재생목록 만들기</li>
+    <li>주 2~3편, 같은 요일 같은 시간에 올리기</li>
+    <li>편마다 새로운 갈등을 넣기. 틀만 바꾼 대량 복제는 YouTube가 ‘진정성 없는 콘텐츠’로 보고 수익 창출을 막아요.</li>
+    <li>최소 10편은 올려 보고 판단하기</li>
+  </ul>
+  <div class="checklist">
+    <h3>STEP 12 체크리스트</h3>
+    <ul>
+      <li><input type="checkbox" id="c-s12a" data-check="s12a"><label for="c-s12a">첫 작품 업로드하기</label></li>
+      <li><input type="checkbox" id="c-s12b" data-check="s12b"><label for="c-s12b">48시간 뒤 숫자 3개 기록하기</label></li>
+      <li><input type="checkbox" id="c-s12c" data-check="s12c"><label for="c-s12c">고칠 점 하나 정하기</label></li>
+      <li><input type="checkbox" id="c-s12d" data-check="s12d"><label for="c-s12d">2화 로그라인 쓰기</label></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="example" aria-labelledby="h-example">
+  <p class="kicker">실습 · 첫 편은 이대로 따라 만들기</p>
+  <h2 id="h-example">예제 패키지 「알바생의 정체」</h2>
+  <p>60초, 12컷, 인물 3명, 장소 1곳. 첫 편은 이 패키지를 그대로 따라 만들어 보세요. 모든 프롬프트는 복사해서 바로 쓸 수 있어요. 등장하는 인물과 회사는 모두 지어낸 것이에요.</p>
+  <dl class="ex-sum">
+    <div><dt>로그라인</dt><dd>카페 알바생 서윤이 진상 손님에게 갑질을 당하는데, 사실 그녀는 그 손님의 회사를 인수하는 그룹의 대표였다.</dd></div>
+    <div><dt>장르</dt><dd>신분 반전 · 사이다</dd></div>
+    <div><dt>인물</dt><dd>한서윤(26, 알바생이자 그룹 대표) · 오정훈 부장(48, 대한물산) · 강민재 비서(32)</dd></div>
+    <div><dt>장소</dt><dd>서울 오피스 빌딩 1층 카페, 낮</dd></div>
+  </dl>
+  <div class="tabs" role="tablist" aria-label="예제 패키지">
+    <button type="button" role="tab" id="tab-script" data-tab="script" aria-controls="panel-script" aria-selected="true">대본</button>
+    <button type="button" role="tab" id="tab-cast" data-tab="cast" aria-controls="panel-cast" aria-selected="false" tabindex="-1">캐릭터·장소</button>
+    <button type="button" role="tab" id="tab-shots" data-tab="shots" aria-controls="panel-shots" aria-selected="false" tabindex="-1">컷별 프롬프트</button>
+    <button type="button" role="tab" id="tab-sound" data-tab="sound" aria-controls="panel-sound" aria-selected="false" tabindex="-1">목소리·사운드·편집</button>
+  </div>
+
+  <div class="panel" role="tabpanel" id="panel-script" data-panel="script" aria-labelledby="tab-script">
+    <div class="tw">
+      <table class="wide-table">
+        <thead><tr><th>컷</th><th>시간</th><th>샷</th><th>화면</th><th>대사</th><th>소리</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td class="nw mono">0:00–0:03</td><td class="nw">익스트림 클로즈업</td><td>카운터에 커피잔이 쾅 내려놓이며 커피가 튄다.</td><td>오 부장(화면 밖): “이걸 커피라고 준 거야?!”</td><td>쾅 · 훅 문구 등장</td></tr>
+          <tr><td class="mono">2</td><td class="nw mono">0:03–0:08</td><td class="nw">미디엄 (서윤 시점)</td><td>오 부장이 카운터 너머로 몸을 숙이며 삿대질한다.</td><td>오 부장: “연하게 달라고 했잖아! 귀가 없어?”</td><td>긴장 음악 시작</td></tr>
+          <tr><td class="mono">3</td><td class="nw mono">0:08–0:12</td><td class="nw">클로즈업</td><td>서윤이 잠깐 놀라지만 침착하게 고개를 숙인다.</td><td>서윤: “죄송합니다. 다시 만들어 드릴게요.”</td><td>—</td></tr>
+          <tr><td class="mono">4</td><td class="nw mono">0:12–0:17</td><td class="nw">바스트샷</td><td>오 부장이 비웃으며 카운터 위 명함을 손가락으로 두드린다.</td><td>오 부장: “됐고, 사장 나오라 그래!”</td><td>톡톡</td></tr>
+          <tr><td class="mono">5</td><td class="nw mono">0:17–0:21</td><td class="nw">와이드</td><td>카페 손님들이 고개를 돌려 쳐다보며 수군거린다.</td><td>(없음)</td><td>웅성웅성</td></tr>
+          <tr><td class="mono">6</td><td class="nw mono">0:21–0:26</td><td class="nw">클로즈업</td><td>서윤이 명함을 내려다보다 천천히 고개를 들며 옅게 웃는다.</td><td>서윤: “대한물산… 오정훈 부장님?”</td><td>—</td></tr>
+          <tr><td class="mono">7</td><td class="nw mono">0:26–0:30</td><td class="nw">미디엄</td><td>오 부장이 팔짱을 끼고 턱을 치켜든다.</td><td>오 부장: “그래! 알바 주제에… 당장 사장 불러!”</td><td>긴장 음악 최고조</td></tr>
+          <tr><td class="mono">8</td><td class="nw mono">0:30–0:35</td><td class="nw">풀샷</td><td>유리문이 열리고 검은 정장의 강 비서가 빠르게 걸어 들어온다.</td><td>(없음)</td><td>음악 끊김 · 딸랑 · 구두 소리</td></tr>
+          <tr><td class="mono">9</td><td class="nw mono">0:35–0:40</td><td class="nw">미디엄 투샷</td><td>강 비서가 서윤 앞에서 정중히 고개를 숙인다.</td><td>강 비서: “대표님, 이사회 십 분 전입니다.”</td><td>반전 테마 시작</td></tr>
+          <tr><td class="mono">10</td><td class="nw mono">0:40–0:45</td><td class="nw">클로즈업</td><td>오 부장의 얼굴이 얼어붙고 입이 벌어진다.</td><td>오 부장: “대… 대표님?”</td><td>두둥</td></tr>
+          <tr><td class="mono">11</td><td class="nw mono">0:45–0:53</td><td class="nw">바스트샷</td><td>서윤이 앞치마를 벗어 내려놓고, 오 부장을 똑바로 보며 차갑게 웃는다.</td><td>서윤: “오늘 저희가 인수하는 회사… 대한물산이죠? 곧 또 뵙겠네요, 부장님.”</td><td>—</td></tr>
+          <tr><td class="mono">12</td><td class="nw mono">0:53–1:00</td><td class="nw">와이드</td><td>얼어붙은 오 부장 뒤로 서윤과 강 비서가 카페를 나간다. 화면이 어두워진다.</td><td>(없음)</td><td>딸랑 · 엔딩 · “2화에서 계속”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>2화 예고:</b> 인수 계약식 날, 회의실 상석에 앉은 사람은…</p>
+    <p class="muted">대사 길이를 컷 길이에 맞춰 두었어요. 1초에 4~5글자 기준이에요.</p>
+  </div>
+
+  <div class="panel" role="tabpanel" id="panel-cast" data-panel="cast" aria-labelledby="tab-cast" hidden>
+    <p>아래 다섯 문장이 이 작품의 ‘고정 문장’이에요. 컷별 프롬프트에는 이 문장들이 이미 들어가 있어요.</p>
+    <div class="fixed-list">
+      <figure class="prompt mini"><figcaption><strong>고정 문장 · 한서윤</strong><span class="where">주인공</span></figcaption><pre>Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>고정 문장 · 오정훈 부장</strong><span class="where">상대역</span></figcaption><pre>Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>고정 문장 · 강민재 비서</strong><span class="where">조연</span></figcaption><pre>Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>고정 문장 · 장소</strong></figcaption><pre>a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>고정 문장 · 스타일</strong><span class="where">모든 이미지 끝에</span></figcaption><pre>cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+    </div>
+    <h3>캐릭터 시트 프롬프트 (Gemini)</h3>
+    <figure class="prompt"><figcaption><strong>한서윤 캐릭터 시트</strong><span class="where">Gemini · 나노바나나</span></figcaption><pre>Character reference sheet of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.</pre></figure>
+    <figure class="prompt"><figcaption><strong>오정훈 부장 캐릭터 시트</strong><span class="where">Gemini · 나노바나나</span></figcaption><pre>Character reference sheet of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.</pre></figure>
+    <figure class="prompt"><figcaption><strong>강민재 비서 캐릭터 시트</strong><span class="where">Gemini · 나노바나나</span></figcaption><pre>Character reference sheet of Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.</pre></figure>
+    <figure class="prompt"><figcaption><strong>장소 레퍼런스</strong><span class="where">Gemini · 사람 없이</span></figcaption><pre>Empty establishing shot of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights, small round tables, morning light, no people, photorealistic, vertical 9:16, no text, no watermark</pre></figure>
+  </div>
+
+  <div class="panel" role="tabpanel" id="panel-shots" data-panel="shots" aria-labelledby="tab-shots" hidden>
+    <p>컷마다 이미지 프롬프트(STEP 6)와 영상 프롬프트(STEP 7)가 짝으로 있어요. 영상 프롬프트 속 한국어 대사는 A안용이에요. B안이라면 따옴표 대사 부분을 지우고 쓰세요.</p>
+    <div class="shot-list">
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 01</span><span class="chip-s mono">0:00–0:03</span><span class="chip-s">익스트림 클로즈업</span></header>
+      <p class="shot-scene">카운터에 커피잔이 쾅 내려놓이며 커피가 튄다.</p>
+      <p class="shot-line">오 부장(화면 밖): “이걸 커피라고 준 거야?!”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 레퍼런스 첨부</span></figcaption><pre>Extreme close-up of a white ceramic coffee cup being slammed onto the counter of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights, coffee splashing out, a man's hand in a charcoal gray suit sleeve with a gold wristwatch, frozen motion. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초 생성 → 3초 사용</span></figcaption><pre>Static camera. The hand slams the cup down and coffee splashes in slow motion across the counter. A sharp ceramic slam, then a man shouts off-screen in Korean, angry: "이걸 커피라고 준 거야?!"</pre></figure>
+      <p class="shot-sfx">소리: 도자기 ‘쾅’ · 훅 문구 “알바생에게 갑질한 손님의 최후”</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 02</span><span class="chip-s mono">0:03–0:08</span><span class="chip-s">미디엄 (서윤 시점)</span></header>
+      <p class="shot-scene">오 부장이 카운터 너머로 몸을 숙이며 삿대질한다.</p>
+      <p class="shot-line">오 부장: “연하게 달라고 했잖아! 귀가 없어?”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 레퍼런스 첨부</span></figcaption><pre>Point-of-view shot from behind the café counter: Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, leaning over the counter and pointing his finger at the camera, shouting with an angry red face. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>Handheld camera with a slight shake. The man leans closer, jabbing his finger toward the camera while he shouts. Customers in the background stay blurred. He shouts in Korean, loud and arrogant: "연하게 달라고 했잖아! 귀가 없어?"</pre></figure>
+      <p class="shot-sfx">소리: 긴장 음악 시작 (작게)</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 03</span><span class="chip-s mono">0:08–0:12</span><span class="chip-s">클로즈업</span></header>
+      <p class="shot-scene">서윤이 잠깐 놀라지만 침착하게 고개를 숙인다.</p>
+      <p class="shot-line">서윤: “죄송합니다. 다시 만들어 드릴게요.”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 서윤 레퍼런스 첨부</span></figcaption><pre>Close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, standing behind the café counter, calm but slightly startled expression, about to bow her head politely. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초 생성 → 4초 사용</span></figcaption><pre>Slow push-in. She blinks once, keeps her composure and bows her head slightly. She says in Korean, polite and calm: "죄송합니다. 다시 만들어 드릴게요."</pre></figure>
+      <p class="shot-sfx">소리: —</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 04</span><span class="chip-s mono">0:12–0:17</span><span class="chip-s">바스트샷</span></header>
+      <p class="shot-scene">오 부장이 비웃으며 카운터 위 명함을 손가락으로 두드린다.</p>
+      <p class="shot-line">오 부장: “됐고, 사장 나오라 그래!”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 레퍼런스 첨부</span></figcaption><pre>Medium close-up of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, smirking arrogantly, his index finger resting on a white business card lying on the counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>Static camera. He smirks, taps the business card twice with his index finger, then leans back. He says in Korean, mocking: "됐고, 사장 나오라 그래!"</pre></figure>
+      <p class="shot-sfx">소리: 손가락 ‘톡톡’</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 05</span><span class="chip-s mono">0:17–0:21</span><span class="chip-s">와이드</span></header>
+      <p class="shot-scene">카페 손님들이 고개를 돌려 쳐다보며 수군거린다.</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 장소 레퍼런스 첨부</span></figcaption><pre>Wide shot of the interior of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: several customers at small round tables turn their heads toward the counter and whisper to each other; a man in a charcoal gray suit stands at the counter in the middle ground, seen from behind. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초 생성 → 4초 사용</span></figcaption><pre>Slow pan from left to right across the café. Customers turn their heads toward the counter and whisper to each other. Ambient sound of a murmuring crowd and soft café noise.</pre></figure>
+      <p class="shot-sfx">소리: 카페 웅성거림</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 06</span><span class="chip-s mono">0:21–0:26</span><span class="chip-s">클로즈업</span></header>
+      <p class="shot-scene">서윤이 명함을 내려다보다 천천히 고개를 들며 옅게 웃는다.</p>
+      <p class="shot-line">서윤: “대한물산… 오정훈 부장님?”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 서윤 레퍼런스 첨부</span></figcaption><pre>Close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, looking down at a white business card on the counter, face calm and unreadable. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>Static close-up. She studies the card, then slowly raises her eyes with a faint, knowing smile. She says quietly in Korean: "대한물산... 오정훈 부장님?"</pre></figure>
+      <p class="shot-sfx">소리: —</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 07</span><span class="chip-s mono">0:26–0:30</span><span class="chip-s">미디엄</span></header>
+      <p class="shot-scene">오 부장이 팔짱을 끼고 턱을 치켜든다.</p>
+      <p class="shot-line">오 부장: “그래! 알바 주제에… 당장 사장 불러!”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 레퍼런스 첨부</span></figcaption><pre>Medium shot of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, arms crossed, chin raised, condescending look, standing at the café counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초 생성 → 4초 사용</span></figcaption><pre>Static camera. He scoffs, tightens his crossed arms and raises his chin. He says in Korean, condescending: "그래! 알바 주제에... 당장 사장 불러!"</pre></figure>
+      <p class="shot-sfx">소리: 긴장 음악 최고조</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 08</span><span class="chip-s mono">0:30–0:35</span><span class="chip-s">풀샷</span></header>
+      <p class="shot-scene">유리문이 열리고 검은 정장의 강 비서가 빠르게 걸어 들어온다.</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 강 비서 레퍼런스 첨부</span></figcaption><pre>Full shot of the glass entrance door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights swinging open, Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, striding in briskly, bright daylight behind him. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>The camera slowly tracks backward as the man in the black suit walks briskly toward it. A door bell chimes and his footsteps echo on the floor.</pre></figure>
+      <p class="shot-sfx">소리: 음악 끊김 · 문 종소리 ‘딸랑’ · 구두 발소리</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 09</span><span class="chip-s mono">0:35–0:40</span><span class="chip-s">미디엄 투샷</span></header>
+      <p class="shot-scene">강 비서가 서윤 앞에서 정중히 고개를 숙인다.</p>
+      <p class="shot-line">강 비서: “대표님, 이사회 십 분 전입니다.”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 강 비서 + 서윤 (둘 다 첨부) 레퍼런스 첨부</span></figcaption><pre>Medium two-shot inside a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, stands in front of the counter, bowing politely toward Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, who stands behind the counter. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>Static camera. The man in the black suit stops in front of the counter and bows politely to the woman. He says in Korean, calm and respectful: "대표님, 이사회 십 분 전입니다."</pre></figure>
+      <p class="shot-sfx">소리: 반전 테마 시작</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 10</span><span class="chip-s mono">0:40–0:45</span><span class="chip-s">클로즈업</span></header>
+      <p class="shot-scene">오 부장의 얼굴이 얼어붙고 입이 벌어진다.</p>
+      <p class="shot-line">오 부장: “대… 대표님?”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 레퍼런스 첨부</span></figcaption><pre>Close-up of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, face frozen in shock, mouth slightly open, eyes wide behind his glasses. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 5초</span></figcaption><pre>Fast push-in on his face. His expression freezes in shock and his mouth falls open. He stammers in Korean: "대... 대표님?" A deep dramatic impact sound.</pre></figure>
+      <p class="shot-sfx">소리: 임팩트 ‘두둥’</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 11</span><span class="chip-s mono">0:45–0:53</span><span class="chip-s">바스트샷</span></header>
+      <p class="shot-scene">서윤이 앞치마를 벗어 내려놓고, 오 부장을 똑바로 보며 차갑게 웃는다.</p>
+      <p class="shot-line">서윤: “오늘 저희가 인수하는 회사… 대한물산이죠? 곧 또 뵙겠네요, 부장님.”</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 서윤 레퍼런스 첨부</span></figcaption><pre>Medium close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, untying her beige apron behind the counter, looking straight into the camera with a cold, confident smile. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 10초 생성 → 8초 사용</span></figcaption><pre>Slow push-in. She takes off the apron, places it on the counter and looks straight at the camera with a cold, confident smile. She says in Korean, calm and cold: "오늘 저희가 인수하는 회사... 대한물산이죠? 곧 또 뵙겠네요, 부장님."</pre></figure>
+      <p class="shot-sfx">소리: —</p>
+      <p class="shot-note">메모: 손 동작이 깨지면 앞치마를 이미 벗은 이미지로 시작하고, 미소와 대사만 넣으세요.</p>
+    </article>
+    <article class="shot">
+      <header class="shot-head"><span class="shot-no mono">컷 12</span><span class="chip-s mono">0:53–1:00</span><span class="chip-s">와이드</span></header>
+      <p class="shot-scene">얼어붙은 오 부장 뒤로 서윤과 강 비서가 카페를 나간다. 화면이 어두워진다.</p>
+      <figure class="prompt mini"><figcaption><strong>이미지 프롬프트</strong><span class="where">Gemini · 오 부장 + 서윤 + 강 비서 레퍼런스 첨부</span></figcaption><pre>Wide shot from behind Mr. Oh: his charcoal gray suit shoulders and graying hair blurred in the foreground; in the background Seoyun, a 26-year-old Korean woman with a straight black bob just above the shoulders, white button-up shirt with rolled sleeves, no apron, and Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, walk out through the glass door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights into bright daylight. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark</pre></figure>
+      <figure class="prompt mini"><figcaption><strong>영상 프롬프트</strong><span class="where">Kling · 10초 생성 → 7초 사용</span></figcaption><pre>Static camera with a slow rack focus from the frozen man in the foreground to the two people leaving through the glass door. The door bell chimes. Slow fade to black at the end.</pre></figure>
+      <p class="shot-sfx">소리: 문 종소리 ‘딸랑’ · 엔딩 음악 · “2화에서 계속”</p>
+      <p class="shot-note">메모: 서윤의 고정 문장에서 앞치마만 뺐어요.</p>
+    </article>
+    </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="panel-sound" data-panel="sound" aria-labelledby="tab-sound" hidden>
+    <h3>인물별 목소리</h3>
+    <div class="tw">
+      <table class="wide-table">
+        <thead><tr><th>인물</th><th>목소리 방향</th><th>ElevenLabs 보이스 디자인 문장</th></tr></thead>
+        <tbody>
+          <tr><td class="nw"><b>한서윤</b></td><td>20대 중반 여성. 낮고 또렷하게, 감정은 절제. 11번 컷만 차갑고 단호하게.</td><td class="mono">A calm, composed Korean woman in her mid-20s with a low, clear voice and quiet confidence.</td></tr>
+          <tr><td class="nw"><b>오정훈 부장</b></td><td>40대 후반 남성. 굵고 큰 소리, 거만하게. 10번 컷은 말을 더듬어요.</td><td class="mono">An arrogant Korean man in his late 40s with a deep, loud, condescending voice.</td></tr>
+          <tr><td class="nw"><b>강민재 비서</b></td><td>30대 초반 남성. 낮고 정중하게, 감정 없이.</td><td class="mono">A composed Korean male secretary in his early 30s with a crisp, low, very polite voice.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Typecast에서는 위 방향에 맞는 목소리를 고르고 감정(차분, 화남, 단호 등)과 속도를 조절하세요. A안이라면 이 목소리 묘사를 영상 프롬프트의 대사 앞에 넣어도 돼요.</p>
+    <h3>음악·효과음 큐시트</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>시간</th><th>음악</th><th>효과음</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">0:00</td><td>(없음)</td><td>도자기 컵 ‘쾅’</td></tr>
+          <tr><td class="mono">0:03</td><td>긴장 음악 시작 (작게)</td><td>—</td></tr>
+          <tr><td class="mono">0:13</td><td>—</td><td>손가락 ‘톡톡’</td></tr>
+          <tr><td class="mono">0:17</td><td>—</td><td>카페 웅성거림 (4초)</td></tr>
+          <tr><td class="mono">0:26</td><td>긴장 음악 최고조</td><td>—</td></tr>
+          <tr><td class="mono">0:30</td><td>음악 뚝 끊기 (정적)</td><td>문 종소리 ‘딸랑’ + 구두 발소리</td></tr>
+          <tr><td class="mono">0:35</td><td>반전 테마 시작</td><td>—</td></tr>
+          <tr><td class="mono">0:41</td><td>—</td><td>임팩트 ‘두둥’</td></tr>
+          <tr><td class="mono">0:53</td><td>엔딩 → 서서히 작아지기</td><td>—</td></tr>
+          <tr><td class="mono">0:57</td><td>—</td><td>문 종소리 ‘딸랑’</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>편집 순서</h3>
+    <ol>
+      <li>컷 1~12를 순서대로 놓고, 위 대본 표의 시간에 맞춰 길이를 잘라요.</li>
+      <li>대사(A안이면 영상 속 소리, B안이면 음성 파일)를 맞춰요.</li>
+      <li>큐시트대로 음악과 효과음을 놓아요. 30초의 정적이 이 작품의 하이라이트예요.</li>
+      <li>자막을 넣고, 0~3초 위쪽에 “알바생에게 갑질한 손님의 최후”를 넣어요.</li>
+      <li>마지막 2초에 “2화에서 계속”을 넣고 화면을 어둡게 해요.</li>
+      <li>1080×1920으로 내보내 ‘알바생의정체_1화.mp4’로 저장해요.</li>
+    </ol>
+    <p>제목 예시는 <a href="#step11">STEP 11</a>에 있어요. 커버는 10번 컷의 얼어붙은 표정을 추천해요.</p>
+  </div>
+</section>
+
+<section class="sec" id="mywork" aria-labelledby="h-mywork">
+  <p class="kicker">실습 · 두 번째 작품부터</p>
+  <h2 id="h-mywork">내 작품 기획서</h2>
+  <p>칸을 채우면 아래 프롬프트들이 내 작품에 맞게 바로 바뀌어요. 적은 내용은 자동으로 저장돼요. Claude 앱에서 이 페이지를 열었다면 ‘AI 코치로’ 버튼을 눌러 여기서 바로 대본과 샷리스트를 만들 수도 있어요.</p>
+  <div class="ws-actions">
+    <button type="button" class="btn small" id="ws-example">예제로 채워 보기</button>
+    <button type="button" class="btn small" id="ws-clear">모두 지우기</button>
+    <span class="confirm" id="ws-confirm" hidden><span id="ws-confirm-msg">지금 적은 내용을 지울까요?</span><button type="button" class="btn small primary" id="ws-confirm-yes">확인</button><button type="button" class="btn small" id="ws-confirm-no">취소</button></span>
+  </div>
+  <form class="ws-grid" id="ws-form" autocomplete="off">
+    <div class="field"><label for="p-title">작품 제목</label><input type="text" id="p-title" data-p="title" placeholder="예: 알바생의 정체"></div>
+    <div class="field"><label for="p-genre">장르</label><input type="text" id="p-genre" data-p="genre" list="genre-list" placeholder="예: 신분 반전 · 사이다"></div>
+    <div class="field"><label for="p-tone">분위기</label><input type="text" id="p-tone" data-p="tone" placeholder="예: 통쾌한 사이다, 앞부분은 긴장감"></div>
+    <div class="field"><label for="p-length">길이</label><select id="p-length" data-p="length"><option value="45">45초 (8~9컷)</option><option value="60" selected>60초 (10~12컷)</option><option value="90">90초 (15~18컷)</option></select></div>
+    <div class="field wide"><label for="p-hero">주인공 (이름, 나이, 직업, 성격)</label><input type="text" id="p-hero" data-p="hero" placeholder="예: 한서윤, 26세 여성, 카페 알바생, 침착하고 단단함"></div>
+    <div class="field wide"><label for="p-heroLook">주인공 외모·의상</label><input type="text" id="p-heroLook" data-p="heroLook" placeholder="예: 어깨 위 검은 단발, 차분한 눈매, 흰 셔츠, 베이지 앞치마"></div>
+    <div class="field wide"><label for="p-partner">상대역 (이름, 나이, 직업, 성격)</label><input type="text" id="p-partner" data-p="partner" placeholder="예: 오정훈 부장, 48세 남성, 거만하고 갑질함"></div>
+    <div class="field wide"><label for="p-partnerLook">상대역 외모·의상</label><input type="text" id="p-partnerLook" data-p="partnerLook" placeholder="예: 희끗한 옆가르마 머리, 금테 안경, 회색 정장"></div>
+    <div class="field wide"><label for="p-extra">그 밖의 인물 (선택, 1명까지)</label><input type="text" id="p-extra" data-p="extra" placeholder="예: 강민재 비서, 32세 남성, 검은 정장"></div>
+    <div class="field wide"><label for="p-place">장소 (1~2곳)</label><input type="text" id="p-place" data-p="place" placeholder="예: 서울 오피스 빌딩 1층의 모던한 카페 (낮)"></div>
+    <div class="field wide"><label for="p-setup">시작 상황</label><textarea id="p-setup" data-p="setup" rows="2" placeholder="예: 점심시간 카페, 손님이 커피가 진하다며 알바생에게 소리친다"></textarea></div>
+    <div class="field wide"><label for="p-conflict">갈등 (주인공이 몰리는 순간)</label><textarea id="p-conflict" data-p="conflict" rows="2" placeholder="예: 손님은 사장을 불러오라며 모욕하고, 다른 손님들이 수군거린다"></textarea></div>
+    <div class="field wide"><label for="p-twist">반전 (숨겨진 진실)</label><textarea id="p-twist" data-p="twist" rows="2" placeholder="예: 비서가 들어와 알바생을 ‘대표님’이라고 부른다"></textarea></div>
+    <div class="field wide"><label for="p-ending">마지막 한 줄 (다음 화 떡밥)</label><input type="text" id="p-ending" data-p="ending" placeholder="예: “곧 또 뵙겠네요, 부장님.”"></div>
+    <datalist id="genre-list">
+      <option value="신분 반전 · 사이다"></option><option value="참교육"></option><option value="계약·재벌 로맨스"></option><option value="복수"></option><option value="회귀·환생"></option><option value="1분 미스터리"></option><option value="AI 사극"></option><option value="코미디"></option><option value="가족·감동"></option>
+    </datalist>
+  </form>
+  <div class="logline"><span>한 줄 요약 미리보기</span><p id="ws-logline">칸을 채우면 여기에 한 줄 요약이 만들어져요.</p></div>
+
+  <div class="ws-step">
+    <h3><span class="mono">①</span>대본 만들기</h3>
+    <figure class="prompt"><figcaption><strong>내 대본 요청 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude에 붙여 넣기</span></figcaption><pre id="gen-script">칸을 채우면 내 작품용 프롬프트가 여기에 만들어져요.</pre></figure>
+    <div class="ai-bar" data-ai hidden>
+      <button type="button" class="btn small primary" id="ai-script">AI 코치로 대본 쓰기</button>
+      <button type="button" class="btn small" id="ai-script-stop" hidden>멈추기</button>
+      <span class="ai-status" id="ai-script-status" aria-live="polite">위 프롬프트를 그대로 보내요. 보통 20초~1분 걸려요.</span>
+    </div>
+    <label class="out-label" for="out-script">내 대본: AI가 쓴 대본이나 직접 고친 대본을 여기에 붙여 넣으면 저장되고, 아래 ③·④ 프롬프트에 자동으로 들어가요.</label>
+    <textarea id="out-script" rows="14" placeholder="[컷 1] 0:00–0:03 | 익스트림 클로즈업&#10;화면: …&#10;대사: …&#10;소리: …"></textarea>
+  </div>
+
+  <div class="ws-step">
+    <h3><span class="mono">②</span>캐릭터 시트 만들기</h3>
+    <figure class="prompt"><figcaption><strong>캐릭터 시트 프롬프트</strong><span class="where">Gemini (나노바나나)</span></figcaption><pre id="gen-char">주인공과 상대역 칸을 채우면 캐릭터 시트 프롬프트가 만들어져요.</pre></figure>
+  </div>
+
+  <div class="ws-step">
+    <h3><span class="mono">③</span>샷리스트와 컷별 프롬프트</h3>
+    <figure class="prompt"><figcaption><strong>샷리스트 변환 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption><pre id="gen-shots">대본을 저장하면 샷리스트 프롬프트가 만들어져요.</pre></figure>
+    <div class="ai-bar" data-ai hidden>
+      <button type="button" class="btn small primary" id="ai-shots">AI 코치로 샷리스트 만들기</button>
+      <button type="button" class="btn small" id="ai-shots-stop" hidden>멈추기</button>
+      <span class="ai-status" id="ai-shots-status" aria-live="polite">위의 ‘내 대본’을 컷별 이미지·영상 프롬프트로 바꿔요. 30초~1분 30초 걸려요.</span>
+    </div>
+    <div id="out-shots"><p class="empty">대본으로 샷리스트를 만들면 여기에 컷별 카드가 생겨요. 어떤 모습인지 궁금하면 <a href="#example" data-tab-go="shots">예제 패키지의 컷별 프롬프트</a>를 보세요.</p></div>
+  </div>
+
+  <div class="ws-step">
+    <h3><span class="mono">④</span>제목·설명·해시태그</h3>
+    <figure class="prompt"><figcaption><strong>업로드 정보 프롬프트</strong><span class="where">ChatGPT · Gemini · Claude</span></figcaption><pre id="gen-titles">대본을 저장하면 업로드 정보 프롬프트가 만들어져요.</pre></figure>
+    <div class="ai-bar" data-ai hidden>
+      <button type="button" class="btn small primary" id="ai-titles">AI 코치로 제목 뽑기</button>
+      <button type="button" class="btn small" id="ai-titles-stop" hidden>멈추기</button>
+      <span class="ai-status" id="ai-titles-status" aria-live="polite">제목 5개, 설명란, 해시태그, 고정 댓글을 만들어요.</span>
+    </div>
+    <div id="out-titles"></div>
+  </div>
+</section>
+
+<section class="sec" id="plan" aria-labelledby="h-plan">
+  <p class="kicker">실습 · 하루 1~2시간</p>
+  <h2 id="h-plan">2주 완성 플랜</h2>
+  <p>첫 주는 예제로 손에 익히고, 둘째 주는 내 이야기로 만들어요. 하루를 마칠 때마다 체크하세요.</p>
+  <div class="weeks">
+    <div class="checklist" data-track="pic">
+      <h3>1주차 · 예제 「알바생의 정체」 완성</h3>
+      <ul>
+        <li><input type="checkbox" id="c-d1" data-check="d1"><label for="c-d1"><b>D1</b>제작 방식 고르기, 계정 만들기, 폴더 만들기<span>시작 1~2 · 1시간</span></label></li>
+        <li><input type="checkbox" id="c-d2" data-check="d2"><label for="c-d2"><b>D2</b>AI 숏드라마 10편 보고 벤치마킹 노트 쓰기<span>STEP 1 · 1시간</span></label></li>
+        <li><input type="checkbox" id="c-d3" data-check="d3"><label for="c-d3"><b>D3</b>예제 대본 읽기, 인물 3명 캐릭터 시트 만들기<span>STEP 3~5 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d4" data-check="d4"><label for="c-d4"><b>D4</b>장면 이미지 12장 만들기<span>STEP 6 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d5" data-check="d5"><label for="c-d5"><b>D5</b>컷 1~6 영상 만들기<span>STEP 7 · 1.5시간</span></label></li>
+        <li><input type="checkbox" id="c-d6" data-check="d6"><label for="c-d6"><b>D6</b>컷 7~12 영상 만들기, 목소리 정리<span>STEP 7~8 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d7" data-check="d7"><label for="c-d7"><b>D7</b>음악·편집·업로드. 첫 작품 완성!<span>STEP 9~12 · 2시간</span></label></li>
+      </ul>
+    </div>
+    <div class="checklist" data-track="story">
+      <h3>2주차 · 내 이야기로 2편 만들기</h3>
+      <ul>
+        <li><input type="checkbox" id="c-d8" data-check="d8"><label for="c-d8"><b>D8</b>1편 48시간 숫자 보기, 내 작품 기획서 쓰기<span>STEP 12 · STEP 2 · 1시간</span></label></li>
+        <li><input type="checkbox" id="c-d9" data-check="d9"><label for="c-d9"><b>D9</b>대본 받고 두 번 이상 다듬기<span>STEP 3 · 1시간</span></label></li>
+        <li><input type="checkbox" id="c-d10" data-check="d10"><label for="c-d10"><b>D10</b>샷리스트 만들기, 캐릭터 고정하기<span>STEP 4~5 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d11" data-check="d11"><label for="c-d11"><b>D11</b>장면 이미지 만들기<span>STEP 6 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d12" data-check="d12"><label for="c-d12"><b>D12</b>영상 만들기<span>STEP 7 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d13" data-check="d13"><label for="c-d13"><b>D13</b>목소리·음악·편집<span>STEP 8~10 · 2시간</span></label></li>
+        <li><input type="checkbox" id="c-d14" data-check="d14"><label for="c-d14"><b>D14</b>제목·AI 표시·업로드, 3화 로그라인 쓰기<span>STEP 11~12 · 1시간</span></label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="faq" aria-labelledby="h-faq">
+  <p class="kicker">도움말</p>
+  <h2 id="h-faq">막힐 때 보는 해결 모음</h2>
+  <div class="faq">
+    <details><summary>컷마다 주인공 얼굴이 달라져요</summary><div class="ans"><ol><li>정면 클로즈업 레퍼런스를 매번 첨부하세요.</li><li>캐릭터 고정 문장을 글자 그대로 복사해 넣으세요.</li><li>글로 바로 영상을 만들지 말고, 이미지에서 얼굴을 확정한 뒤 그 이미지를 움직이세요.</li><li>Kling의 참고 자료(인물 등록) 기능에 레퍼런스를 넣어 보세요.</li><li>그래도 튀는 컷은 그 컷만 다시 만드세요.</li></ol></div></details>
+    <details><summary>손가락이나 물건이 이상하게 나와요</summary><div class="ans"><p>손 동작을 한 컷에 하나로 줄이고, 손이 화면 밖에 있도록 구도를 바꿔 보세요. 컵이나 명함 같은 물건은 키프레임 이미지에 미리 그려 두면 덜 깨져요. 이미지 프롬프트에 <span class="mono">hands resting naturally</span>를 넣는 것도 도움이 돼요.</p></div></details>
+    <details><summary>인물이 녹아내리거나 이상하게 움직여요</summary><div class="ans"><p>동작을 하나만 남기고 slowly, subtle을 넣어 움직임을 작게 하세요. 5초로 짧게 만들고, 카메라와 인물을 동시에 크게 움직이지 마세요.</p></div></details>
+    <details><summary>화면에 이상한 글자나 자막이 생겨요</summary><div class="ans"><p>이미지 프롬프트 끝에 <span class="mono">no text, no subtitles, no watermark</span>를 넣으세요. 자막은 편집 단계에서 직접 넣는 거예요. 이미 생긴 글자는 편집에서 확대로 잘라 내거나 흐리게 가리세요.</p></div></details>
+    <details><summary>한국어 대사 발음이 어색해요</summary><div class="ans"><p>숫자와 영어를 한글로 풀어 쓰고(10분 → 십 분), 쉼표와 말줄임표로 호흡을 넣고, 긴 문장은 두 개로 나누세요. 그래도 어색하면 그 컷만 B안(Typecast 같은 AI 음성)으로 바꾸세요.</p></div></details>
+    <details><summary>입 모양이 대사와 맞지 않아요</summary><div class="ans"><p>대사를 영상 생성 때 함께 넣거나(A안), 영상 도구의 립싱크 기능을 쓰세요. 입이 잘 보이지 않는 옆모습, 뒷모습, 듣는 사람의 반응 컷에 대사를 깔아도 자연스러워요.</p></div></details>
+    <details><summary>같은 인물인데 컷마다 목소리가 달라요</summary><div class="ans"><p>A안은 컷마다 목소리가 조금씩 바뀔 수 있어요. 인물의 목소리 묘사를 모든 컷에 똑같이 넣거나, 그 인물만 B안의 한 목소리로 통일하세요.</p></div></details>
+    <details><summary>크레딧이 금방 떨어져요</summary><div class="ans"><p>이미지 단계에서 충분히 고르고, 영상은 확정된 컷만 만드세요. 처음엔 5초, 시안은 가벼운 모델로 만들고, 무료 크레딧은 매일 받아 쓰세요. 무료 크레딧은 다음 날로 이월되지 않아요.</p></div></details>
+    <details><summary>영상이 가로로 나오거나 위아래가 잘려요</summary><div class="ans"><p>키프레임 이미지, 영상 생성 설정, 편집 프로젝트를 모두 9:16으로 맞추세요. 세 곳 중 하나라도 다르면 잘리거나 검은 띠가 생겨요.</p></div></details>
+    <details><summary>무료 플랜 워터마크를 지워도 되나요?</summary><div class="ans"><p>지우는 도구로 없애면 서비스 약관 위반이 될 수 있어요. 공개할 영상은 유료 플랜에서 다시 만들거나, 연습용이라면 워터마크를 그대로 두세요.</p></div></details>
+    <details><summary>연예인을 닮게 만들어도 되나요?</summary><div class="ans"><p>안 돼요. 실존 인물의 얼굴이나 목소리를 쓰면 초상권과 퍼블리시티권을 침해할 수 있고, 딥페이크로 처벌받을 수도 있어요. 가상의 얼굴을 만들어 쓰세요.</p></div></details>
+    <details><summary>영어 프롬프트가 어려워요</summary><div class="ans"><p>한국어로 쓴 뒤 AI 챗봇에 “영어 이미지 프롬프트로 바꿔 줘”라고 하면 돼요. Gemini 이미지 생성은 한국어 요청도 잘 알아들어요. 이 페이지의 프롬프트 공식을 복사해 빈칸만 바꿔 써도 충분해요.</p></div></details>
+    <details><summary>올렸는데 조회수가 안 나와요</summary><div class="ans"><p>첫 1초를 바꿔 보세요. 가장 센 장면을 맨 앞에 두고, 제목에 궁금증을 남기세요. 한 편으로 판단하지 말고 같은 캐릭터로 최소 10편을 올리면서 48시간 숫자를 보고 한 가지씩 고치세요.</p></div></details>
+  </div>
+</section>
+
+<section class="sec" id="rules" aria-labelledby="h-rules">
+  <p class="kicker">도움말 · 올리기 전에 꼭</p>
+  <h2 id="h-rules">꼭 지킬 규칙: 저작권·AI 표시·수익화</h2>
+  <ol class="rules">
+    <li><div><h3>실존 인물은 쓰지 않아요</h3><p>연예인이나 지인의 얼굴·목소리를 합성하지 마세요. 초상권과 퍼블리시티권 침해가 될 수 있고 딥페이크 처벌 대상이 될 수 있어요. 목소리 복제는 본인 목소리로만 하세요.</p></div></li>
+    <li><div><h3>남의 작품·브랜드는 빼요</h3><p>기존 드라마·만화 캐릭터, 실제 회사 로고, 유명한 음악은 넣지 마세요. 디즈니가 ByteDance의 Seedance 2.0에 자사 캐릭터 문제로 반발한 일처럼, AI 결과물이라도 저작권 문제는 그대로예요.</p></div></li>
+    <li><div><h3>AI로 만들었다고 밝혀요</h3><p>YouTube의 ‘변경되거나 합성된 콘텐츠’, Instagram의 AI 레이블, TikTok의 AI 생성 콘텐츠 표시를 켜고 설명란에도 적으세요. 2026년 1월 22일 시행된 AI 기본법의 표시 의무는 주로 AI 서비스 제공자에게 있고, 도구를 쓰는 개인 창작자에게는 과도한 의무를 지우지 않는 방향으로 안내되고 있어요. 그래도 실제처럼 보이는 영상은 표시하는 습관이 가장 안전해요.</p></div></li>
+    <li><div><h3>무료 플랜 결과물은 수익화에 쓰지 않아요</h3><p>Kling 무료, Suno 무료처럼 상업적 이용을 막는 플랜이 많아요. 수익을 낼 채널이라면 유료 플랜에서 만든 결과물을 쓰고, 서비스마다 약관을 확인하세요.</p></div></li>
+    <li><div><h3>YouTube 수익화 기준을 알아 둬요</h3><p>AI 사용 자체는 괜찮아요. 하지만 2026년 7월 YouTube가 명확히 한 기준에 따르면 틀만 바꾼 대량 반복 영상, 불쾌하거나 충격적인 영상, 건강·금융 같은 민감 주제를 AI 인물이 말하는 영상은 수익을 낼 수 없어요. 편마다 새 이야기와 내 편집을 담으세요.</p></div></li>
+    <li><div><h3>내가 기여한 부분을 남겨 둬요</h3><p>문화체육관광부와 한국저작권위원회의 「생성형 AI 활용 저작물의 저작권 등록 안내서」(2025년 6월)에 따르면 AI가 만든 결과물 자체는 보호받기 어렵고, 사람이 창작적으로 기여한 부분(대본, 선택과 배열, 편집)이 보호 대상이에요. 기획서, 대본, 프롬프트와 작업 기록을 저장해 두세요.</p></div></li>
+    <li><div><h3>자극에는 선이 있어요</h3><p>폭력, 혐오, 선정적인 장면과 특정 집단을 깎아내리는 내용은 넣지 마세요. 막장 드라마도 선을 넘으면 노출이 제한되고 수익을 낼 수 없어요.</p></div></li>
+  </ol>
+</section>
+
+<section class="sec" id="glossary" aria-labelledby="h-glossary">
+  <p class="kicker">도움말 · 강의에서 자주 나오는 말</p>
+  <h2 id="h-glossary">A부터 Z까지 용어 사전</h2>
+  <dl class="az">
+    <div><span class="L">A</span><div><dt>화면비<span>Aspect Ratio</span></dt><dd>숏폼은 9:16 세로. 이미지, 영상, 편집 모두 같은 비율로 맞춰요.</dd></div></div>
+    <div><span class="L">B</span><div><dt>인서트 컷<span>B-roll</span></dt><dd>장소나 분위기를 보여 주는 보조 컷. 대사 사이에 숨 쉴 틈을 줘요.</dd></div></div>
+    <div><span class="L">C</span><div><dt>클리프행어<span>Cliffhanger</span></dt><dd>가장 궁금한 순간에 끊어서 다음 화를 보게 만드는 끝맺음.</dd></div></div>
+    <div><span class="L">D</span><div><dt>다가가기<span>Dolly In · Push-in</span></dt><dd>카메라가 인물에게 다가가며 긴장을 높이는 움직임.</dd></div></div>
+    <div><span class="L">E</span><div><dt>익스트림 클로즈업<span>ECU</span></dt><dd>눈, 입술, 손끝처럼 한 부분만 아주 크게 보여 주는 샷.</dd></div></div>
+    <div><span class="L">F</span><div><dt>첫 프레임<span>First Frame</span></dt><dd>이미지로 영상을 만들 때의 시작 그림. 쇼츠 피드에서 가장 먼저 보이는 화면이기도 해요.</dd></div></div>
+    <div><span class="L">G</span><div><dt>생성 크레딧<span>Generation Credit</span></dt><dd>이미지나 영상을 한 번 만들 때 쓰는 포인트. 모델과 길이에 따라 드는 양이 달라요.</dd></div></div>
+    <div><span class="L">H</span><div><dt>훅<span>Hook</span></dt><dd>첫 1~3초에 스크롤을 멈추게 하는 장면이나 대사.</dd></div></div>
+    <div><span class="L">I</span><div><dt>이미지→영상<span>Image-to-Video · I2V</span></dt><dd>정지 이미지를 움직이는 클립으로 바꾸는 방식. 얼굴을 지키기에 유리해요.</dd></div></div>
+    <div><span class="L">J</span><div><dt>J컷<span>J-cut</span></dt><dd>다음 장면의 소리가 화면보다 먼저 들리게 붙이는 편집.</dd></div></div>
+    <div><span class="L">K</span><div><dt>키프레임<span>Keyframe</span></dt><dd>컷의 핵심 장면 그림. Kling 4.0은 한 영상에 최대 10장을 넣을 수 있어요.</dd></div></div>
+    <div><span class="L">L</span><div><dt>립싱크<span>Lip Sync</span></dt><dd>입 모양을 대사에 맞추는 것.</dd></div></div>
+    <div><span class="L">M</span><div><dt>모션 프롬프트<span>Motion Prompt</span></dt><dd>카메라와 인물의 움직임을 지시하는 문장.</dd></div></div>
+    <div><span class="L">N</span><div><dt>네거티브 프롬프트<span>Negative Prompt</span></dt><dd>나오지 말아야 할 것. 예: no text, no watermark.</dd></div></div>
+    <div><span class="L">O</span><div><dt>오버 더 숄더<span>OTS</span></dt><dd>한 사람의 어깨 너머로 상대를 보는 대화 샷.</dd></div></div>
+    <div><span class="L">P</span><div><dt>프롬프트<span>Prompt</span></dt><dd>AI에게 주는 지시문. 공식대로 쓰면 결과가 안정돼요.</dd></div></div>
+    <div><span class="L">Q</span><div><dt>품질 모드<span>Quality Mode</span></dt><dd>가벼운(Lite), 빠른(Fast), 고품질(Quality) 중 고르는 설정. 시안은 가볍게 만들어요.</dd></div></div>
+    <div><span class="L">R</span><div><dt>레퍼런스 이미지<span>Reference Image</span></dt><dd>얼굴, 의상, 장소를 고정하려고 함께 넣는 참고 그림.</dd></div></div>
+    <div><span class="L">S</span><div><dt>샷리스트<span>Shot List</span></dt><dd>컷 번호, 크기, 움직임, 대사, 길이를 정리한 표.</dd></div></div>
+    <div><span class="L">T</span><div><dt>음성 합성<span>TTS · Text-to-Speech</span></dt><dd>글을 목소리로 바꾸는 기술. Typecast, ElevenLabs, 클로바더빙 등.</dd></div></div>
+    <div><span class="L">U</span><div><dt>업스케일<span>Upscale</span></dt><dd>낮은 해상도의 영상을 높은 해상도로 키우는 작업.</dd></div></div>
+    <div><span class="L">V</span><div><dt>보이스오버<span>Voice-over</span></dt><dd>화면 밖에서 들리는 목소리나 내레이션.</dd></div></div>
+    <div><span class="L">W</span><div><dt>워터마크<span>Watermark</span></dt><dd>무료 플랜의 로고, 또는 AI로 만들었다는 표시.</dd></div></div>
+    <div><span class="L">X</span><div><dt>크로스페이드<span>X-fade · Crossfade</span></dt><dd>두 소리나 장면을 겹치며 자연스럽게 바꾸는 전환.</dd></div></div>
+    <div><span class="L">Y</span><div><dt>유튜브 쇼츠<span>YouTube Shorts</span></dt><dd>최대 3분의 세로 영상. AI 숏드라마의 기본 무대예요.</dd></div></div>
+    <div><span class="L">Z</span><div><dt>줌<span>Zoom</span></dt><dd>렌즈로 화면을 확대하거나 축소하는 것. 급줌은 반전 순간의 단골 연출이에요.</dd></div></div>
+  </dl>
+</section>
+
+<section class="sec" id="sources" aria-labelledby="h-sources">
+  <p class="kicker">기준일 2026년 10월 23일</p>
+  <h2 id="h-sources">출처와 확인 방법</h2>
+  <p>도구, 가격, 정책 정보는 2026년 10월 23일에 확인했어요. AI 도구는 몇 주 단위로 바뀌니 결제하거나 수익화를 시작하기 전에는 공식 페이지를 다시 확인하세요.</p>
+  <ul class="sources">
+    <li>Kling 4.0 전면 공개: <a href="https://letsdatascience.com/news/kling-ai-opens-kling-40-to-all-users-d9dc6422" target="_blank" rel="noopener">Let’s Data Science</a> · 초기 사용기: <a href="https://www.mindstudio.ai/blog/kling-4-0-first-look/" target="_blank" rel="noopener">MindStudio</a></li>
+    <li>Kling 요금제: <a href="https://www.aiarty.com/ai-video-generator/kling-ai-pricing.htm" target="_blank" rel="noopener">Aiarty (2026년 8월 확인)</a> · <a href="https://www.wireflow.ai/blog/kling-4-0-pricing" target="_blank" rel="noopener">Wireflow (2026년 10월)</a></li>
+    <li>Sora 종료: <a href="https://engadget.com/ai/openai-is-shutting-down-its-sora-video-generation-app-211023358.html" target="_blank" rel="noopener">Engadget</a> · <a href="https://cyberinsider.com/openai-pulls-the-plug-on-sora-ai-video-app-15-months-after-launch/" target="_blank" rel="noopener">CyberInsider</a></li>
+    <li>Google Flow 무료 크레딧: <a href="https://support.google.com/flow/answer/16526234" target="_blank" rel="noopener">Google Flow 고객센터</a></li>
+    <li>Gemini Omni Flash: <a href="https://www.shacknews.com/article/149206/google-gemini-omni-multimodal-gen-ai" target="_blank" rel="noopener">Shacknews</a> · <a href="https://ai.google.dev/gemini-api/docs/models/gemini-omni-flash" target="_blank" rel="noopener">Gemini API 문서</a></li>
+    <li>Google AI Plus 국내 출시: <a href="https://blog.google/intl/ko-kr/products/google-ai-plus-plans-kr/" target="_blank" rel="noopener">Google 코리아 블로그</a> · 나노바나나: <a href="https://gemini.google/kr/overview/image-generation/?hl=ko" target="_blank" rel="noopener">Gemini 이미지 생성 안내</a></li>
+    <li>Seedance 2.0: <a href="https://techcrunch.com/2026/03/26/bytedances-new-ai-video-generation-model-dreamina-seedance-2.0-comes-to-capcut/" target="_blank" rel="noopener">TechCrunch</a> · Hailuo H3: <a href="https://www.gradually.ai/en/ai-video-model-comparison/minimax-h3-vs-hailuo-2-3/" target="_blank" rel="noopener">gradually.ai</a></li>
+    <li>YouTube AI 콘텐츠 수익화 기준: <a href="https://techcrunch.com/2026/07/20/youtube-clarifies-policies-around-ai-slop-and-upsetting-videos/" target="_blank" rel="noopener">TechCrunch (2026년 7월)</a></li>
+    <li>AI 기본법 시행과 표시 의무: <a href="https://www.kmib.co.kr/article/view.asp?arcid=1768984300" target="_blank" rel="noopener">국민일보</a> · <a href="https://ctee.kr/blog/86572" target="_blank" rel="noopener">크리에이터 대상 해설</a></li>
+    <li>생성형 AI 저작권: <a href="https://v.daum.net/v/20260421144511956" target="_blank" rel="noopener">관련 보도 (2026년 4월)</a></li>
+    <li>중국 AI 숏드라마 통계: <a href="https://www.xportsnews.com/article/2196220" target="_blank" rel="noopener">엑스포츠뉴스</a> · <a href="https://letter.wepick.kr/post/26334" target="_blank" rel="noopener">위픽 레터</a></li>
+    <li>국내 동향: <a href="https://www.unicornfactory.co.kr/article/2026071016322471217" target="_blank" rel="noopener">비글루 AI 제작 툴 (유니콘팩토리)</a> · <a href="https://www.starnewskorea.com/broadcast-drama/2026/09/08/2026082114011033639" target="_blank" rel="noopener">스타뉴스</a></li>
+    <li>음성·음악·편집: <a href="https://typecast.ai/kr/learn/natural-korean-ai-voice-2026/" target="_blank" rel="noopener">Typecast 비교 글 (제조사 작성)</a> · <a href="https://dynamoi.com/learn/guides/suno-commercial-rights-explained" target="_blank" rel="noopener">Suno 상업적 이용</a> · <a href="https://newsweek.com/app-used-millions-nearly-doubles-subscription-price-overnight-11535999" target="_blank" rel="noopener">CapCut 요금 변경 (Newsweek)</a></li>
+  </ul>
+</section>
+
+<footer class="foot">
+  <p>AI 숏드라마 제작 교실 · 2026년 10월 23일 판. 예제 「알바생의 정체」의 인물과 회사는 모두 지어낸 것이에요.</p>
+  <div class="row">
+    <button type="button" class="btn small" id="reset-checks">체크 기록 초기화</button>
+    <span class="confirm" id="reset-confirm" hidden><span>체크를 모두 해제할까요? 기획서와 대본은 그대로 남아요.</span><button type="button" class="btn small primary" id="reset-yes">초기화</button><button type="button" class="btn small" id="reset-no">취소</button></span>
+  </div>
+</footer>
+
+</main>
+</div>
+</div>
+
+<button type="button" class="coach-fab" id="coach-open" data-ai hidden aria-controls="coach" aria-expanded="false">AI 코치</button>
+<div class="coach" id="coach" role="dialog" aria-modal="false" aria-labelledby="coach-title" hidden>
+  <div class="coach-head"><h2 id="coach-title">AI 코치</h2><button type="button" class="btn small" id="coach-close">닫기</button></div>
+  <div class="coach-log" id="coach-log" aria-live="polite">
+    <div class="msg ai">막히는 부분을 편하게 물어보세요. 지금 진행 중인 단계와 기획서 내용을 참고해서 답해 드릴게요.</div>
+  </div>
+  <div class="coach-quick" aria-label="자주 묻는 질문">
+    <button type="button" class="q-chip">지금 단계에서 뭘 하면 돼요?</button>
+    <button type="button" class="q-chip">컷마다 주인공 얼굴이 달라져요</button>
+    <button type="button" class="q-chip">크레딧을 아끼는 방법은?</button>
+    <button type="button" class="q-chip">첫 3초 훅을 더 세게 만들고 싶어요</button>
+    <button type="button" class="q-chip">한국어 대사 발음이 어색해요</button>
+  </div>
+  <form class="coach-form" id="coach-form">
+    <textarea id="coach-input" rows="2" placeholder="예: 컷 4에서 손가락이 이상하게 나와요" aria-label="코치에게 보낼 질문"></textarea>
+    <div class="actions"><button type="submit" class="btn small primary" id="coach-send">보내기</button><button type="button" class="btn small" id="coach-stop" hidden>멈추기</button></div>
+  </form>
+  <p class="coach-note">답변은 내 Claude 사용량으로 만들어져요. 가격과 무료 한도는 공식 사이트에서 다시 확인하세요.</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  try { document.documentElement.lang = "ko"; } catch (e) {}
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var KEY = "aisd-course-v1";
+  var UIKEY = "aisd-ui-v1";
+  var CLIENT = Math.random().toString(36).slice(2, 10);
+  var FIELDS = ["title", "genre", "tone", "length", "hero", "heroLook", "partner", "partnerLook", "extra", "place", "setup", "conflict", "twist", "ending"];
+  var ROUTES = { free: "무료 체험(0원)", value: "가성비(월 2.5만 원 안팎)", pro: "본격 연재(월 7만 원부터)" };
+  var STEP_TITLES = { 1: "벤치마킹", 2: "기획", 3: "대본", 4: "콘티·샷리스트", 5: "캐릭터 고정", 6: "장면 이미지", 7: "영상 만들기", 8: "목소리", 9: "음악·효과음", 10: "편집·자막", 11: "제목·AI 표시", 12: "업로드·분석" };
+  var EXAMPLE = {
+    title: "알바생의 정체",
+    genre: "신분 반전 · 사이다",
+    tone: "통쾌한 사이다, 앞부분은 긴장감",
+    length: "60",
+    hero: "한서윤, 26세 여성, 카페 알바생, 침착하고 단단함 (사실은 그룹 대표)",
+    heroLook: "어깨 위 검은 단발, 차분한 눈매, 흰 셔츠, 베이지 앞치마, 작은 은색 귀걸이",
+    partner: "오정훈 부장, 48세 남성, 같은 건물 대한물산 부장, 거만하고 갑질함",
+    partnerLook: "희끗한 옆가르마 머리, 금테 안경, 회색 정장, 남색 넥타이, 금색 손목시계",
+    extra: "강민재 비서, 32세 남성, 검은 정장, 단정한 올백 머리",
+    place: "서울 오피스 빌딩 1층의 모던한 카페 (낮)",
+    setup: "점심시간 카페, 오 부장이 커피가 진하다며 알바생 서윤에게 소리친다",
+    conflict: "오 부장은 사장을 불러오라며 서윤을 모욕하고, 손님들이 수군거린다",
+    twist: "비서가 들어와 서윤을 ‘대표님’이라고 부른다. 서윤은 오늘 대한물산을 인수하는 그룹의 대표",
+    ending: "“곧 또 뵙겠네요, 부장님.” 2화는 인수 계약 자리에서 다시 만난 두 사람"
+  };
+
+  function blankProject() { var p = {}; FIELDS.forEach(function (f) { p[f] = ""; }); p.length = "60"; return p; }
+  function fresh() { return { v: 1, route: "value", checks: {}, project: blankProject(), script: "", shots: null, titles: null, updatedAt: 0 }; }
+  function str(v, max) { return typeof v === "string" ? v.slice(0, max) : ""; }
+  function cleanShots(d) {
+    if (!d || typeof d !== "object" || !Array.isArray(d.shots) || !d.shots.length) return null;
+    var shots = d.shots.slice(0, 30).map(function (s, i) {
+      s = s && typeof s === "object" ? s : {};
+      var sec = Number(s.sec);
+      return { no: Number(s.no) || i + 1, sec: isFinite(sec) && sec > 0 ? Math.round(sec * 10) / 10 : 0, size: str(s.size, 60), scene: str(s.scene, 400), image: str(s.image, 2000), video: str(s.video, 1500), line: str(s.line, 300), sfx: str(s.sfx, 200) };
+    });
+    var chars = Array.isArray(d.characters) ? d.characters.slice(0, 6).map(function (c) { c = c && typeof c === "object" ? c : {}; return { name: str(c.name, 40), fixed: str(c.fixed, 600) }; }).filter(function (c) { return c.fixed; }) : [];
+    return { characters: chars, place: str(d.place, 600), style: str(d.style, 600), shots: shots };
+  }
+  function cleanTitles(d) {
+    if (!d || typeof d !== "object" || !Array.isArray(d.titles) || !d.titles.length) return null;
+    return {
+      titles: d.titles.slice(0, 8).map(function (t) { return str(t, 120); }).filter(Boolean),
+      description: str(d.description, 1200),
+      hashtags: Array.isArray(d.hashtags) ? d.hashtags.slice(0, 10).map(function (h) { return str(h, 40); }).filter(Boolean) : [],
+      pinned: str(d.pinned, 300)
+    };
+  }
+  function normalize(s) {
+    var d = fresh();
+    if (!s || typeof s !== "object") return d;
+    if (ROUTES[s.route]) d.route = s.route;
+    if (s.checks && typeof s.checks === "object") Object.keys(s.checks).forEach(function (k) { if (s.checks[k] === true && /^[a-z0-9]{1,8}$/.test(k)) d.checks[k] = true; });
+    if (s.project && typeof s.project === "object") FIELDS.forEach(function (f) { if (typeof s.project[f] === "string") d.project[f] = s.project[f].slice(0, 2000); });
+    if (["45", "60", "90"].indexOf(d.project.length) < 0) d.project.length = "60";
+    d.script = str(s.script, 20000);
+    d.shots = cleanShots(s.shots);
+    d.titles = cleanTitles(s.titles);
+    if (typeof s.updatedAt === "number" && isFinite(s.updatedAt)) d.updatedAt = s.updatedAt;
+    return d;
+  }
+  function sig(s) { return JSON.stringify([s.route, Object.keys(s.checks).sort(), s.project, s.script, s.shots, s.titles]); }
+
+  var state = fresh();
+  var localOK = false;
+  function readLocal() { try { var raw = window.localStorage.getItem(KEY); localOK = true; return raw ? JSON.parse(raw) : null; } catch (e) { localOK = false; return null; } }
+  function writeLocal() { try { window.localStorage.setItem(KEY, JSON.stringify(state)); localOK = true; } catch (e) { localOK = false; } }
+  function readUI() { try { return JSON.parse(window.localStorage.getItem(UIKEY) || "{}") || {}; } catch (e) { return {}; } }
+  function writeUI(u) { try { window.localStorage.setItem(UIKEY, JSON.stringify(u)); } catch (e) {} }
+
+  /* ---- cloud save (db capability, private per viewer) ---- */
+  var docRef = null, cloud = "pending", saving = false, again = false, saveTimer = null, lastSig = "", retried = false, touchTimer = null;
+  function scheduleCloud(delay) {
+    if (!docRef || cloud !== "on") return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { saveTimer = null; flush(); }, delay == null ? 1200 : delay);
+  }
+  function flush() {
+    if (!docRef || cloud !== "on") return;
+    if (saving) { again = true; return; }
+    var s = sig(state);
+    if (s === lastSig) { renderStatus(); return; }
+    saving = true; renderStatus();
+    var body = JSON.parse(JSON.stringify(state)); body.client = CLIENT;
+    Promise.resolve().then(function () { return docRef.set(body); }).then(function () {
+      lastSig = s; retried = false;
+    }, function (e) {
+      if (e && e.code === "unavailable" && !retried) { retried = true; again = true; }
+      else { cloud = "off"; docRef = null; }
+    }).then(function () {
+      saving = false;
+      if (again && cloud === "on") { again = false; setTimeout(flush, retried ? 1500 + Math.random() * 1500 : 0); }
+      renderStatus();
+    });
+  }
+  function touch() { clearTimeout(touchTimer); touchTimer = null; state.updatedAt = Date.now(); writeLocal(); scheduleCloud(); renderStatus(); }
+  function touchSoon() { clearTimeout(touchTimer); touchTimer = setTimeout(touch, 600); }
+  function busy() { return saving || !!saveTimer || !!touchTimer; }
+
+  function renderStatus() {
+    var el = $("#save-status"); if (!el) return;
+    var t, st;
+    if (cloud === "on") { if (busy()) { t = "저장 중…"; st = "busy"; } else { t = "내 계정에 자동 저장됨"; st = "ok"; } }
+    else if (cloud === "pending") { t = localOK ? "이 브라우저에 저장됨" : "저장 준비 중"; st = "local"; }
+    else { t = localOK ? "이 브라우저에 저장됨" : "저장되지 않아요 (새로 고침하면 사라져요)"; st = localOK ? "local" : "warn"; }
+    el.textContent = t; el.setAttribute("data-state", st);
+    el.title = cloud === "on" ? "체크와 기획서가 내 Claude 계정에 저장돼 다른 기기에서도 이어서 할 수 있어요." : "이 브라우저에만 저장돼요. 브라우저 데이터를 지우면 사라져요.";
+  }
+
+  /* ---- render ---- */
+  var currentStepNo = 1;
+  function setText(sel, text) { var el = $(sel); if (el && el.textContent !== text) el.textContent = text; }
+  function renderChecks() {
+    $$("input[data-check]").forEach(function (el) { el.checked = !!state.checks[el.getAttribute("data-check")]; });
+    var doneSteps = 0, current = 0;
+    for (var n = 1; n <= 12; n++) {
+      var ins = $$("#step" + n + " input[data-check]");
+      var c = ins.filter(function (i) { return i.checked; }).length;
+      var done = ins.length > 0 && c === ins.length;
+      if (done) doneSteps++; else if (!current) current = n;
+      var st = $('[data-state-for="' + n + '"]');
+      if (st) { st.textContent = done ? "완료" : c + "/" + ins.length; st.classList.toggle("done", done); }
+      $$('[data-nav="' + n + '"]').forEach(function (a) { a.classList.toggle("done", done); a.classList.toggle("current", n === current); });
+      var seg = $('#prog-seg [data-seg="' + n + '"]'); if (seg) seg.classList.toggle("done", done);
+    }
+    var all = $$("input[data-check]"), checked = all.filter(function (i) { return i.checked; }).length;
+    currentStepNo = current;
+    setText("#prog-steps", String(doneSteps));
+    setText("#prog-checks", String(checked));
+    setText("#prog-total", String(all.length));
+    setText("#rail-prog", doneSteps + "/12 단계 완료");
+    setText("#jb-prog", doneSteps + "/12");
+    var bar = $("#rail-bar"); if (bar) bar.style.width = Math.round(doneSteps / 12 * 100) + "%";
+  }
+  function renderRoute() {
+    document.body.setAttribute("data-route", state.route);
+    $$('input[name="route"]').forEach(function (r) { r.checked = r.value === state.route; var card = r.closest(".route"); if (card) card.classList.toggle("selected", r.checked); });
+  }
+  function renderProject() {
+    $$("[data-p]").forEach(function (el) {
+      if (document.activeElement === el) return;
+      var v = state.project[el.getAttribute("data-p")] || "";
+      if (el.tagName === "SELECT" && !v) v = "60";
+      if (el.value !== v) el.value = v;
+    });
+    var ta = $("#out-script");
+    if (ta && document.activeElement !== ta && ta.value !== state.script) ta.value = state.script;
+  }
+
+  function val(k, ph) { var v = (state.project[k] || "").trim(); return v || ph; }
+  function cutsFor(len) { return len === "45" ? "8~9" : len === "90" ? "15~18" : "10~12"; }
+  function scriptPrompt() {
+    var len = state.project.length || "60";
+    var extra = (state.project.extra || "").trim();
+    return [
+      "너는 조회수 높은 세로형(9:16) AI 숏드라마 작가야. 아래 기획으로 " + len + "초 분량의 대본을 써 줘.",
+      "",
+      "[기획]",
+      "제목: " + val("title", "[작품 제목]"),
+      "장르·분위기: " + val("genre", "[장르]") + " / " + val("tone", "[분위기]"),
+      "주인공: " + val("hero", "[이름, 나이, 직업, 성격]") + " (외모·의상: " + val("heroLook", "[머리, 얼굴 특징, 옷]") + ")",
+      "상대역: " + val("partner", "[이름, 나이, 직업, 성격]") + " (외모·의상: " + val("partnerLook", "[머리, 얼굴 특징, 옷]") + ")"
+    ].concat(extra ? ["그 밖의 인물: " + extra] : []).concat([
+      "장소: " + val("place", "[1~2곳]"),
+      "시작 상황: " + val("setup", "[처음 벌어지는 일]"),
+      "갈등: " + val("conflict", "[주인공이 몰리는 상황]"),
+      "반전: " + val("twist", "[숨겨진 진실]"),
+      "마지막 한 줄(다음 화 떡밥): " + val("ending", "[다음 화가 궁금해지는 대사나 장면]"),
+      "",
+      "[규칙]",
+      "1) 첫 3초는 이야기에서 가장 강렬한 장면이나 대사(훅)로 시작",
+      "2) 구조: 훅 → 상황 → 갈등 고조 → 반전 → 통쾌한 마무리와 다음 화 떡밥",
+      "3) 총 " + cutsFor(len) + "컷, 컷당 3~8초, 합계 " + len + "초",
+      "4) 대사는 한 컷에 한 문장, 20자 안팎의 자연스러운 구어체",
+      "5) 인물 3명 이하, 장소 2곳 이하. 격한 액션·복잡한 손동작 대신 표정·시선·짧은 동작 위주",
+      "6) 실존 인물·실제 브랜드·기존 작품 캐릭터는 쓰지 않기",
+      "",
+      "[출력 형식] 마크다운 기호 없이 컷마다 아래처럼 써 줘.",
+      "[컷 1] 0:00–0:03 | 샷 크기",
+      "화면: 보이는 장면",
+      "대사: 인물: \"대사\" (없으면 없음)",
+      "소리: 효과음·음악",
+      "",
+      "마지막에 '2화 예고 한 줄'과 '제목 후보 3개'를 붙여 줘."
+    ]).join("\n");
+  }
+  function charPrompt() {
+    var sheet = "이 인물의 캐릭터 레퍼런스 시트를 사실적인 사진 스타일로 만들어 줘. 한 장에 정면 얼굴 클로즈업, 3/4 측면, 전신 서 있는 모습을 나란히 놓고, 밝은 회색 스튜디오 배경에 부드럽고 고른 조명, 세 칸 모두 같은 얼굴·머리·의상, 글자 없음.";
+    var out = [
+      "[주인공 캐릭터 시트]",
+      val("hero", "[주인공: 이름, 나이, 성별]") + ". 외모와 의상: " + val("heroLook", "[머리 모양·색, 얼굴 특징, 옷과 색, 소품]") + ".",
+      sheet, "",
+      "[상대역 캐릭터 시트]",
+      val("partner", "[상대역: 이름, 나이, 성별]") + ". 외모와 의상: " + val("partnerLook", "[머리 모양·색, 얼굴 특징, 옷과 색, 소품]") + ".",
+      sheet
+    ];
+    var extra = (state.project.extra || "").trim();
+    if (extra) out.push("", "[그 밖의 인물 캐릭터 시트]", extra + ".", sheet);
+    out.push("", "[장소 레퍼런스]", val("place", "[장소]") + "의 모습을 사람 없이 세로 9:16 사실적인 사진으로 만들어 줘. 자연스러운 조명, 글자 없음.");
+    return out.join("\n");
+  }
+  var SHOT_RULES = [
+    "1) 등장인물마다 '캐릭터 고정 문장'을 영어 한 문장으로 만들어 줘. 나이, 성별, 머리 모양·색, 얼굴 특징, 의상 색, 소품을 넣어.",
+    "2) 장소 고정 문장과 스타일 고정 문장도 영어로 하나씩 만들어 줘. 스타일 문장에는 vertical 9:16, no text, no watermark를 넣어.",
+    "3) 컷마다 이미지 프롬프트(영어)를 써 줘: 샷 크기 + 캐릭터 고정 문장 + 행동·표정 + 장소 고정 문장 + 스타일 고정 문장. 고정 문장은 글자 하나 바꾸지 말고 그대로 넣어.",
+    "4) 컷마다 영상 프롬프트(영어)를 써 줘: 카메라 움직임 + 인물 동작 하나 + 표정 변화 + 배경 움직임. 대사가 있으면 끝에 She says in Korean, calm: \"대사\" 처럼 한국어 대사를 따옴표로 넣어.",
+    "5) 한국어 대사와 효과음도 컷마다 적어 줘."
+  ];
+  function scriptOr(ph) { var s = (state.script || "").trim(); return s ? s.slice(0, 12000) : ph; }
+  function shotsPrompt() {
+    return ["아래 대본을 AI 영상 제작용 샷리스트로 바꿔 줘.", ""].concat(SHOT_RULES).concat([
+      "",
+      "출력: 맨 위에 고정 문장들, 그 아래 컷마다 '컷 번호 / 길이 / 샷 크기 / 이미지 프롬프트 / 영상 프롬프트 / 대사 / 효과음' 순서로.",
+      "",
+      "[대본]",
+      scriptOr("(여기에 대본을 붙여 넣으세요. 위 '내 대본' 칸에 저장하면 자동으로 들어가요.)")
+    ]).join("\n");
+  }
+  function shotsPromptAI() {
+    return ["아래 대본을 AI 영상 제작용 샷리스트로 바꿔 줘.", ""].concat(SHOT_RULES).concat([
+      "",
+      "JSON 객체 하나로만 답해. 다른 말은 쓰지 마. 형식:",
+      '{"characters":[{"name":"한국어 이름","fixed":"English fixed sentence"}],"place":"English place sentence","style":"English style sentence","shots":[{"no":1,"sec":3,"size":"클로즈업","scene":"한국어 화면 설명","image":"English image prompt","video":"English motion prompt","line":"인물: \\"대사\\" (없으면 빈 문자열)","sfx":"한국어 효과음"}]}',
+      "",
+      "[대본]",
+      scriptOr("")
+    ]).join("\n");
+  }
+  var TITLE_RULES = [
+    "아래 숏드라마 대본으로 업로드 정보를 만들어 줘.",
+    "1) 유튜브 쇼츠 제목 5개: 30자 이내, 궁금증을 남기되 내용과 다른 낚시는 금지",
+    "2) 설명란 3줄: 마지막 줄은 \"이 영상은 AI 도구로 제작한 창작 드라마이며 등장인물과 단체는 모두 허구입니다.\"",
+    "3) 해시태그 5개: #AI드라마 #숏드라마 포함",
+    "4) 고정 댓글 1개: 다음 화를 기다리게 만드는 질문"
+  ];
+  function titlesPrompt() { return TITLE_RULES.concat(["", "[대본]", scriptOr("(여기에 대본을 붙여 넣으세요)")]).join("\n"); }
+  function titlesPromptAI() {
+    return TITLE_RULES.concat([
+      "",
+      "JSON 객체 하나로만 답해. 형식: {\"titles\":[\"제목1\",\"제목2\",\"제목3\",\"제목4\",\"제목5\"],\"description\":\"설명란 3줄 (줄바꿈은 \\n)\",\"hashtags\":[\"#AI드라마\",\"#숏드라마\",\"#태그3\",\"#태그4\",\"#태그5\"],\"pinned\":\"고정 댓글\"}",
+      "",
+      "[대본]",
+      scriptOr("")
+    ]).join("\n");
+  }
+  function loglineText() {
+    var p = state.project;
+    if (!(p.hero || p.setup || p.conflict || p.twist)) return "칸을 채우면 여기에 한 줄 요약이 만들어져요. 예: 카페 알바생 서윤이 진상 손님에게 갑질을 당하는데, 사실 그녀는 그 손님의 회사를 인수하는 그룹의 대표였다.";
+    var name = (p.hero || "").split(/[,(]/)[0].trim() || "[주인공]";
+    return name + " · " + (p.setup || "[시작 상황]").trim() + " → " + (p.conflict || "[갈등]").trim() + " → 사실은 " + (p.twist || "[반전]").trim();
+  }
+  function renderGenerated() {
+    setText("#gen-script", scriptPrompt());
+    setText("#gen-char", charPrompt());
+    setText("#gen-shots", shotsPrompt());
+    setText("#gen-titles", titlesPrompt());
+    setText("#ws-logline", loglineText());
+  }
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function copyBtn() { var b = el("button", "copy", "복사"); b.type = "button"; return b; }
+  function promptFig(title, text, where) {
+    var f = el("figure", "prompt mini"), cap = el("figcaption");
+    cap.appendChild(el("strong", "", title));
+    if (where) cap.appendChild(el("span", "where", where));
+    cap.appendChild(copyBtn());
+    f.appendChild(cap); f.appendChild(el("pre", "", text));
+    return f;
+  }
+  function pad2(n) { n = Number(n) || 0; return n < 10 ? "0" + n : String(n); }
+  function renderShots() {
+    var box = $("#out-shots"); if (!box) return;
+    var d = state.shots;
+    if (!d) {
+      if (box.querySelector(".shot, .fixed-list")) { box.textContent = ""; box.appendChild(el("p", "empty", "대본으로 샷리스트를 만들면 여기에 컷별 카드가 생겨요.")); }
+      return;
+    }
+    box.textContent = "";
+    var fx = el("div", "fixed-list");
+    d.characters.forEach(function (c) { fx.appendChild(promptFig("고정 문장 · " + (c.name || "인물"), c.fixed)); });
+    if (d.place) fx.appendChild(promptFig("고정 문장 · 장소", d.place));
+    if (d.style) fx.appendChild(promptFig("고정 문장 · 스타일", d.style));
+    box.appendChild(fx);
+    var list = el("div", "shot-list");
+    d.shots.forEach(function (s) {
+      var a = el("article", "shot"), h = el("header", "shot-head");
+      h.appendChild(el("span", "shot-no mono", "컷 " + pad2(s.no)));
+      if (s.sec) h.appendChild(el("span", "chip-s mono", s.sec + "초"));
+      if (s.size) h.appendChild(el("span", "chip-s", s.size));
+      a.appendChild(h);
+      if (s.scene) a.appendChild(el("p", "shot-scene", s.scene));
+      if (s.line) a.appendChild(el("p", "shot-line", s.line));
+      if (s.image) a.appendChild(promptFig("이미지 프롬프트", s.image, "Gemini · 레퍼런스 첨부"));
+      if (s.video) a.appendChild(promptFig("영상 프롬프트", s.video, "Kling"));
+      if (s.sfx) a.appendChild(el("p", "shot-sfx", "소리: " + s.sfx));
+      list.appendChild(a);
+    });
+    box.appendChild(list);
+  }
+  function renderTitles() {
+    var box = $("#out-titles"); if (!box) return;
+    box.textContent = "";
+    var d = state.titles; if (!d) return;
+    var wrap = el("div", "titles-out");
+    wrap.appendChild(promptFig("제목 후보", d.titles.map(function (t, i) { return (i + 1) + ". " + t; }).join("\n")));
+    if (d.description) wrap.appendChild(promptFig("설명란", d.description + (d.hashtags.length ? "\n" + d.hashtags.join(" ") : "")));
+    if (d.pinned) wrap.appendChild(promptFig("고정 댓글", d.pinned));
+    box.appendChild(wrap);
+  }
+  function renderAll() { renderRoute(); renderChecks(); renderProject(); renderGenerated(); renderShots(); renderTitles(); renderStatus(); }
+
+  /* ---- copy ---- */
+  function copyText(text, btn, pre) {
+    var reset = function () { setTimeout(function () { btn.textContent = "복사"; btn.classList.remove("ok", "fail"); }, 1800); };
+    var fallback = function () {
+      if (pre) { try { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} }
+      btn.textContent = "선택됨 · 직접 복사"; btn.classList.add("fail"); reset();
+    };
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) { fallback(); return; }
+      navigator.clipboard.writeText(text).then(function () { btn.textContent = "복사됨"; btn.classList.add("ok"); reset(); }, fallback);
+    } catch (e) { fallback(); }
+  }
+
+  /* ---- tabs ---- */
+  var TABS = ["script", "cast", "shots", "sound"];
+  function openTab(name, focus) {
+    if (TABS.indexOf(name) < 0) name = "script";
+    $$('#example [role="tab"]').forEach(function (b) { var on = b.getAttribute("data-tab") === name; b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+    $$('#example [role="tabpanel"]').forEach(function (p) { p.hidden = p.getAttribute("data-panel") !== name; });
+    var u = readUI(); u.tab = name; writeUI(u);
+  }
+
+  /* ---- inline confirms ---- */
+  var pendingWs = null;
+  function askWs(msg, yesLabel, action) { pendingWs = action; setText("#ws-confirm-msg", msg); setText("#ws-confirm-yes", yesLabel); $("#ws-confirm").hidden = false; }
+  function hideWs() { pendingWs = null; $("#ws-confirm").hidden = true; }
+  function projectHasText() { return FIELDS.some(function (f) { return f !== "length" && (state.project[f] || "").trim(); }); }
+  function fillExample() { state.project = Object.assign(blankProject(), EXAMPLE); touch(); renderProject(); renderGenerated(); }
+  function clearProject() { state.project = blankProject(); state.script = ""; state.shots = null; state.titles = null; touch(); renderProject(); renderGenerated(); renderShots(); renderTitles(); }
+
+  /* ---- AI coach (sample capability) ---- */
+  var sample = null;
+  var PERMANENT = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+  function disableAI() {
+    sample = null;
+    $$("[data-ai]").forEach(function (n) { n.hidden = true; });
+    var c = $("#coach"); if (c) c.hidden = true;
+  }
+  function aiMessage(e) {
+    var c = e && e.code;
+    if (PERMANENT.indexOf(c) >= 0) { disableAI(); return "이 화면에서는 AI 코치를 쓸 수 없어요. 위 프롬프트를 복사해서 ChatGPT·Gemini·Claude에 붙여 넣어 주세요."; }
+    switch (c) {
+      case "cancelled": return "멈췄어요.";
+      case "rate_limited": return "요청이 몰려 잠시 쉬어야 해요. 1~2분 뒤에 다시 눌러 주세요.";
+      case "session_expired": return "로그인이 만료됐어요. 다시 로그인한 뒤 눌러 주세요.";
+      case "refused": return "이 내용으로는 만들 수 없어요. 실존 인물이나 기존 작품 캐릭터가 들어갔는지 확인하고 내용을 바꿔 주세요.";
+      case "prompt_too_large": return "내용이 너무 길어요. 대본을 줄인 뒤 다시 시도해 주세요.";
+      case "invalid_json": return "결과를 카드로 정리하지 못했어요. 한 번 더 눌러 주세요.";
+      case "empty_completion": return "답이 비어 있어요. 기획서나 대본을 조금 더 채운 뒤 다시 시도해 주세요.";
+      default: return "연결이 잠깐 끊겼어요. 다시 눌러 주세요.";
+    }
+  }
+  function runAI(o) {
+    if (!sample) return;
+    var ctl = new AbortController();
+    o.btn.disabled = true; o.stop.hidden = false; o.status.textContent = o.thinking;
+    o.stop.onclick = function () { ctl.abort(); };
+    Promise.resolve().then(function () { return o.run(ctl.signal); })
+      .then(function (msg) { o.status.textContent = msg; }, function (e) { if (o.onError) o.onError(e); o.status.textContent = aiMessage(e); })
+      .then(function () { o.btn.disabled = false; o.stop.hidden = true; o.stop.onclick = null; });
+  }
+  function aiScript(btn) {
+    var ta = $("#out-script"), before = ta.value, got = false;
+    runAI({
+      btn: btn, stop: $("#ai-script-stop"), status: $("#ai-script-status"), thinking: "대본을 쓰는 중이에요… 보통 20초~1분 걸려요.",
+      run: function (signal) {
+        return sample(scriptPrompt(), { signal: signal, cache: false, onText: function (u) { got = true; ta.value = u.text; } }).then(function (r) {
+          ta.value = r.text; state.script = r.text.slice(0, 20000); touch(); renderGenerated();
+          return r.truncated ? "중간에 끊겼어요. 길이를 줄여 다시 시도해 보세요. 받은 부분은 저장했어요." : "대본을 저장했어요. 마음대로 고쳐도 돼요. 이제 ③ 샷리스트로 넘어가세요.";
+        });
+      },
+      onError: function (e) {
+        if (e && e.text) { ta.value = e.text; state.script = e.text.slice(0, 20000); touch(); renderGenerated(); }
+        else if (got || (e && e.code === "refused")) { ta.value = before; }
+      }
+    });
+  }
+  function aiShots(btn) {
+    if (!(state.script || "").trim()) { $("#ai-shots-status").textContent = "먼저 ① ‘내 대본’ 칸에 대본을 넣어 주세요."; return; }
+    var box = $("#out-shots");
+    runAI({
+      btn: btn, stop: $("#ai-shots-stop"), status: $("#ai-shots-status"), thinking: "컷별 프롬프트를 만드는 중이에요… 30초~1분 30초 걸려요.",
+      run: function (signal) {
+        return sample.json(shotsPromptAI(), { signal: signal, cache: false }).then(function (data) {
+          var clean = cleanShots(data);
+          if (!clean) throw { code: "invalid_json" };
+          state.shots = clean; touch(); renderShots();
+          if (box) box.scrollIntoView({ behavior: "smooth", block: "start" });
+          return "샷리스트 " + clean.shots.length + "컷을 저장했어요. 컷마다 [복사]로 가져가세요.";
+        });
+      }
+    });
+  }
+  function aiTitles(btn) {
+    if (!(state.script || "").trim()) { $("#ai-titles-status").textContent = "먼저 ① ‘내 대본’ 칸에 대본을 넣어 주세요."; return; }
+    runAI({
+      btn: btn, stop: $("#ai-titles-stop"), status: $("#ai-titles-status"), thinking: "제목을 뽑는 중이에요…",
+      run: function (signal) {
+        return sample.json(titlesPromptAI(), { signal: signal, cache: false, modelTier: "quick" }).then(function (data) {
+          var clean = cleanTitles(data);
+          if (!clean) throw { code: "invalid_json" };
+          state.titles = clean; touch(); renderTitles();
+          return "제목 후보를 저장했어요. 마음에 드는 것을 골라 쓰세요.";
+        });
+      }
+    });
+  }
+
+  var turns = [], coachCtl = null;
+  function context() {
+    var p = state.project, bits = [];
+    if (p.title) bits.push("제목 " + p.title);
+    if (p.genre) bits.push("장르 " + p.genre);
+    if (p.hero) bits.push("주인공 " + p.hero);
+    if (p.twist) bits.push("반전 " + p.twist);
+    var cur = currentStepNo ? "STEP " + currentStepNo + " " + STEP_TITLES[currentStepNo] : "12단계 모두 완료";
+    return "제작 방식 " + ROUTES[state.route] + " / 지금 단계 " + cur + " / 작품 " + (bits.join(", ").slice(0, 400) || "아직 기획 전 (첫 편은 예제 「알바생의 정체」를 따라 만드는 중일 수 있음)") + (state.script ? " / 대본 있음" : "");
+  }
+  function coachRules() {
+    return [
+      "너는 'AI 숏드라마 제작 교실'의 코치야. 수강생은 AI 영상 제작이 처음인 한국 사람이고, 오늘은 2026년 10월이야.",
+      "교실에서 쓰는 도구: 대본은 ChatGPT·Gemini·Claude, 이미지는 Gemini 나노바나나(2·Pro), 영상은 Kling 4.0(2026년 10월 출시, 최대 30초, 키프레임 10장·참고 자료 15개, 한국어 립싱크 지원 발표)과 Google Flow(Veo 3.1 Lite·Fast·Quality, 비구독자 하루 50크레딧, Gemini Omni Flash), 그 밖에 Hailuo H3·Dreamina Seedance 2.0. 음성은 Kling 영상 속 대사(A안) 또는 Typecast·ElevenLabs·클로바더빙(B안), 음악은 YouTube 오디오 보관함·Suno, 편집은 CapCut·Vrew. Sora 앱은 2026년 4월 종료됐어.",
+      "교실의 12단계: 1 벤치마킹, 2 기획, 3 대본, 4 콘티·샷리스트, 5 캐릭터 고정, 6 장면 이미지(키프레임), 7 이미지→영상, 8 목소리, 9 음악·효과음, 10 편집·자막, 11 제목·AI 표시, 12 업로드·분석·시리즈.",
+      "답하는 법: 한국어 존댓말로, 초보자가 바로 따라 할 수 있게 짧고 구체적으로. 단계는 1) 2) 3)처럼 번호로. 마크다운 기호(#, **, 표)는 쓰지 마. 프롬프트 예시가 필요하면 줄을 바꿔 그대로 보여 줘. 10줄 안팎으로 답해.",
+      "가격과 무료 한도처럼 자주 바뀌는 정보는 확실하지 않으면 공식 사이트에서 확인하라고 말해.",
+      "실존 인물(연예인·지인)의 얼굴·목소리 합성, 기존 작품 캐릭터 사용, 워터마크 제거 같은 약관 우회는 돕지 말고 안전한 대안을 알려 줘.",
+      "수강생 상황: " + context()
+    ].join("\n");
+  }
+  function addMsg(who, text) { var m = el("div", "msg " + who, text); $("#coach-log").appendChild(m); keepBottom(); return m; }
+  function keepBottom() { var log = $("#coach-log"); if (log) log.scrollTop = log.scrollHeight; }
+  function setCoachBusy(b) { $("#coach-send").disabled = b; $("#coach-stop").hidden = !b; $$(".q-chip").forEach(function (q) { q.disabled = b; }); }
+  function sendCoach(text) {
+    text = (text || "").trim();
+    if (!sample || !text || coachCtl) return;
+    addMsg("me", text);
+    turns.push({ role: "user", content: text.slice(0, 2000) });
+    var bubble = addMsg("ai thinking", "생각하는 중이에요…");
+    var ctl = new AbortController(); coachCtl = ctl; setCoachBusy(true);
+    var input = [{ role: "user", content: coachRules() }].concat(turns.slice(-8));
+    sample(input, { signal: ctl.signal, cache: false, onText: function (u) { bubble.classList.remove("thinking"); bubble.textContent = u.text; keepBottom(); } })
+      .then(function (r) { bubble.classList.remove("thinking"); bubble.textContent = r.text; turns.push({ role: "assistant", content: r.text }); },
+        function (e) {
+          bubble.classList.remove("thinking");
+          var m = aiMessage(e);
+          if (e && e.text) { bubble.textContent = e.text + "\n\n(" + m + ")"; turns.push({ role: "assistant", content: e.text }); }
+          else bubble.textContent = m;
+        })
+      .then(function () { coachCtl = null; if (sample) setCoachBusy(false); keepBottom(); });
+  }
+  function toggleCoach(open) {
+    var p = $("#coach"), b = $("#coach-open");
+    if (!p || !b) return;
+    p.hidden = !open; b.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) setTimeout(function () { var i = $("#coach-input"); if (i) i.focus(); }, 30); else b.focus();
+  }
+
+  /* ---- events ---- */
+  function bind() {
+    $$("figure.prompt figcaption").forEach(function (c) { if (!c.querySelector(".copy")) c.appendChild(copyBtn()); });
+    document.addEventListener("change", function (e) {
+      var t = e.target;
+      if (t.matches("input[data-check]")) { var k = t.getAttribute("data-check"); if (t.checked) state.checks[k] = true; else delete state.checks[k]; touch(); renderChecks(); return; }
+      if (t.name === "route") { state.route = ROUTES[t.value] ? t.value : "value"; touch(); renderRoute(); return; }
+      if (t.matches("select[data-p]")) { state.project[t.getAttribute("data-p")] = t.value; touch(); renderGenerated(); }
+    });
+    document.addEventListener("input", function (e) {
+      var t = e.target;
+      if (t.matches("input[data-p], textarea[data-p]")) { state.project[t.getAttribute("data-p")] = t.value.slice(0, 2000); renderGenerated(); touchSoon(); renderStatus(); return; }
+      if (t.id === "out-script") { state.script = t.value.slice(0, 20000); renderGenerated(); touchSoon(); renderStatus(); }
+    });
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest("button, a") : null;
+      if (!t) return;
+      if (t.classList.contains("copy")) { var fig = t.closest("figure"), pre = fig && fig.querySelector("pre"); if (pre) copyText(pre.textContent, t, pre); return; }
+      if (t.hasAttribute("data-tab-go")) { openTab(t.getAttribute("data-tab-go")); return; }
+      if (t.getAttribute("role") === "tab") { openTab(t.getAttribute("data-tab")); return; }
+      if (t.classList.contains("q-chip")) { sendCoach(t.textContent); return; }
+      switch (t.id) {
+        case "ws-example": if (projectHasText()) askWs("지금 적은 기획을 예제 내용으로 바꿀까요?", "바꾸기", fillExample); else fillExample(); break;
+        case "ws-clear": askWs("기획서, 대본, 샷리스트, 제목을 모두 지울까요?", "지우기", clearProject); break;
+        case "ws-confirm-yes": var act = pendingWs; hideWs(); if (act) act(); break;
+        case "ws-confirm-no": hideWs(); break;
+        case "reset-checks": $("#reset-confirm").hidden = false; break;
+        case "reset-yes": state.checks = {}; touch(); renderChecks(); $("#reset-confirm").hidden = true; break;
+        case "reset-no": $("#reset-confirm").hidden = true; break;
+        case "ai-script": aiScript(t); break;
+        case "ai-shots": aiShots(t); break;
+        case "ai-titles": aiTitles(t); break;
+        case "coach-open": toggleCoach($("#coach").hidden); break;
+        case "coach-close": toggleCoach(false); break;
+        case "coach-stop": if (coachCtl) coachCtl.abort(); break;
+      }
+    });
+    var tablist = $('#example [role="tablist"]');
+    if (tablist) tablist.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      var cur = $('#example [role="tab"][aria-selected="true"]'), i = TABS.indexOf(cur ? cur.getAttribute("data-tab") : "script");
+      i = (i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length;
+      e.preventDefault(); openTab(TABS[i], true);
+    });
+    var form = $("#coach-form");
+    if (form) form.addEventListener("submit", function (e) { e.preventDefault(); var i = $("#coach-input"); var v = i.value; if (!v.trim() || coachCtl) return; i.value = ""; sendCoach(v); });
+    var input = $("#coach-input");
+    if (input) input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); if (form.requestSubmit) form.requestSubmit(); else $("#coach-send").click(); }
+    });
+    var wsForm = $("#ws-form"); if (wsForm) wsForm.addEventListener("submit", function (e) { e.preventDefault(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && $("#coach") && !$("#coach").hidden) toggleCoach(false); });
+  }
+
+  /* ---- capabilities ---- */
+  function initCloud() {
+    var use = window.claude && typeof window.claude.use === "function" ? window.claude : null;
+    if (!use) { cloud = "off"; renderStatus(); return; }
+    Promise.all([use.use("db"), use.use("user")]).then(function (r) {
+      var db = r[0], user = r[1];
+      if (!db || !user) throw 0;
+      return user.id().then(function (uid) {
+        if (!uid) throw 0;
+        docRef = db.doc("data/users/" + uid + "/course");
+        return docRef.get();
+      });
+    }).then(function (snap) {
+      cloud = "on";
+      if (snap.exists) {
+        var remote = normalize(snap.data());
+        lastSig = sig(remote);
+        if (remote.updatedAt > state.updatedAt && !busy()) { state = remote; writeLocal(); renderAll(); }
+        else if (state.updatedAt > remote.updatedAt) scheduleCloud(300);
+      } else if (state.updatedAt > 0) scheduleCloud(300);
+      renderStatus();
+      docRef.onSnapshot(function (s) {
+        if (!s.exists || s.metadata.hasPendingWrites) return;
+        var d = s.data();
+        if (!d || d.client === CLIENT || busy()) return;
+        var remote = normalize(d);
+        if (remote.updatedAt > state.updatedAt) { lastSig = sig(remote); state = remote; writeLocal(); renderAll(); }
+      }, function () {});
+    }).catch(function () { docRef = null; cloud = "off"; renderStatus(); });
+  }
+  function initSample() {
+    var use = window.claude && typeof window.claude.use === "function" ? window.claude : null;
+    if (!use) return;
+    use.use("sample").then(function (s) {
+      if (typeof s !== "function") return;
+      sample = s;
+      $$("[data-ai]").forEach(function (n) { n.hidden = false; });
+    }, function () {});
+  }
+
+  /* ---- boot ---- */
+  function start(hotData) {
+    var fromHot = hotData && hotData.state;
+    state = normalize(fromHot || readLocal());
+    bind();
+    renderAll();
+    openTab(readUI().tab || "script");
+    initCloud();
+    initSample();
+  }
+  try { if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === "function") window.claude.hot.snapshot(function () { return { state: state }; }); } catch (e) {}
+  var hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.ready === "function") hot.ready(start); else start((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
