@@ -379,41 +379,53 @@ STEP 5~7 · 얼굴을 고정하고, 장면을 그리고, 움직여요
 
 ## STEP 05 · 캐릭터 만들기: 얼굴 고정이 생명
 
-**끝나면:** 인물마다 ‘캐릭터 고정 문장’과 캐릭터 시트 2장(전신 5방향, 얼굴·표정·소품)이 생겨요.
+**끝나면:** 인물마다 ‘외모 문장(IDENTITY)’과 13칸짜리 캐릭터 시트 1장이 생겨요.
 
 AI 숏드라마에서 가장 흔한 실패는 컷마다 주인공 얼굴이 달라지는 거예요. 영상을 만들기 전에 얼굴과 의상을 고정해 두면 뒤 단계가 훨씬 쉬워져요.
 
-### 캐릭터 고정 문장 공식
+### 외모 문장(IDENTITY) 공식
 
-\[이름\] , a \[나이\]-year-old Korean \[woman/man\] , \[머리 모양·색\] , \[얼굴 특징\] , \[의상과 색\] , \[소품\]
+\[이름, 나이\] + \[분위기: the visual of a top-tier Korean film actress\] + \[얼굴형\] + \[눈: 쌍꺼풀·눈꼬리\] + \[코·입술\] + \[얼굴 지문: 점·흉터·주근깨\] + \[머리\] + \[체형·키\]
 
-**예: 서윤의 고정 문장** · 모든 프롬프트에 그대로 복사
+‘잘생긴’, ‘예쁜’ 같은 추상적인 말만 쓰면 AI가 가장 흔한 아이돌 얼굴을 만들어서 인물끼리 닮고, Flow의 유명인 차단에도 잘 걸려요. 눈꼬리 방향, 쌍꺼풀 모양, 점이나 흉터 같은 **눈에 보이는 특징**을 넣으면 얼굴이 고정되고 차단도 줄어요. 실존 연예인 이름은 절대 넣지 마세요.
 
-``` text
-Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers
-```
+### 13칸 캐릭터 시트 만들기
 
-### 캐릭터 시트 2장 만들기 (Gemini 또는 Flow 이미지)
+1.  Flow(또는 Gemini)에서 이미지 모델을 **나노바나나 Pro**로, 비율을 **16:9 가로**로 정해요. 칸이 많아서 가로가 좋아요.
+2.  아래 프롬프트의 대괄호를 내 인물로 바꿔 넣어요. 한 장에 **한 사람**만 넣으세요. 두 사람을 한 장에 넣으면 칸이 작아지고 얼굴이 섞여요.
+3.  13칸이 다 나오지 않으면 맨 앞에 Exactly 13 panels.를 붙여 다시 뽑아요. 이미지는 AI Pro 구독이면 0크레딧이라 여러 장 뽑아 고르세요.
+4.  02_캐릭터 폴더에 ‘서윤_시트.png’처럼 저장해요. 장면 이미지를 만들 때 이 시트를 첨부하고, IDENTITY와 의상 문장도 그대로 함께 넣어요.
 
-1.  새 대화(또는 Flow 새 프로젝트)를 열고 이미지 비율을 16:9 가로로 정해요. 여러 칸이 들어가야 해서 가로가 좋아요.
-2.  **A 시트(전신 5방향)** 프롬프트를 넣어요. 앞, 3/4 앞, 옆, 3/4 뒤, 뒤 모습이 한 줄로 나와서 의상·신발·체형이 고정돼요.
-3.  마음에 드는 A 시트를 고른 뒤, 그 이미지를 첨부하고 **B 시트(얼굴·표정·소품)** 프롬프트를 넣어요. 얼굴 각도 3개, 표정 3개, 소품 클로즈업 2개가 나와요.
-4.  틀린 곳은 “얼굴은 그대로 두고 신발만 흰색 운동화로”처럼 고칠 부분만 말해요.
-5.  02_캐릭터 폴더에 ‘서윤_A_전신.png’, ‘서윤_B_얼굴.png’로 저장해요. 장면 이미지를 만들 때 전신 컷엔 A를, 클로즈업엔 B를 첨부해요.
-
-**A 시트: 전신 5방향** · Gemini·Flow 이미지 · 16:9
+**13칸 캐릭터 시트 프롬프트** · Flow·Gemini 이미지 · 나노바나나 Pro · 16:9
 
 ``` text
-Character turnaround sheet of [캐릭터 고정 문장]. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
+Photorealistic character reference sheet of ONE fictional original Korean [woman/man] who does not resemble any real person. Landscape 16:9, clean light-gray studio background, 13 panels separated by thin white lines, nothing overlapping or cropped.
+
+IDENTITY: [이름], [나이], the visual of a top-tier Korean film [actress/actor]: [얼굴형], [피부], [눈 모양·쌍꺼풀·눈꼬리], [코], [입술], [점·흉터·주근깨 같은 고유 표시], [머리 모양·색], [체형, 키].
+
+WARDROBE (same in every full-body panel): [상의], [하의], [신발], [시계·안경 같은 소품].
+
+LAYOUT:
+Left: 1 large chest-up front portrait.
+Center top row: head-and-shoulders front, 45-degree three-quarter, 90-degree side profile.
+Center bottom row: [대본에 나오는 표정 3개].
+Center right: full body front, side, back.
+Right column: close-ups of eyes, nose, lips, hair.
+
+CONSISTENCY: exactly the same person in all 13 panels; same bone structure, eye shape, eyelids, nose, lips, distinguishing marks, hairline, haircut, skin tone, age and proportions. Expressions change only through natural muscle movement.
+
+QUALITY: ultra-photorealistic live-action portrait photography, even soft studio lighting, realistic skin microtexture, individual hair strands, natural eye reflections, realistic fabric. Attractive but believable, natural eye size, natural proportions.
+
+AVOID: identity drift, extra people, distorted hands, plastic skin, text, watermark.
 ```
 
-**B 시트: 얼굴 각도·표정·소품** · A 시트 첨부 · 16:9
-
-``` text
-Character detail sheet of the same person as the attached turnaround image: [캐릭터 고정 문장]. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions ([대본에 나오는 표정 3개, 예: calm, startled, cold smile]) and two close-ups of outfit details ([소품 2개, 예: the name tag, the earrings]). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
-```
-
-**고정 문장 팁:** 고정 문장에 fictional(가상 인물)과 점, 눈썹, 얼굴형 같은 독특한 특징, 그리고 신발까지 넣으세요. 전신이 보이는 컷에서 신발이 바뀌는 일과, 실존 인물과 닮았다는 이유로 생성이 막히는 일을 함께 줄여 줘요.
+| 위치          | 칸                             | 쓰는 곳              |
+|---------------|--------------------------------|----------------------|
+| 왼쪽          | 큰 정면 초상 1칸               | 대표 얼굴 확인       |
+| 가운데 윗줄   | 정면 · 3/4 · 옆얼굴            | 클로즈업 컷 레퍼런스 |
+| 가운데 아랫줄 | 대본 속 표정 3개               | 감정 연기 컷         |
+| 가운데 오른쪽 | 전신 앞 · 옆 · 뒤              | 걷기·등장·뒷모습 컷  |
+| 오른쪽        | 눈 · 코 · 입술 · 머리 클로즈업 | 디테일 확인          |
 
 영어가 부담스러우면 한국어로 써도 돼요. Gemini는 한국어 이미지 요청도 잘 알아들어요. 다만 같은 인물은 끝까지 같은 문장을 쓰는 게 핵심이에요.
 
@@ -427,16 +439,16 @@ Character detail sheet of the same person as the attached turnaround image: [캐
 
 - 고정 문장은 글자 하나 바꾸지 말고 매번 복사해서 붙여 넣기
 - 의상은 단순하게, 색은 정확하게 (베이지 앞치마, 회색 정장)
-- 레퍼런스 이미지(정면 클로즈업)를 매번 첨부하기
+- 캐릭터 시트를 매번 첨부하기
 - 한 인물은 한 대화창에서 이어서 작업하기
 - 이상한 결과는 고치려 애쓰지 말고 버리고 다시 만들기
-- 연예인이나 지인의 사진·이름은 넣지 않기
+- 연예인 이름이나 지인 사진은 넣지 않기 (영상 생성이 막혀요)
 
 ### STEP 5 체크리스트
 
-- [ ] 인물별 고정 문장 쓰기
-- [ ] 인물별 A 시트(전신)와 B 시트(얼굴·표정) 만들기
-- [ ] 장소 레퍼런스 1장 만들기
+- [ ] 인물별 외모 문장(IDENTITY)과 의상 문장 쓰기
+- [ ] 인물별 13칸 캐릭터 시트 만들기
+- [ ] 장소마다 레퍼런스 1장씩 만들기
 - [ ] 02_캐릭터 폴더에 이름 붙여 저장하기
 
 그림 · STEP 06 · 약 90분
@@ -453,7 +465,7 @@ Character detail sheet of the same person as the attached turnaround image: [캐
 
 ### 작업 순서
 
-1.  그 컷에 나오는 인물의 레퍼런스 이미지를 첨부해요. 두 명이 나오면 두 명 다.
+1.  그 컷에 나오는 인물의 캐릭터 시트를 첨부해요. 두 명이 나오면 두 명 다.
 2.  컷의 이미지 프롬프트를 붙여 넣어요.
 3.  가장 좋은 결과를 고르고 “표정을 더 화나게”, “카메라를 조금 더 가까이”처럼 대화로 고쳐요.
 4.  03_장면 폴더에 ‘컷01.png’처럼 번호로 저장해요.
@@ -463,7 +475,8 @@ Character detail sheet of the same person as the attached turnaround image: [캐
 - 동작이 시작되기 직전의 자세 (손을 들기 직전, 고개를 숙이기 직전)
 - 손은 단순하게, 가능하면 화면 밖에
 - 배경이 깔끔하고 인물이 화면 가운데 근처에
-- 얼굴이 레퍼런스와 같은 사람으로 보일 것
+- 얼굴이 캐릭터 시트와 같은 사람으로 보일 것
+- 태블릿 화면, 서류, 간판처럼 **글자가 필요한 곳은 비워 두기**. AI는 한글을 뭉개서 그려요. 글자는 편집에서 자막으로 얹어요.
 
 내 방식별 이미지 도구
 
@@ -488,12 +501,12 @@ Character detail sheet of the same person as the attached turnaround image: [캐
 
 ### 어떤 도구를 쓸까
 
-| 도구                                         | 잘하는 것                                                                                               | 알아 둘 점                                                                                                          |
-|----------------------------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| **Kling 4.0** (Kling AI)                     | 한 번에 최대 30초. 키프레임 10장, 참고 자료 15개. 한국어를 포함한 여러 언어의 립싱크 지원을 발표했어요. | 무료는 하루 크레딧, 워터마크, 비상업. 초기 체험판은 720p였어요.                                                     |
-| **Google Flow** (Veo 3.1, Gemini Omni Flash) | 사실적인 화질과 주변 소리. 비구독자도 하루 50크레딧 (Veo 3.1 Lite 10크레딧, Fast 20크레딧).             | 클립이 짧아요 (Veo 3.1 Lite 4~8초, Omni 3~10초). 한국어 대사는 직접 테스트해 보세요. 나라별 제공 여부도 확인하세요. |
-| **Hailuo** (MiniMax H3)                      | 감정 연기, 인물 레퍼런스 최대 9장, 5~15초.                                                              | 2026년 7월 출시라 사용 후기가 아직 적어요.                                                                          |
-| **Dreamina** (Seedance 2.0)                  | 참고 자료를 활용한 멀티샷, 최대 15초.                                                                   | 실제 사람 얼굴이 담긴 이미지는 쓸 수 없어요. 지역별로 순차 제공 중이에요.                                           |
+| 도구                                         | 잘하는 것                                                                                                                                                                   | 알아 둘 점                                                                                                                |
+|----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| **Kling 4.0** (Kling AI)                     | 한 번에 최대 30초. 키프레임 10장, 참고 자료 15개. 한국어를 포함한 여러 언어의 립싱크 지원을 발표했어요.                                                                     | 무료는 하루 크레딧, 워터마크, 비상업. 초기 체험판은 720p였어요.                                                           |
+| **Google Flow** (Veo 3.1, Gemini Omni Flash) | 사실적인 화질과 주변 소리. Veo 3.1 Lite는 4·6·8초 모두 10크레딧(720p, 1080p 업스케일 가능)이라 **8초로 만들면 1초당 비용이 가장 낮아요**. AI Pro 구독이면 이미지는 0크레딧. | 비구독자는 하루 50크레딧. 한국어 대사는 고르지 않아 TTS로 따로 넣는 게 안전해요. 얼굴이 실존 인물과 닮으면 생성이 막혀요. |
+| **Hailuo** (MiniMax H3)                      | 감정 연기, 인물 레퍼런스 최대 9장, 5~15초.                                                                                                                                  | 2026년 7월 출시라 사용 후기가 아직 적어요.                                                                                |
+| **Dreamina** (Seedance 2.0)                  | 참고 자료를 활용한 멀티샷, 최대 15초.                                                                                                                                       | 실제 사람 얼굴이 담긴 이미지는 쓸 수 없어요. 지역별로 순차 제공 중이에요.                                                 |
 
 ### Kling으로 따라 하기
 
@@ -508,23 +521,28 @@ Character detail sheet of the same person as the attached turnaround image: [캐
 
 ### 모션 프롬프트 공식
 
-\[카메라 움직임\] + \[인물 동작 하나\] + \[표정 변화\] + \[배경 움직임\] + (대사)
+One continuous shot, no cuts + \[카메라 움직임\] + \[인물 동작 하나\] + \[표정 변화\] + \[그 뒤엔 정지\] + (대사) + No text
 
 **예: 컷 3 영상 프롬프트** · Kling · 이미지로 영상 만들기
 
 ``` text
-Slow push-in. She blinks once, keeps her composure and bows her head slightly. She says in Korean, polite and calm: "죄송합니다. 다시 만들어 드릴게요."
+One continuous shot, no cuts, no scene change, same framing throughout. Slow push-in. She looks startled for a moment, blinks, regains her composure and gives a small polite nod. Her hands stay still at her sides. Calm café ambience. No text, no subtitles.
 ```
 
 - 한 컷에는 동작 하나만
 - slowly, subtle 같은 말로 움직임을 작게
 - 처음에는 5초로 만들고 편집에서 자르기
 - 카메라와 인물을 동시에 크게 움직이지 않기
+- 맨 앞에 One continuous shot, no cuts: 남는 시간에 AI가 장면을 바꾸거나 새 동작을 지어내는 걸 막아요
+- 끝에 No text, no subtitles: 화면 구석에 엉뚱한 글자가 생기는 걸 막아요
+
+**실제 테스트에서 배운 것:** 8초 클립에서 쓸 만한 건 보통 3~5초예요. 앞뒤에서 손이 하나 더 생기거나, 장면이 바뀌거나, 글자가 나타나는 일이 많아요. 실패라고 생각하지 말고 가장 좋은 3~5초만 잘라 쓰는 게 기본이에요.
 
 ### 크레딧 아끼는 법
 
 - 이미지 단계에서 충분히 고르고, 영상은 확정된 컷만 만들기
-- 시안은 가벼운 모델(Flow의 Veo 3.1 Lite 등)로, 확정 컷만 고품질로
+- Flow라면 Veo 3.1 Lite를 8초로: 길이와 상관없이 10크레딧이라 1초당 비용이 가장 낮고, 720p라 그대로 본편에 써요. 사용법만 익힐 땐 Omni Flash 360p 4초(5크레딧)도 좋아요
+- 확정 컷만 1080p로 업스케일하기
 - 무료 크레딧은 이월되지 않으니 매일 조금씩 쓰기
 - 한 번에 여러 개를 생성하는 옵션은 꺼 두기
 
@@ -825,24 +843,24 @@ STEP 10~12 · 편집하고, 올리고, 키워요
 
 ### 예제 · 캐릭터·장소
 
-아래 다섯 문장이 이 작품의 ‘고정 문장’이에요. 컷별 프롬프트에는 이 문장들이 이미 들어가 있어요.
+아래 다섯 문장이 이 작품의 ‘고정 문장’이에요. 인물 문장은 외모(IDENTITY)와 의상을 합친 거예요. 컷별 프롬프트에는 이 문장들이 이미 들어가 있어요.
 
 **고정 문장 · 한서윤** · 주인공
 
 ``` text
-Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers
+Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build, wearing white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings
 ```
 
 **고정 문장 · 오정훈 부장** · 상대역
 
 ``` text
-a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes
+Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, wearing charcoal gray suit, navy tie, gold wristwatch, black leather shoes
 ```
 
 **고정 문장 · 강민재 비서** · 조연
 
 ``` text
-Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder
+Kang, 32, the sleek visual of a top-tier Korean actor: long narrow face with a sharp jawline, calm monolid eyes, a straight high nose, thin lips, a small scar above his right eyebrow, neatly slicked-back black hair, slim tall build, wearing black suit, white shirt, black tie, black leather shoes, holding a black leather folder
 ```
 
 **고정 문장 · 장소**
@@ -857,47 +875,80 @@ a modern minimalist café in a Seoul office building, light oak counter, black e
 cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
-### 캐릭터 시트 프롬프트: 인물마다 2장
+### 13칸 캐릭터 시트 (인물마다 1장)
 
-인물마다 시트를 두 장 만들어요. **A 시트**는 앞·옆·뒤 전신이라 의상과 체형을 고정하고, **B 시트**는 얼굴 각도·표정·소품이라 클로즈업 컷의 얼굴을 고정해요. A를 먼저 만들고, B를 만들 때 A 이미지를 첨부하세요.
+나노바나나 Pro, 16:9 가로로 한 사람씩 만들어요. 장면 이미지를 만들 때 이 시트를 첨부해요.
 
-**한서윤 · A 시트 (전신 5방향)** · 주인공 · Gemini·Flow 이미지 · 16:9
-
-``` text
-Character turnaround sheet of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
-```
-
-**한서윤 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
+**한서윤 캐릭터 시트** · 주인공 · 나노바나나 Pro · 16:9
 
 ``` text
-Character detail sheet of the same person as the attached turnaround image: Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (calm, startled, cold confident smile) and two close-ups of outfit details (the apron with its name tag, the silver stud earrings). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
+Photorealistic character reference sheet of ONE fictional original Korean woman who does not resemble any real person. Landscape 16:9, clean light-gray studio background, 13 panels separated by thin white lines, nothing overlapping or cropped.
+
+IDENTITY: Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build.
+
+WARDROBE (same in every full-body panel): white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings.
+
+LAYOUT:
+Left: 1 large chest-up front portrait.
+Center top row: head-and-shoulders front, 45-degree three-quarter, 90-degree side profile.
+Center bottom row: calm, startled, cold confident smile.
+Center right: full body front, side, back.
+Right column: close-ups of eyes, nose, lips, hair.
+
+CONSISTENCY: exactly the same person in all 13 panels; same bone structure, eye shape, eyelids, nose, lips, distinguishing marks, hairline, haircut, skin tone, age and proportions. Expressions change only through natural muscle movement.
+
+QUALITY: ultra-photorealistic live-action portrait photography, even soft studio lighting, realistic skin microtexture, individual hair strands, natural eye reflections, realistic fabric. Attractive but believable, natural eye size, natural proportions.
+
+AVOID: identity drift, extra people, distorted hands, plastic skin, text, watermark.
 ```
 
-**오정훈 부장 · A 시트 (전신 5방향)** · 상대역 · Gemini·Flow 이미지 · 16:9
+**오정훈 부장 캐릭터 시트** · 상대역 · 나노바나나 Pro · 16:9
 
 ``` text
-Character turnaround sheet of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
+Photorealistic character reference sheet of ONE fictional original Korean man who does not resemble any real person. Landscape 16:9, clean light-gray studio background, 13 panels separated by thin white lines, nothing overlapping or cropped.
+
+IDENTITY: Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build.
+
+WARDROBE (same in every full-body panel): charcoal gray suit, navy tie, gold wristwatch, black leather shoes.
+
+LAYOUT:
+Left: 1 large chest-up front portrait.
+Center top row: head-and-shoulders front, 45-degree three-quarter, 90-degree side profile.
+Center bottom row: arrogant smirk, shouting in anger, frozen in shock.
+Center right: full body front, side, back.
+Right column: close-ups of eyes, nose, lips, hair.
+
+CONSISTENCY: exactly the same person in all 13 panels; same bone structure, eye shape, eyelids, nose, lips, distinguishing marks, hairline, haircut, skin tone, age and proportions. Expressions change only through natural muscle movement.
+
+QUALITY: ultra-photorealistic live-action portrait photography, even soft studio lighting, realistic skin microtexture, individual hair strands, natural eye reflections, realistic fabric. Attractive but believable, natural eye size, natural proportions.
+
+AVOID: identity drift, extra people, distorted hands, plastic skin, text, watermark.
 ```
 
-**오정훈 부장 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
+**강민재 비서 캐릭터 시트** · 조연 · 나노바나나 Pro · 16:9
 
 ``` text
-Character detail sheet of the same person as the attached turnaround image: a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (arrogant smirk, shouting in anger, frozen in shock) and two close-ups of outfit details (the gold-rimmed glasses, the gold wristwatch on his wrist). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
+Photorealistic character reference sheet of ONE fictional original Korean man who does not resemble any real person. Landscape 16:9, clean light-gray studio background, 13 panels separated by thin white lines, nothing overlapping or cropped.
+
+IDENTITY: Kang, 32, the sleek visual of a top-tier Korean actor: long narrow face with a sharp jawline, calm monolid eyes, a straight high nose, thin lips, a small scar above his right eyebrow, neatly slicked-back black hair, slim tall build.
+
+WARDROBE (same in every full-body panel): black suit, white shirt, black tie, black leather shoes, holding a black leather folder.
+
+LAYOUT:
+Left: 1 large chest-up front portrait.
+Center top row: head-and-shoulders front, 45-degree three-quarter, 90-degree side profile.
+Center bottom row: neutral, polite, serious.
+Center right: full body front, side, back.
+Right column: close-ups of eyes, nose, lips, hair.
+
+CONSISTENCY: exactly the same person in all 13 panels; same bone structure, eye shape, eyelids, nose, lips, distinguishing marks, hairline, haircut, skin tone, age and proportions. Expressions change only through natural muscle movement.
+
+QUALITY: ultra-photorealistic live-action portrait photography, even soft studio lighting, realistic skin microtexture, individual hair strands, natural eye reflections, realistic fabric. Attractive but believable, natural eye size, natural proportions.
+
+AVOID: identity drift, extra people, distorted hands, plastic skin, text, watermark.
 ```
 
-**강민재 비서 · A 시트 (전신 5방향)** · 조연 · Gemini·Flow 이미지 · 16:9
-
-``` text
-Character turnaround sheet of Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
-```
-
-**강민재 비서 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
-
-``` text
-Character detail sheet of the same person as the attached turnaround image: Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (neutral, polite, serious) and two close-ups of outfit details (the black leather folder, the tie and white shirt collar). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
-```
-
-**차단 방지:** 모든 고정 문장에 fictional(가상 인물)과 점, 눈썹 같은 독특한 얼굴 특징을 넣었어요. 실존 인물과 닮았다는 이유로 영상 생성이 막히는 일을 줄여 줘요.
+**얼굴 지문:** 서윤은 눈 밑 점과 올라간 눈꼬리, 오 부장은 볼의 점과 둥근 얼굴, 강 비서는 눈썹 위 흉터와 무쌍이에요. 세 사람이 닮지 않고, 실존 인물로 오인되어 생성이 막히는 일도 줄어요.
 
 **장소 레퍼런스** · Gemini · 사람 없이
 
@@ -924,7 +975,7 @@ Extreme close-up of a white ceramic coffee cup being slammed onto the counter of
 **영상 프롬프트** · Kling · 5초 생성 → 3초 사용
 
 ``` text
-Static camera. The hand slams the cup down and coffee splashes in slow motion across the counter. A sharp ceramic slam, then a man shouts off-screen in Korean, angry: "이걸 커피라고 준 거야?!"
+One continuous shot, no cuts, same framing throughout. Static camera. The hand slams the cup down and coffee splashes in slow motion across the counter. A sharp ceramic slam, then a man shouts off-screen in Korean, angry: "이걸 커피라고 준 거야?!" No text, no subtitles.
 ```
 
 소리: 도자기 ‘쾅’ · 훅 문구 “알바생에게 갑질한 손님의 최후”
@@ -938,13 +989,13 @@ Static camera. The hand slams the cup down and coffee splashes in slow motion ac
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Point-of-view shot from behind the café counter: a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, leaning over the counter and pointing his finger at the camera, shouting with an angry red face. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Point-of-view shot from behind the café counter: Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, wearing charcoal gray suit, navy tie, gold wristwatch, black leather shoes, leaning over the counter and pointing his finger at the camera, shouting with an angry red face. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-Handheld camera with a slight shake. The man leans closer, jabbing his finger toward the camera while he shouts. Customers in the background stay blurred. He shouts in Korean, loud and arrogant: "연하게 달라고 했잖아! 귀가 없어?"
+One continuous shot, no cuts, same framing throughout. Handheld camera with a slight shake. The man leans closer, jabbing his finger toward the camera while he shouts. Customers in the background stay blurred. He shouts in Korean, loud and arrogant: "연하게 달라고 했잖아! 귀가 없어?" No text, no subtitles.
 ```
 
 소리: 긴장 음악 시작 (작게)
@@ -958,13 +1009,13 @@ Handheld camera with a slight shake. The man leans closer, jabbing his finger to
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, standing behind the café counter, calm but slightly startled expression, about to bow her head politely. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build, wearing white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings, standing behind the café counter, calm but slightly startled expression, about to bow her head politely. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초 생성 → 4초 사용
 
 ``` text
-Slow push-in. She blinks once, keeps her composure and bows her head slightly. She says in Korean, polite and calm: "죄송합니다. 다시 만들어 드릴게요."
+One continuous shot, no cuts, same framing throughout. Slow push-in. She blinks once, keeps her composure and bows her head slightly. She says in Korean, polite and calm: "죄송합니다. 다시 만들어 드릴게요." No text, no subtitles.
 ```
 
 소리: —
@@ -978,13 +1029,13 @@ Slow push-in. She blinks once, keeps her composure and bows her head slightly. S
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Medium close-up of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, smirking arrogantly, his index finger resting on a white business card lying on the counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium close-up of Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, wearing charcoal gray suit, navy tie, gold wristwatch, black leather shoes, smirking arrogantly, his index finger resting on a white business card lying on the counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-Static camera. He smirks, taps the business card twice with his index finger, then leans back. He says in Korean, mocking: "됐고, 사장 나오라 그래!"
+One continuous shot, no cuts, same framing throughout. Static camera. He smirks, taps the business card twice with his index finger, then leans back. He says in Korean, mocking: "됐고, 사장 나오라 그래!" No text, no subtitles.
 ```
 
 소리: 손가락 ‘톡톡’
@@ -1002,7 +1053,7 @@ Wide shot of the interior of a modern minimalist café in a Seoul office buildin
 **영상 프롬프트** · Kling · 5초 생성 → 4초 사용
 
 ``` text
-Slow pan from left to right across the café. Customers turn their heads toward the counter and whisper to each other. Ambient sound of a murmuring crowd and soft café noise.
+One continuous shot, no cuts, same framing throughout. Slow pan from left to right across the café. Customers turn their heads toward the counter and whisper to each other. Ambient sound of a murmuring crowd and soft café noise. No text, no subtitles.
 ```
 
 소리: 카페 웅성거림
@@ -1016,13 +1067,13 @@ Slow pan from left to right across the café. Customers turn their heads toward 
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, looking down at a white business card on the counter, face calm and unreadable. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build, wearing white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings, looking down at a white business card on the counter, face calm and unreadable. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-Static close-up. She studies the card, then slowly raises her eyes with a faint, knowing smile. She says quietly in Korean: "대한물산... 오정훈 부장님?"
+One continuous shot, no cuts, same framing throughout. Static close-up. She studies the card, then slowly raises her eyes with a faint, knowing smile. She says quietly in Korean: "대한물산... 오정훈 부장님?" No text, no subtitles.
 ```
 
 소리: —
@@ -1036,13 +1087,13 @@ Static close-up. She studies the card, then slowly raises her eyes with a faint,
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Medium shot of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, arms crossed, chin raised, condescending look, standing at the café counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium shot of Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, wearing charcoal gray suit, navy tie, gold wristwatch, black leather shoes, arms crossed, chin raised, condescending look, standing at the café counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초 생성 → 4초 사용
 
 ``` text
-Static camera. He scoffs, tightens his crossed arms and raises his chin. He says in Korean, condescending: "그래! 알바 주제에... 당장 사장 불러!"
+One continuous shot, no cuts, same framing throughout. Static camera. He scoffs, tightens his crossed arms and raises his chin. He says in Korean, condescending: "그래! 알바 주제에... 당장 사장 불러!" No text, no subtitles.
 ```
 
 소리: 긴장 음악 최고조
@@ -1054,13 +1105,13 @@ Static camera. He scoffs, tightens his crossed arms and raises his chin. He says
 **이미지 프롬프트** · Gemini · 강 비서 레퍼런스 첨부
 
 ``` text
-Full shot of the glass entrance door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights swinging open, Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, striding in briskly, bright daylight behind him. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Full shot of the glass entrance door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights swinging open, Kang, 32, the sleek visual of a top-tier Korean actor: long narrow face with a sharp jawline, calm monolid eyes, a straight high nose, thin lips, a small scar above his right eyebrow, neatly slicked-back black hair, slim tall build, wearing black suit, white shirt, black tie, black leather shoes, holding a black leather folder, striding in briskly, bright daylight behind him. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-The camera slowly tracks backward as the man in the black suit walks briskly toward it. A door bell chimes and his footsteps echo on the floor.
+One continuous shot, no cuts, same framing throughout. The camera slowly tracks backward as the man in the black suit walks briskly toward it. A door bell chimes and his footsteps echo on the floor. No text, no subtitles.
 ```
 
 소리: 음악 끊김 · 문 종소리 ‘딸랑’ · 구두 발소리
@@ -1074,13 +1125,13 @@ The camera slowly tracks backward as the man in the black suit walks briskly tow
 **이미지 프롬프트** · Gemini · 강 비서 + 서윤 (둘 다 첨부) 레퍼런스 첨부
 
 ``` text
-Medium two-shot inside a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, stands in front of the counter, bowing politely toward Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, who stands behind the counter. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium two-shot inside a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: Kang, 32, the sleek visual of a top-tier Korean actor: long narrow face with a sharp jawline, calm monolid eyes, a straight high nose, thin lips, a small scar above his right eyebrow, neatly slicked-back black hair, slim tall build, wearing black suit, white shirt, black tie, black leather shoes, holding a black leather folder, stands in front of the counter, bowing politely toward Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build, wearing white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings, who stands behind the counter. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-Static camera. The man in the black suit stops in front of the counter and bows politely to the woman. He says in Korean, calm and respectful: "대표님, 이사회 십 분 전입니다."
+One continuous shot, no cuts, same framing throughout. Static camera. The man in the black suit stops in front of the counter and bows politely to the woman. He says in Korean, calm and respectful: "대표님, 이사회 십 분 전입니다." No text, no subtitles.
 ```
 
 소리: 반전 테마 시작
@@ -1094,13 +1145,13 @@ Static camera. The man in the black suit stops in front of the counter and bows 
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Close-up of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, face frozen in shock, mouth slightly open, eyes wide behind his glasses. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of Mr. Oh, 48, the visual of a seasoned Korean character actor: round face with full cheeks, thick dark eyebrows, small hooded eyes, a small mole on his left cheek, a broad nose, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, wearing charcoal gray suit, navy tie, gold wristwatch, black leather shoes, face frozen in shock, mouth slightly open, eyes wide behind his glasses. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
 
 ``` text
-Fast push-in on his face. His expression freezes in shock and his mouth falls open. He stammers in Korean: "대... 대표님?" A deep dramatic impact sound.
+One continuous shot, no cuts, same framing throughout. Fast push-in on his face. His expression freezes in shock and his mouth falls open. He stammers in Korean: "대... 대표님?" A deep dramatic impact sound. No text, no subtitles.
 ```
 
 소리: 임팩트 ‘두둥’
@@ -1114,13 +1165,13 @@ Fast push-in on his face. His expression freezes in shock and his mouth falls op
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Medium close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, untying her beige apron behind the counter, looking straight into the camera with a cold, confident smile. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium close-up of Seoyun, 26, the visual of a top-tier Korean film actress: small oval face with a softly defined jaw, clear luminous skin with natural pores, almond-shaped dark brown eyes with subtle inner double eyelids and slightly lifted outer corners, a high slim nose with a rounded tip, naturally full coral lips, a small beauty mark under her right eye, a glossy straight black bob just above the shoulders, slender build, wearing white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, small silver stud earrings, untying her beige apron behind the counter, looking straight into the camera with a cold, confident smile. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 10초 생성 → 8초 사용
 
 ``` text
-Slow push-in. She takes off the apron, places it on the counter and looks straight at the camera with a cold, confident smile. She says in Korean, calm and cold: "오늘 저희가 인수하는 회사... 대한물산이죠? 곧 또 뵙겠네요, 부장님."
+One continuous shot, no cuts, same framing throughout. Slow push-in. She takes off the apron, places it on the counter and looks straight at the camera with a cold, confident smile. She says in Korean, calm and cold: "오늘 저희가 인수하는 회사... 대한물산이죠? 곧 또 뵙겠네요, 부장님." No text, no subtitles.
 ```
 
 소리: —
@@ -1134,13 +1185,13 @@ Slow push-in. She takes off the apron, places it on the counter and looks straig
 **이미지 프롬프트** · Gemini · 오 부장 + 서윤 + 강 비서 레퍼런스 첨부
 
 ``` text
-Wide shot from behind the man in the charcoal gray suit: his charcoal gray suit shoulders and graying hair blurred in the foreground; in the background Seoyun, a fictional 26-year-old Korean woman with a straight black bob just above the shoulders, white button-up shirt with rolled sleeves, no apron, and Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, walk out through the glass door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights into bright daylight. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Wide shot from behind the man in the charcoal gray suit: his charcoal gray suit shoulders and graying hair blurred in the foreground; in the background Seoyun, a 26-year-old Korean woman with a glossy straight black bob, white button-up shirt with rolled sleeves, no apron, and Kang, 32, the sleek visual of a top-tier Korean actor: long narrow face with a sharp jawline, calm monolid eyes, a straight high nose, thin lips, a small scar above his right eyebrow, neatly slicked-back black hair, slim tall build, wearing black suit, white shirt, black tie, black leather shoes, holding a black leather folder, walk out through the glass door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights into bright daylight. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 10초 생성 → 7초 사용
 
 ``` text
-Static camera with a slow rack focus from the frozen man in the foreground to the two people leaving through the glass door. The door bell chimes. Slow fade to black at the end.
+One continuous shot, no cuts, same framing throughout. Static camera with a slow rack focus from the frozen man in the foreground to the two people leaving through the glass door. The door bell chimes. Slow fade to black at the end. No text, no subtitles.
 ```
 
 소리: 문 종소리 ‘딸랑’ · 엔딩 음악 · “2화에서 계속”
@@ -1270,6 +1321,10 @@ A안은 컷마다 목소리가 조금씩 바뀔 수 있어요. 인물의 목소�
 #### Flow에서 “유명인 관련 정책 위반” 오류로 계속 실패해요
 
 시작 이미지의 얼굴이 실존 인물과 닮았다고 판단되면 같은 이미지로는 계속 막혀요. 실패한 생성의 크레딧은 환불돼요. 고정 문장에 fictional과 둥근 얼굴, 짙은 눈썹, 볼의 점 같은 독특한 특징을 넣어 얼굴 이미지를 새로 만들고, 이름이나 Korean drama 같은 단서는 빼세요. 그래도 막히면 손이나 뒷모습으로 감정을 보여 주는 컷으로 바꾸세요.
+
+#### 8초 영상 뒷부분에 손이 하나 더 생기거나, 장면이 바뀌거나, 글자가 나타나요
+
+AI가 지시받은 동작을 끝낸 뒤 남는 시간을 스스로 채우면서 생기는 일이에요. 영상 프롬프트 맨 앞에 One continuous shot, no cuts, same framing throughout., 끝에 No text, no subtitles.를 넣고, 동작 뒤에 “그 뒤엔 정지(then stays still)”를 붙이세요. 그래도 생기면 가장 좋은 3~5초만 잘라 쓰면 돼요. 오른쪽 아래 작은 ‘Veo’ 표시는 구글의 AI 생성 표시라 지우지 마세요.
 
 #### 연예인을 닮게 만들어도 되나요?
 
