@@ -616,14 +616,14 @@ STEP 8~9 · 목소리와 음악으로 감정을 완성해요
 
 Veo는 영상을 만들면서 목소리, 입 모양, 효과음까지 함께 만들어요. 따로 녹음하거나 립싱크할 필요가 없어서 가장 간단해요. 대신 컷마다 목소리를 새로 만들기 때문에, **인물별 목소리 묘사를 고정**해서 매번 똑같이 넣어야 해요.
 
-| 규칙                  | 프롬프트에 쓰는 말                                                                        |
-|-----------------------|-------------------------------------------------------------------------------------------|
-| 인물별 목소리 고정    | in a calm, clear, low-pitched Korean female voice in her late 20s, restrained and precise |
-| 누가, 언제 말하는지   | Seconds 4-8: she speaks with clear lip movement, ... saying in Korean: "대사"             |
-| 말하기 전엔 입을 닫게 | lips closed                                                                               |
-| 두 명이 나올 때       | Only he speaks. / Only she speaks.                                                        |
-| 화면 밖 목소리        | Her lips stay closed. Off-screen, \[목소리 묘사\], says in Korean: "대사"                 |
-| 음악은 편집에서       | Audio: \[효과음\], her voice, no background music. No text, no subtitles.                 |
+| 규칙                  | 프롬프트에 쓰는 말                                                                                                                                                                                                                                  |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 인물별 목소리 고정    | in a calm, clear, low-pitched Korean female voice in her late 20s, restrained and precise                                                                                                                                                           |
+| 누가, 언제 말하는지   | Seconds 4-8: she speaks with clear lip movement, ... saying in Korean: "대사"                                                                                                                                                                       |
+| 말하기 전엔 입을 닫게 | lips closed                                                                                                                                                                                                                                         |
+| 두 명이 나올 때       | Only he speaks. / Only she speaks.                                                                                                                                                                                                                  |
+| 화면 밖 목소리        | Veo는 화면에 보이는 얼굴에 대사를 붙이는 경향이 있어요. 말하는 사람의 **어깨나 뒤통수를 화면에 걸치는 오버 더 숄더 구도**로 바꾸고, Only the man speaks. The woman stays completely silent, lips pressed together, mouth never opening.를 넣으세요. |
+| 음악은 편집에서       | Audio: \[효과음\], her voice, no background music. No text, no subtitles.                                                                                                                                                                           |
 
 **C안 영상 프롬프트 공식** · Flow · Veo 3.1 Lite · 8초
 
@@ -1378,6 +1378,10 @@ A안은 컷마다 목소리가 조금씩 바뀔 수 있어요. 인물의 목소�
 #### 8초 영상 뒷부분에 손이 하나 더 생기거나, 장면이 바뀌거나, 글자가 나타나요
 
 AI가 지시받은 동작을 끝낸 뒤 남는 시간을 스스로 채우면서 생기는 일이에요. 영상 프롬프트 맨 앞에 One continuous shot, no cuts, same framing throughout., 끝에 No text, no subtitles.를 넣고, 동작 뒤에 “그 뒤엔 정지(then stays still)”를 붙이세요. 그래도 생기면 가장 좋은 3~5초만 잘라 쓰면 돼요. 오른쪽 아래 작은 ‘Veo’ 표시는 구글의 AI 생성 표시라 지우지 마세요.
+
+#### 화면 밖 인물의 대사를 화면 속 인물이 말해 버려요
+
+Veo는 화면에 보이는 얼굴에 대사와 입 모양을 붙이려고 해요. 말하는 사람의 어깨나 뒤통수가 앞쪽에 흐릿하게 걸리는 **오버 더 숄더 구도**로 키프레임을 다시 만들고, 영상 프롬프트에 “Only the man speaks. The woman stays completely silent, lips pressed together, mouth never opening.”을 넣으세요. 다른 방법은 그 컷을 대사 없이 만들고, 대사는 말하는 사람이 나오는 다른 컷의 소리나 TTS로 덧입히는 거예요.
 
 #### 연예인을 닮게 만들어도 되나요?
 
