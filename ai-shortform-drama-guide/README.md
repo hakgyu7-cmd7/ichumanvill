@@ -379,7 +379,7 @@ STEP 5~7 · 얼굴을 고정하고, 장면을 그리고, 움직여요
 
 ## STEP 05 · 캐릭터 만들기: 얼굴 고정이 생명
 
-**끝나면:** 인물마다 ‘캐릭터 고정 문장’과 레퍼런스 이미지 3장이 생겨요.
+**끝나면:** 인물마다 ‘캐릭터 고정 문장’과 캐릭터 시트 2장(전신 5방향, 얼굴·표정·소품)이 생겨요.
 
 AI 숏드라마에서 가장 흔한 실패는 컷마다 주인공 얼굴이 달라지는 거예요. 영상을 만들기 전에 얼굴과 의상을 고정해 두면 뒤 단계가 훨씬 쉬워져요.
 
@@ -390,22 +390,30 @@ AI 숏드라마에서 가장 흔한 실패는 컷마다 주인공 얼굴이 달�
 **예: 서윤의 고정 문장** · 모든 프롬프트에 그대로 복사
 
 ``` text
-Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag
+Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers
 ```
 
-### Gemini에서 캐릭터 시트 만들기
+### 캐릭터 시트 2장 만들기 (Gemini 또는 Flow 이미지)
 
-1.  Gemini 앱이나 gemini.google.com에서 새 대화를 열어요.
-2.  아래 캐릭터 시트 프롬프트를 붙여 넣고 이미지를 만들어 달라고 해요. 나노바나나가 이미지를 그려요.
-3.  마음에 안 들면 “얼굴은 그대로 두고 머리만 조금 더 짧게”처럼 고칠 부분만 말해요.
-4.  정면 클로즈업, 3/4 측면, 전신 3장을 확보해 02_캐릭터 폴더에 ‘서윤_정면.png’처럼 저장해요.
-5.  장소도 사람 없이 한 장 만들어 두면 컷마다 배경이 덜 바뀌어요.
+1.  새 대화(또는 Flow 새 프로젝트)를 열고 이미지 비율을 16:9 가로로 정해요. 여러 칸이 들어가야 해서 가로가 좋아요.
+2.  **A 시트(전신 5방향)** 프롬프트를 넣어요. 앞, 3/4 앞, 옆, 3/4 뒤, 뒤 모습이 한 줄로 나와서 의상·신발·체형이 고정돼요.
+3.  마음에 드는 A 시트를 고른 뒤, 그 이미지를 첨부하고 **B 시트(얼굴·표정·소품)** 프롬프트를 넣어요. 얼굴 각도 3개, 표정 3개, 소품 클로즈업 2개가 나와요.
+4.  틀린 곳은 “얼굴은 그대로 두고 신발만 흰색 운동화로”처럼 고칠 부분만 말해요.
+5.  02_캐릭터 폴더에 ‘서윤_A_전신.png’, ‘서윤_B_얼굴.png’로 저장해요. 장면 이미지를 만들 때 전신 컷엔 A를, 클로즈업엔 B를 첨부해요.
 
-**캐릭터 시트 프롬프트** · Gemini (나노바나나)
+**A 시트: 전신 5방향** · Gemini·Flow 이미지 · 16:9
 
 ``` text
-Character reference sheet of [캐릭터 고정 문장]. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.
+Character turnaround sheet of [캐릭터 고정 문장]. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
 ```
+
+**B 시트: 얼굴 각도·표정·소품** · A 시트 첨부 · 16:9
+
+``` text
+Character detail sheet of the same person as the attached turnaround image: [캐릭터 고정 문장]. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions ([대본에 나오는 표정 3개, 예: calm, startled, cold smile]) and two close-ups of outfit details ([소품 2개, 예: the name tag, the earrings]). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
+```
+
+**고정 문장 팁:** 고정 문장에 fictional(가상 인물)과 점, 눈썹, 얼굴형 같은 독특한 특징, 그리고 신발까지 넣으세요. 전신이 보이는 컷에서 신발이 바뀌는 일과, 실존 인물과 닮았다는 이유로 생성이 막히는 일을 함께 줄여 줘요.
 
 영어가 부담스러우면 한국어로 써도 돼요. Gemini는 한국어 이미지 요청도 잘 알아들어요. 다만 같은 인물은 끝까지 같은 문장을 쓰는 게 핵심이에요.
 
@@ -427,7 +435,7 @@ Character reference sheet of [캐릭터 고정 문장]. Three panels side by sid
 ### STEP 5 체크리스트
 
 - [ ] 인물별 고정 문장 쓰기
-- [ ] 인물별 레퍼런스 3장 만들기
+- [ ] 인물별 A 시트(전신)와 B 시트(얼굴·표정) 만들기
 - [ ] 장소 레퍼런스 1장 만들기
 - [ ] 02_캐릭터 폴더에 이름 붙여 저장하기
 
@@ -822,19 +830,19 @@ STEP 10~12 · 편집하고, 올리고, 키워요
 **고정 문장 · 한서윤** · 주인공
 
 ``` text
-Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag
+Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers
 ```
 
 **고정 문장 · 오정훈 부장** · 상대역
 
 ``` text
-Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch
+a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes
 ```
 
 **고정 문장 · 강민재 비서** · 조연
 
 ``` text
-Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder
+Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder
 ```
 
 **고정 문장 · 장소**
@@ -849,25 +857,47 @@ a modern minimalist café in a Seoul office building, light oak counter, black e
 cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
-### 캐릭터 시트 프롬프트 (Gemini)
+### 캐릭터 시트 프롬프트: 인물마다 2장
 
-**한서윤 캐릭터 시트** · Gemini · 나노바나나
+인물마다 시트를 두 장 만들어요. **A 시트**는 앞·옆·뒤 전신이라 의상과 체형을 고정하고, **B 시트**는 얼굴 각도·표정·소품이라 클로즈업 컷의 얼굴을 고정해요. A를 먼저 만들고, B를 만들 때 A 이미지를 첨부하세요.
 
-``` text
-Character reference sheet of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.
-```
-
-**오정훈 부장 캐릭터 시트** · Gemini · 나노바나나
+**한서윤 · A 시트 (전신 5방향)** · 주인공 · Gemini·Flow 이미지 · 16:9
 
 ``` text
-Character reference sheet of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.
+Character turnaround sheet of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
 ```
 
-**강민재 비서 캐릭터 시트** · Gemini · 나노바나나
+**한서윤 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
 
 ``` text
-Character reference sheet of Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder. Three panels side by side in one image: front close-up portrait, three-quarter view, full-body standing pose. Plain light gray studio background, soft even lighting, photorealistic, identical face, hairstyle and outfit in all three panels, no text.
+Character detail sheet of the same person as the attached turnaround image: Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (calm, startled, cold confident smile) and two close-ups of outfit details (the apron with its name tag, the silver stud earrings). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
 ```
+
+**오정훈 부장 · A 시트 (전신 5방향)** · 상대역 · Gemini·Flow 이미지 · 16:9
+
+``` text
+Character turnaround sheet of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
+```
+
+**오정훈 부장 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
+
+``` text
+Character detail sheet of the same person as the attached turnaround image: a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (arrogant smirk, shouting in anger, frozen in shock) and two close-ups of outfit details (the gold-rimmed glasses, the gold wristwatch on his wrist). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
+```
+
+**강민재 비서 · A 시트 (전신 5방향)** · 조연 · Gemini·Flow 이미지 · 16:9
+
+``` text
+Character turnaround sheet of Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder. Five full-body views in one row, evenly spaced, same height and scale, standing in a relaxed neutral pose with arms at the sides: front view, three-quarter front view, side profile view, three-quarter back view, back view. Identical face, hairstyle, outfit, colors, shoes and accessories in every view. Plain light gray studio background, soft even lighting, photorealistic, sharp focus on clothing details, wide 16:9 image, no text, no labels.
+```
+
+**강민재 비서 · B 시트 (얼굴·표정·소품)** · A 시트 이미지 첨부 · 16:9
+
+``` text
+Character detail sheet of the same person as the attached turnaround image: Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder. Top row: three head-and-shoulders portraits, front view, three-quarter view and side profile. Bottom row: three facial expressions (neutral, polite, serious) and two close-ups of outfit details (the black leather folder, the tie and white shirt collar). Identical face, hairstyle and outfit in every panel. Plain light gray studio background, soft even lighting, photorealistic, wide 16:9 image, no text, no labels.
+```
+
+**차단 방지:** 모든 고정 문장에 fictional(가상 인물)과 점, 눈썹 같은 독특한 얼굴 특징을 넣었어요. 실존 인물과 닮았다는 이유로 영상 생성이 막히는 일을 줄여 줘요.
 
 **장소 레퍼런스** · Gemini · 사람 없이
 
@@ -908,7 +938,7 @@ Static camera. The hand slams the cup down and coffee splashes in slow motion ac
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Point-of-view shot from behind the café counter: Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, leaning over the counter and pointing his finger at the camera, shouting with an angry red face. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Point-of-view shot from behind the café counter: a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, leaning over the counter and pointing his finger at the camera, shouting with an angry red face. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -928,7 +958,7 @@ Handheld camera with a slight shake. The man leans closer, jabbing his finger to
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, standing behind the café counter, calm but slightly startled expression, about to bow her head politely. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, standing behind the café counter, calm but slightly startled expression, about to bow her head politely. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초 생성 → 4초 사용
@@ -948,7 +978,7 @@ Slow push-in. She blinks once, keeps her composure and bows her head slightly. S
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Medium close-up of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, smirking arrogantly, his index finger resting on a white business card lying on the counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium close-up of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, smirking arrogantly, his index finger resting on a white business card lying on the counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -986,7 +1016,7 @@ Slow pan from left to right across the café. Customers turn their heads toward 
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, looking down at a white business card on the counter, face calm and unreadable. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, looking down at a white business card on the counter, face calm and unreadable. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -1006,7 +1036,7 @@ Static close-up. She studies the card, then slowly raises her eyes with a faint,
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Medium shot of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, arms crossed, chin raised, condescending look, standing at the café counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium shot of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, arms crossed, chin raised, condescending look, standing at the café counter. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초 생성 → 4초 사용
@@ -1024,7 +1054,7 @@ Static camera. He scoffs, tightens his crossed arms and raises his chin. He says
 **이미지 프롬프트** · Gemini · 강 비서 레퍼런스 첨부
 
 ``` text
-Full shot of the glass entrance door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights swinging open, Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, striding in briskly, bright daylight behind him. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Full shot of the glass entrance door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights swinging open, Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, striding in briskly, bright daylight behind him. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -1044,7 +1074,7 @@ The camera slowly tracks backward as the man in the black suit walks briskly tow
 **이미지 프롬프트** · Gemini · 강 비서 + 서윤 (둘 다 첨부) 레퍼런스 첨부
 
 ``` text
-Medium two-shot inside a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, stands in front of the counter, bowing politely toward Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, who stands behind the counter. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium two-shot inside a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights: Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, stands in front of the counter, bowing politely toward Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, who stands behind the counter. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -1064,7 +1094,7 @@ Static camera. The man in the black suit stops in front of the counter and bows 
 **이미지 프롬프트** · Gemini · 오 부장 레퍼런스 첨부
 
 ``` text
-Close-up of Mr. Oh, a 48-year-old Korean man, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, face frozen in shock, mouth slightly open, eyes wide behind his glasses. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Close-up of a fictional 48-year-old Korean office manager with a round face, thick eyebrows and a small mole on his left cheek, short side-parted black hair graying at the temples, thin gold-rimmed glasses, slightly heavy build, charcoal gray suit, navy tie, gold wristwatch, black leather shoes, face frozen in shock, mouth slightly open, eyes wide behind his glasses. Background softly blurred: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 5초
@@ -1084,7 +1114,7 @@ Fast push-in on his face. His expression freezes in shock and his mouth falls op
 **이미지 프롬프트** · Gemini · 서윤 레퍼런스 첨부
 
 ``` text
-Medium close-up of Seoyun, a 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, untying her beige apron behind the counter, looking straight into the camera with a cold, confident smile. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Medium close-up of Seoyun, a fictional 26-year-old Korean woman, straight black bob just above the shoulders, calm almond-shaped eyes, natural minimal makeup, small silver stud earrings, white button-up shirt with rolled sleeves, beige linen barista apron with a small name tag, black slacks, white sneakers, untying her beige apron behind the counter, looking straight into the camera with a cold, confident smile. Background: a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 10초 생성 → 8초 사용
@@ -1104,7 +1134,7 @@ Slow push-in. She takes off the apron, places it on the counter and looks straig
 **이미지 프롬프트** · Gemini · 오 부장 + 서윤 + 강 비서 레퍼런스 첨부
 
 ``` text
-Wide shot from behind Mr. Oh: his charcoal gray suit shoulders and graying hair blurred in the foreground; in the background Seoyun, a 26-year-old Korean woman with a straight black bob just above the shoulders, white button-up shirt with rolled sleeves, no apron, and Kang, a 32-year-old Korean man, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, holding a black leather folder, walk out through the glass door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights into bright daylight. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
+Wide shot from behind the man in the charcoal gray suit: his charcoal gray suit shoulders and graying hair blurred in the foreground; in the background Seoyun, a fictional 26-year-old Korean woman with a straight black bob just above the shoulders, white button-up shirt with rolled sleeves, no apron, and Kang, a fictional 32-year-old Korean man with a long narrow face, neatly slicked-back black hair, slim build, black suit, white shirt, black tie, black leather shoes, holding a black leather folder, walk out through the glass door of a modern minimalist café in a Seoul office building, light oak counter, black espresso machine, large windows, warm pendant lights into bright daylight. cinematic Korean drama still, photorealistic, soft warm window light, shallow depth of field, vertical 9:16, no text, no watermark
 ```
 
 **영상 프롬프트** · Kling · 10초 생성 → 7초 사용
@@ -1236,6 +1266,10 @@ A안은 컷마다 목소리가 조금씩 바뀔 수 있어요. 인물의 목소�
 #### 무료 플랜 워터마크를 지워도 되나요?
 
 지우는 도구로 없애면 서비스 약관 위반이 될 수 있어요. 공개할 영상은 유료 플랜에서 다시 만들거나, 연습용이라면 워터마크를 그대로 두세요.
+
+#### Flow에서 “유명인 관련 정책 위반” 오류로 계속 실패해요
+
+시작 이미지의 얼굴이 실존 인물과 닮았다고 판단되면 같은 이미지로는 계속 막혀요. 실패한 생성의 크레딧은 환불돼요. 고정 문장에 fictional과 둥근 얼굴, 짙은 눈썹, 볼의 점 같은 독특한 특징을 넣어 얼굴 이미지를 새로 만들고, 이름이나 Korean drama 같은 단서는 빼세요. 그래도 막히면 손이나 뒷모습으로 감정을 보여 주는 컷으로 바꾸세요.
 
 #### 연예인을 닮게 만들어도 되나요?
 
