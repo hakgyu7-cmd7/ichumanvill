@@ -470,6 +470,16 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
 3.  가장 좋은 결과를 고르고 “표정을 더 화나게”, “카메라를 조금 더 가까이”처럼 대화로 고쳐요.
 4.  03_장면 폴더에 ‘컷01.png’처럼 번호로 저장해요.
 
+### 시트를 첨부할 때의 짧은 이미지 프롬프트
+
+캐릭터 시트를 첨부하면 긴 외모 문장을 다 쓰지 않아도 돼요. **얼굴 지문(점·흉터·안경·머리)과 의상**만 괄호로 짚어 주세요. 얼굴이 달라지면 그때 긴 IDENTITY 문장을 앞에 더해요. 두 사람이 나오면 시트를 둘 다 첨부하고 sheets로 바꿔요.
+
+**Flow 키프레임 프롬프트** · 나노바나나 Pro · 9:16 · 시트 첨부
+
+``` text
+Use the attached character sheet for identity. Vertical 9:16 [샷 크기] of [이름] (the woman/man from the attached sheet: [얼굴 지문], [의상]), [행동·표정]. Setting: [장소]. Cinematic Korean drama film still, photorealistic, [색감·조명], shallow depth of field. Screens and papers are blank. No text, no watermark.
+```
+
 ### 좋은 키프레임의 조건
 
 - 동작이 시작되기 직전의 자세 (손을 들기 직전, 고개를 숙이기 직전)
@@ -507,6 +517,14 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
 | **Google Flow** (Veo 3.1, Gemini Omni Flash) | 사실적인 화질과 주변 소리. Veo 3.1 Lite는 4·6·8초 모두 10크레딧(720p, 1080p 업스케일 가능)이라 **8초로 만들면 1초당 비용이 가장 낮아요**. AI Pro 구독이면 이미지는 0크레딧. | 비구독자는 하루 50크레딧. 한국어 대사는 고르지 않아 TTS로 따로 넣는 게 안전해요. 얼굴이 실존 인물과 닮으면 생성이 막혀요. |
 | **Hailuo** (MiniMax H3)                      | 감정 연기, 인물 레퍼런스 최대 9장, 5~15초.                                                                                                                                  | 2026년 7월 출시라 사용 후기가 아직 적어요.                                                                                |
 | **Dreamina** (Seedance 2.0)                  | 참고 자료를 활용한 멀티샷, 최대 15초.                                                                                                                                       | 실제 사람 얼굴이 담긴 이미지는 쓸 수 없어요. 지역별로 순차 제공 중이에요.                                                 |
+
+### Google Flow로 따라 하기 (AI Pro 구독이라면 추천)
+
+1.  labs.google/flow에서 프로젝트를 열고, 이미지 모델 나노바나나 Pro · 비율 9:16으로 키프레임을 만들어요. (AI Pro는 0크레딧)
+2.  ‘프레임으로 동영상 만들기(Frames to Video)’를 고르고, 키프레임을 시작 프레임으로 넣어요.
+3.  모델 Veo 3.1 Lite · 8초 · 한 번에 1개로 설정해요. (10크레딧)
+4.  영상 프롬프트를 넣어요. 대사가 있으면 STEP 8의 ‘C안’처럼 목소리와 입 모양까지 한 번에 만들어요.
+5.  마음에 드는 결과만 1080p로 업스케일하고, ‘컷01.mp4’처럼 번호로 저장해요.
 
 ### Kling으로 따라 하기
 
@@ -594,6 +612,29 @@ STEP 8~9 · 목소리와 음악으로 감정을 완성해요
 
 먼저 A안으로 해 보고, 목소리가 거슬리는 인물만 B안으로 바꾸는 게 가장 효율적이에요. 같은 인물의 목소리 묘사(예: deep, arrogant male voice in his late 40s)를 모든 컷에 똑같이 넣으면 A안도 꽤 일정해져요.
 
+### C안: Flow(Veo)에서 목소리와 입 모양을 한 번에
+
+Veo는 영상을 만들면서 목소리, 입 모양, 효과음까지 함께 만들어요. 따로 녹음하거나 립싱크할 필요가 없어서 가장 간단해요. 대신 컷마다 목소리를 새로 만들기 때문에, **인물별 목소리 묘사를 고정**해서 매번 똑같이 넣어야 해요.
+
+| 규칙                  | 프롬프트에 쓰는 말                                                                        |
+|-----------------------|-------------------------------------------------------------------------------------------|
+| 인물별 목소리 고정    | in a calm, clear, low-pitched Korean female voice in her late 20s, restrained and precise |
+| 누가, 언제 말하는지   | Seconds 4-8: she speaks with clear lip movement, ... saying in Korean: "대사"             |
+| 말하기 전엔 입을 닫게 | lips closed                                                                               |
+| 두 명이 나올 때       | Only he speaks. / Only she speaks.                                                        |
+| 화면 밖 목소리        | Her lips stay closed. Off-screen, \[목소리 묘사\], says in Korean: "대사"                 |
+| 음악은 편집에서       | Audio: \[효과음\], her voice, no background music. No text, no subtitles.                 |
+
+**C안 영상 프롬프트 공식** · Flow · Veo 3.1 Lite · 8초
+
+``` text
+One continuous 8-second shot, no cuts, same framing throughout. Seconds 0-4: [동작], lips closed. Seconds 4-8: [표정 변화] and [he/she] speaks with clear lip movement, in [인물 목소리 묘사], saying in Korean: "[대사]" Only [he/she] speaks. Audio: [효과음], [his/her] voice, no background music. No text, no subtitles.
+```
+
+- **발음이 뭉개지면** 한두 번 더 뽑고, 그래도 안 되면 대사를 한 문장으로 줄이세요.
+- **입 모양이 안 맞으면** 대사 앞에 facing the camera를 넣어 얼굴이 정면을 보게 하세요.
+- **컷마다 목소리가 조금씩 달라요.** 완전히 같게 하려면 그 인물만 B안(TTS)으로 바꾸세요.
+
 ### Typecast로 대사 만들기 (B안)
 
 1.  typecast.ai에서 새 프로젝트를 만들어요.
@@ -619,11 +660,11 @@ STEP 8~9 · 목소리와 음악으로 감정을 완성해요
 
 - **무료** · A안(Kling 영상 속 대사) 위주로 하고, Typecast 무료 범위에서 몇 줄만 보충해요.
 - **가성비** · A안을 기본으로, 목소리가 거슬리는 인물만 Typecast로 바꿔요.
-- **본격** · B안: Typecast나 ElevenLabs 유료 플랜으로 인물별 목소리를 통일해요.
+- **본격** · AI Pro라면 C안(Flow에서 목소리·입 모양 한 번에)부터 해 보고, 목소리를 완전히 통일해야 하는 인물만 B안(Typecast·ElevenLabs 유료)으로 바꿔요.
 
 ### STEP 8 체크리스트
 
-- [ ] A안과 B안 중 정하기
+- [ ] A안·B안·C안(Flow 한 번에) 중 정하기
 - [ ] 인물별 목소리 정하기
 - [ ] 대사 파일 만들기 (컷 번호로 저장)
 - [ ] 입 모양을 맞추거나 컷 배치 조정하기
