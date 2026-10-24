@@ -138,6 +138,25 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(vs[0]["seconds"], 720)
         self.assertFalse(vs[0]["is_live"])
 
+    def test_channel_without_uploads_is_skipped(self):
+        class Fake(fh.YouTube):
+            def get(self, path, cost=1, **params):
+                if path == "channels":
+                    return {"items": [{"id": "UC" + "y" * 22, "snippet": {"title": "빈채널"},
+                                       "statistics": {"subscriberCount": "5000"},
+                                       "contentDetails": {"relatedPlaylists": {"uploads": "UUy"}}}]}
+                raise fh.ApiError(404, "playlist cannot be found")
+
+        self.assertEqual(fh.collect_from_api(Fake("k"), ["@빈채널"], TODAY), [])
+
+    def test_other_errors_still_stop(self):
+        class Fake(fh.YouTube):
+            def get(self, path, cost=1, **params):
+                raise fh.ApiError(403, "quotaExceeded")
+
+        with self.assertRaises(fh.ApiError):
+            fh.collect_from_api(Fake("k"), ["@x"], TODAY)
+
 
 if __name__ == "__main__":
     unittest.main()

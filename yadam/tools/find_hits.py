@@ -48,6 +48,12 @@ PAIRS_PER_TIER = 2              # 5장: 평범한 영상 2편
 
 # ---------------------------------------------------------------- 자료 모으기
 
+class ApiError(Exception):
+    def __init__(self, code, message):
+        super().__init__(f"YouTube API 오류 {code}: {message}")
+        self.code = code
+
+
 class YouTube:
     def __init__(self, key):
         self.key = key
@@ -66,7 +72,7 @@ class YouTube:
                 msg = json.loads(body)["error"]["message"]
             except (ValueError, KeyError):
                 msg = body[:300]
-            sys.exit(f"YouTube API 오류 {e.code}: {msg}")
+            raise ApiError(e.code, msg) from None
 
     def search_channels(self, query, pages=1):
         ids, token = [], None
@@ -160,8 +166,15 @@ def collect_from_api(yt, channel_refs, today):
         if tier_of(info["subscribers"]) is None:
             print(f"  구간 밖이라 뺌: {info['channel']} (구독자 {info['subscribers']:,})", file=sys.stderr)
             continue
+        try:
+            ids = yt.recent_uploads(ch["contentDetails"]["relatedPlaylists"]["uploads"], since)
+        except ApiError as e:
+            # 영상이 하나도 없거나 목록을 숨긴 채널은 업로드 목록이 404로 온다.
+            if e.code != 404:
+                raise
+            print(f"  영상 목록이 없어 뺌: {info['channel']}", file=sys.stderr)
+            continue
         channels.append(info)
-        ids = yt.recent_uploads(ch["contentDetails"]["relatedPlaylists"]["uploads"], since)
         for v in yt.videos(ids):
             sn, st = v["snippet"], v.get("statistics", {})
             videos.append({
@@ -414,15 +427,18 @@ def main(argv=None):
         if not a.api_key:
             p.error("--api-key 또는 환경 변수 YOUTUBE_API_KEY가 필요합니다 (API 키 없이 하려면 --from-csv)")
         yt = YouTube(a.api_key)
-        if a.channels:
-            with open(a.channels, encoding="utf-8-sig") as f:
-                refs = [ln.strip() for ln in f if ln.strip() and not ln.lstrip().startswith("#")]
-        else:
-            refs = []
-            for q in [q.strip() for q in a.search.split(",") if q.strip()]:
-                refs += [r for r in yt.search_channels(q) if r not in refs]
-            print(f"검색으로 찾은 채널 {len(refs)}개", file=sys.stderr)
-        videos = collect_from_api(yt, refs, today)
+        try:
+            if a.channels:
+                with open(a.channels, encoding="utf-8-sig") as f:
+                    refs = [ln.strip() for ln in f if ln.strip() and not ln.lstrip().startswith("#")]
+            else:
+                refs = []
+                for q in [q.strip() for q in a.search.split(",") if q.strip()]:
+                    refs += [r for r in yt.search_channels(q) if r not in refs]
+                print(f"검색으로 찾은 채널 {len(refs)}개", file=sys.stderr)
+            videos = collect_from_api(yt, refs, today)
+        except ApiError as e:
+            sys.exit(str(e))
         print(f"쓴 API 할당량: {yt.units} (하루 무료 10,000)", file=sys.stderr)
 
     channels = judge(videos, today)
