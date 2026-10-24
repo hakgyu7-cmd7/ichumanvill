@@ -1050,6 +1050,13 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
     <li>끝에 <span class="mono">No text, no subtitles</span>: 화면 구석에 엉뚱한 글자가 생기는 걸 막아요</li>
   </ul>
   <p class="note tip"><b>실제 테스트에서 배운 것</b><span>8초 클립에서 쓸 만한 건 보통 3~5초예요. 앞뒤에서 손이 하나 더 생기거나, 장면이 바뀌거나, 글자가 나타나는 일이 많아요. 실패라고 생각하지 말고 <b>가장 좋은 3~5초만 잘라 쓰는 게 기본</b>이에요.</span></p>
+  <h3>8초를 통째로 쓰는 방법</h3>
+  <p>길이가 꼭 60초일 필요는 없어요. <b>12컷 × 8초(약 1분 36초)</b>로 구성하면 클립을 자르지 않고 그대로 이어 붙일 수 있어요. 대신 AI가 남는 시간을 엉뚱하게 채우지 않도록 8초를 두 박자로 나눠 지시하세요.</p>
+  <figure class="prompt">
+    <figcaption><strong>8초 두 박자 모션 프롬프트</strong><span class="where">Veo 3.1 Lite · 8초</span></figcaption>
+<pre>One continuous 8-second shot, no cuts, same framing throughout. Seconds 0-4: [동작 하나]. Seconds 4-8: [표정 변화나 반응], then holds still. [대사]. No text, no subtitles.</pre>
+  </figure>
+  <p class="muted">대사도 8초면 30자 안팎까지 넣을 수 있어요. 내 작품 기획서의 길이를 ‘96초’로 고르면 대본 프롬프트가 이 구성으로 바뀌어요.</p>
   <h3>크레딧 아끼는 법</h3>
   <ul>
     <li>이미지 단계에서 충분히 고르고, 영상은 확정된 컷만 만들기</li>
@@ -1617,7 +1624,7 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
     <div class="field"><label for="p-title">작품 제목</label><input type="text" id="p-title" data-p="title" placeholder="예: 알바생의 정체"></div>
     <div class="field"><label for="p-genre">장르</label><input type="text" id="p-genre" data-p="genre" list="genre-list" placeholder="예: 신분 반전 · 사이다"></div>
     <div class="field"><label for="p-tone">분위기</label><input type="text" id="p-tone" data-p="tone" placeholder="예: 통쾌한 사이다, 앞부분은 긴장감"></div>
-    <div class="field"><label for="p-length">길이</label><select id="p-length" data-p="length"><option value="45">45초 (8~9컷)</option><option value="60" selected>60초 (10~12컷)</option><option value="90">90초 (15~18컷)</option></select></div>
+    <div class="field"><label for="p-length">길이</label><select id="p-length" data-p="length"><option value="45">45초 (8~9컷)</option><option value="60" selected>60초 (10~12컷)</option><option value="90">90초 (15~18컷)</option><option value="96">96초 (12컷 × 8초, 클립 그대로)</option></select></div>
     <div class="field wide"><label for="p-hero">주인공 (이름, 나이, 직업, 성격)</label><input type="text" id="p-hero" data-p="hero" placeholder="예: 한서윤, 26세 여성, 카페 알바생, 침착하고 단단함"></div>
     <div class="field wide"><label for="p-heroLook">주인공 외모·의상</label><input type="text" id="p-heroLook" data-p="heroLook" placeholder="예: 어깨 위 검은 단발, 차분한 눈매, 흰 셔츠, 베이지 앞치마"></div>
     <div class="field wide"><label for="p-partner">상대역 (이름, 나이, 직업, 성격)</label><input type="text" id="p-partner" data-p="partner" placeholder="예: 오정훈 부장, 48세 남성, 거만하고 갑질함"></div>
@@ -1887,7 +1894,7 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
     if (ROUTES[s.route]) d.route = s.route;
     if (s.checks && typeof s.checks === "object") Object.keys(s.checks).forEach(function (k) { if (s.checks[k] === true && /^[a-z0-9]{1,8}$/.test(k)) d.checks[k] = true; });
     if (s.project && typeof s.project === "object") FIELDS.forEach(function (f) { if (typeof s.project[f] === "string") d.project[f] = s.project[f].slice(0, 2000); });
-    if (["45", "60", "90"].indexOf(d.project.length) < 0) d.project.length = "60";
+    if (["45", "60", "90", "96"].indexOf(d.project.length) < 0) d.project.length = "60";
     d.script = str(s.script, 20000);
     d.shots = cleanShots(s.shots);
     d.titles = cleanTitles(s.titles);
@@ -1983,7 +1990,7 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
   }
 
   function val(k, ph) { var v = (state.project[k] || "").trim(); return v || ph; }
-  function cutsFor(len) { return len === "45" ? "8~9" : len === "90" ? "15~18" : "10~12"; }
+  function cutsFor(len) { return len === "45" ? "8~9" : len === "90" ? "15~18" : len === "96" ? "12" : "10~12"; }
   function scriptPrompt() {
     var len = state.project.length || "60";
     var extra = (state.project.extra || "").trim();
@@ -2005,7 +2012,7 @@ AVOID: identity drift, extra people, distorted hands, plastic skin, text, waterm
       "[규칙]",
       "1) 첫 3초는 이야기에서 가장 강렬한 장면이나 대사(훅)로 시작",
       "2) 구조: 훅 → 상황 → 갈등 고조 → 반전 → 통쾌한 마무리와 다음 화 떡밥",
-      "3) 총 " + cutsFor(len) + "컷, 컷당 3~8초, 합계 " + len + "초",
+      (len === "96" ? "3) 총 12컷, 컷마다 정확히 8초(8초 영상 클립을 자르지 않고 그대로 씀), 합계 96초. 한 컷 안에 앞 4초 동작과 뒤 4초 반응·정지가 들어가게 쓰고, 대사는 30자 안팎까지" : "3) 총 " + cutsFor(len) + "컷, 컷당 3~8초, 합계 " + len + "초"),
       "4) 대사는 한 컷에 한 문장, 20자 안팎의 자연스러운 구어체",
       "5) 인물 3명 이하, 장소 2곳 이하. 격한 액션·복잡한 손동작 대신 표정·시선·짧은 동작 위주",
       "6) 실존 인물(연예인 이름 포함)·실제 브랜드·기존 작품 캐릭터는 쓰지 않기",

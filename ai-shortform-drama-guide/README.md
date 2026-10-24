@@ -538,6 +538,18 @@ One continuous shot, no cuts, no scene change, same framing throughout. Slow pus
 
 **실제 테스트에서 배운 것:** 8초 클립에서 쓸 만한 건 보통 3~5초예요. 앞뒤에서 손이 하나 더 생기거나, 장면이 바뀌거나, 글자가 나타나는 일이 많아요. 실패라고 생각하지 말고 가장 좋은 3~5초만 잘라 쓰는 게 기본이에요.
 
+### 8초를 통째로 쓰는 방법
+
+길이가 꼭 60초일 필요는 없어요. **12컷 × 8초(약 1분 36초)**로 구성하면 클립을 자르지 않고 그대로 이어 붙일 수 있어요. 대신 AI가 남는 시간을 엉뚱하게 채우지 않도록 8초를 두 박자로 나눠 지시하세요.
+
+**8초 두 박자 모션 프롬프트** · Veo 3.1 Lite · 8초
+
+``` text
+One continuous 8-second shot, no cuts, same framing throughout. Seconds 0-4: [동작 하나]. Seconds 4-8: [표정 변화나 반응], then holds still. [대사]. No text, no subtitles.
+```
+
+대사도 8초면 30자 안팎까지 넣을 수 있어요. 내 작품 기획서의 길이를 ‘96초’로 고르면 대본 프롬프트가 이 구성으로 바뀌어요.
+
 ### 크레딧 아끼는 법
 
 - 이미지 단계에서 충분히 고르고, 영상은 확정된 컷만 만들기
