@@ -377,13 +377,47 @@ def crop_filter(video: Path, clip: Clip, width: int, height: int, layout: str, d
 
 # ---------------------------------------------------------------- 5. 자막 + 렌더링
 
+def font_family(path: Path) -> str | None:
+    """TTF/OTF 파일 안에 적힌 글꼴 이름(name table의 family)을 읽는다. 자막에 그 이름을 써야 해당 글꼴이 쓰인다."""
+    import struct
+    data = path.read_bytes()
+    if data[:4] == b"ttcf":  # 글꼴 묶음 파일은 첫 번째 글꼴만
+        data_off = struct.unpack(">I", data[12:16])[0]
+    else:
+        data_off = 0
+    num = struct.unpack(">H", data[data_off + 4:data_off + 6])[0]
+    for i in range(num):
+        tag, _, off, _ = struct.unpack(">4sIII", data[data_off + 12 + 16 * i:data_off + 28 + 16 * i])
+        if tag != b"name":
+            continue
+        _, count, str_off = struct.unpack(">HHH", data[off:off + 6])
+        names = {}
+        for j in range(count):
+            pid, eid, lang, nid, length, noff = struct.unpack(">6H", data[off + 6 + 12 * j:off + 18 + 12 * j])
+            if nid not in (1, 16):
+                continue
+            raw = data[off + str_off + noff:off + str_off + noff + length]
+            text = raw.decode("utf-16-be", "ignore") if pid in (0, 3) else raw.decode("latin-1", "ignore")
+            names[(nid, pid == 3 and lang == 0x409)] = text
+        for key in [(16, True), (1, True), (16, False), (1, False)]:
+            if names.get(key):
+                return names[key]
+    return None
+
+
+def ass_color(hex_rgb: str) -> str:
+    """'FFE400' 같은 RGB 색을 ASS 자막 색 형식(&H00BBGGRR)으로."""
+    h = hex_rgb.lstrip("#")
+    return f"&H00{h[4:6]}{h[2:4]}{h[0:2]}".upper()
+
+
 def ass_time(t: float) -> str:
     t = max(t, 0)
     return f"{int(t // 3600)}:{int(t % 3600 // 60):02d}:{t % 60:05.2f}"
 
 
 def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int,
-              font_size: int, sub_y: int, title: bool) -> None:
+              font_size: int, sub_y: int, title: bool, color: str = "FFE400") -> None:
     words = [w for s in segments for w in s.words if w.end > clip.start and w.start < clip.end]
     lines: list[tuple[float, float, str]] = []
     for i in range(0, len(words), words_per_line):
@@ -401,8 +435,8 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font},{font_size},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(4, font_size // 14)},3,2,50,50,{sub_y},1
-Style: Title,{font},{int(font_size * 0.9)},&H0000E5FF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(4, font_size // 14)},3,8,60,60,300,1
+Style: Default,{font},{font_size},{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 12)},3,2,50,50,{sub_y},1
+Style: Title,{font},{min(110, int(font_size * 0.8))},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 14)},3,8,60,60,300,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -416,9 +450,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     path.write_text(header + body, encoding="utf-8")
 
 
-def render(video: Path, clip: Clip, vf: str, out: Path, ass: Path | None) -> None:
+def render(video: Path, clip: Clip, vf: str, out: Path, ass: Path | None, fontsdir: str | None = None) -> None:
     if ass:
         vf += f",subtitles={ass.name}"  # cwd를 출력 폴더로 두어 경로 이스케이프 문제를 피함
+        if fontsdir:
+            vf += f":fontsdir={fontsdir}"
     cmd = [
         "ffmpeg", "-y", "-loglevel", "error",
         "-ss", f"{clip.start:.2f}", "-i", str(video.resolve()), "-t", f"{clip.end - clip.start:.2f}",
@@ -472,17 +508,29 @@ def process(source: str, args: argparse.Namespace) -> Path:
         print(f"[4-5/5] 세로 크롭 + 자막 렌더링 ({len(clips)}개, 레이아웃: {args.layout})")
         detect = load_face_detector() if args.layout == "face" else None
         # fit 레이아웃은 영상이 화면 가운데(약 656~1264px)에 오므로 자막을 영상 바로 아래 흐린 영역에 둔다
-        sub_y = args.sub_y if args.sub_y is not None else (480 if args.layout == "fit" else 420)
+        sub_y = args.sub_y if args.sub_y is not None else (620 if args.layout == "fit" else 560)
+        font, fontsdir = args.font, None
+        if args.font_file and not args.no_subs:
+            ff = Path(args.font_file)
+            if not ff.exists():
+                ff = Path(__file__).resolve().parent / args.font_file  # 상대 경로는 스크립트 폴더 기준으로도 찾기
+            if ff.exists():
+                (out / "fonts").mkdir(exist_ok=True)
+                shutil.copy(ff, out / "fonts" / ff.name)  # 한글 경로 문제를 피하려고 출력 폴더 안으로 복사
+                font, fontsdir = font_family(ff) or args.font, "fonts"
+                print(f"      자막 글꼴: {font} ({ff.name})")
+            else:
+                print(f"      ⚠ 글꼴 파일을 찾지 못했습니다: {args.font_file} → '{args.font}' 사용")
         for i, c in enumerate(clips, 1):
             name = f"short_{i:02d}_{slugify(c.title)}"
             ass = None
             if not args.no_subs:
                 ass = out / f"{name}.ass"
-                write_ass(ass, c, segments, args.font, args.words_per_line, args.font_size, sub_y,
-                          title=args.layout == "fit" and not args.no_title)
+                write_ass(ass, c, segments, font, args.words_per_line, args.font_size, sub_y,
+                          title=args.layout == "fit" and not args.no_title, color=args.sub_color)
             vf = crop_filter(video, c, width, height, args.layout, detect)
             mp4 = out / f"{name}.mp4"
-            render(video, c, vf, mp4, ass)
+            render(video, c, vf, mp4, ass, fontsdir)
             print(f"      ✓ {mp4}")
             results.append({"file": mp4.name, **asdict(c)})
     else:
@@ -542,7 +590,9 @@ def main() -> None:
     p.add_argument("--preset", choices=sorted(PRESETS), default=None,
                    help="채널 유형별 구간 선정 기준 (story: 옛날이야기·민담 낭독 채널)")
     p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
-    p.add_argument("--font-size", type=int, default=120, help="자막 글자 크기 (기본: 120)")
+    p.add_argument("--font-file", default=None, help="자막 글꼴 파일 (.ttf/.otf). 예: fonts/BMJUA_ttf.ttf")
+    p.add_argument("--font-size", type=int, default=140, help="자막 글자 크기 (기본: 140)")
+    p.add_argument("--sub-color", default="FFE400", help="자막 글자 색 RGB (기본: FFE400 노란색, 흰색은 FFFFFF)")
     p.add_argument("--sub-y", type=int, default=None, help="자막의 화면 아래쪽에서의 높이(px, 1920 기준)")
     p.add_argument("--words-per-line", type=int, default=2, help="자막 한 번에 표시할 단어 수")
     p.add_argument("--no-subs", action="store_true", help="자막 입히지 않기")

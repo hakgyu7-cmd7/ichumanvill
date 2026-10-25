@@ -93,9 +93,11 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 | `--whisper-model` | `tiny` `base` `small` `medium` `large-v3` (클수록 정확하지만 느림) | `small` |
 | `--prompt` | 구간 선정 추가 지시 (예: `"꿀팁 위주로"`) | 없음 |
 | `--preset` | 채널 유형별 구간 선정 기준. `story`: 옛날이야기·민담 낭독 (반전·궁금한 장면, 결말은 숨김) | 없음 |
-| `--font` | 자막 폰트 | `NanumGothic` |
-| `--font-size` | 자막 글자 크기 | 120 |
-| `--sub-y` | 자막 높이 (화면 아래에서 px, 1920 기준) | face 420 / fit 480 |
+| `--font` | 자막 폰트 이름 (시스템에 설치된 것) | `NanumGothic` |
+| `--font-file` | 자막 글꼴 파일 (.ttf/.otf). 설치하지 않아도 됨. 예: `fonts\BMJUA_ttf.ttf` (배달의민족 주아체) | 없음 |
+| `--sub-color` | 자막 글자 색 (RGB) | `FFE400` 노란색 |
+| `--font-size` | 자막 글자 크기 | 140 |
+| `--sub-y` | 자막 높이 (화면 아래에서 px, 1920 기준, 클수록 위로) | face 560 / fit 620 |
 | `--words-per-line` | 자막 한 번에 표시할 단어 수 | 2 |
 | `--no-subs` | 자막 없이 출력 | |
 | `--layout` | `face`: 장면마다 인물 따라 크롭 / `fit`: 원본 전체 + 흐린 배경 + 상단 제목 / `center`: 가운데 크롭 | `face` |

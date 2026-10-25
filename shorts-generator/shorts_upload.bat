@@ -12,7 +12,8 @@ set CLIPS=5
 set PRIVACY=private
 set LAYOUT=fit
 set PRESET=story
-set FONT_SIZE=120
+set FONT_SIZE=140
+set FONT_FILE=fonts\BMJUA_ttf.ttf
 set WHISPER=large-v3
 rem ===================================
 
@@ -26,7 +27,7 @@ if "%~1"=="" (
 if "%~1"=="" goto done
 echo.
 echo ===== %~nx1 =====
-".venv\Scripts\python.exe" shorts.py "%~1" --lang %LANG_CODE% -n %CLIPS% --whisper-model %WHISPER% --layout %LAYOUT% --preset %PRESET% --font-size %FONT_SIZE% --upload --privacy %PRIVACY%
+".venv\Scripts\python.exe" shorts.py "%~1" --lang %LANG_CODE% -n %CLIPS% --whisper-model %WHISPER% --layout %LAYOUT% --preset %PRESET% --font-size %FONT_SIZE% --font-file "%FONT_FILE%" --upload --privacy %PRIVACY%
 shift
 goto loop
 
