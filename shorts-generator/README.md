@@ -12,10 +12,15 @@
    - Windows: `winget install ffmpeg`
    - macOS: `brew install ffmpeg`
    - Ubuntu: `sudo apt install ffmpeg`
-2. Python 3.10 이상에서:
+2. **Python 3.11~3.13** 에서 설치 (3.14 이상은 받아쓰기 패키지 `av` 등의 설치 파일이 아직 없어 빌드 에러가 납니다):
    ```bash
-   pip install -r requirements.txt
+   py install 3.12                     # Windows: 3.12 설치 (또는 python.org에서 설치)
+   py -3.12 -m venv .venv
+   .venv\Scripts\python.exe -m pip install -r requirements.txt      # macOS/Linux: .venv/bin/python -m pip ...
    ```
+   이후 실행도 `.venv\Scripts\python.exe shorts.py ...`처럼 같은 Python으로 합니다.
+   Windows 11에서 **"응용 프로그램 제어 정책에서 이 파일을 차단했습니다"** 가 나오면 스마트 앱 컨트롤이 DLL을 막는 것입니다.
+   Windows 보안 → 앱 및 브라우저 컨트롤 → 스마트 앱 컨트롤을 끄거나 WSL(Ubuntu)에서 실행하세요.
 3. Claude API 키 설정 ([console.anthropic.com](https://console.anthropic.com)에서 발급)
    ```bash
    export ANTHROPIC_API_KEY="sk-ant-..."      # Windows PowerShell: $env:ANTHROPIC_API_KEY="sk-ant-..."
