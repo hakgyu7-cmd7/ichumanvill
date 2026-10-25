@@ -2,15 +2,17 @@
 """YouTube 롱폼 → 숏폼 자동 추출기.
 
 파이프라인:
-  1. yt-dlp        : 영상 다운로드 (로컬 파일도 가능)
+  1. 입력          : 내 영상 파일 (YouTube URL도 가능 — yt-dlp 설치 시)
   2. faster-whisper: 음성 → 텍스트 (단어 단위 타임스탬프)
   3. Claude        : 자막을 읽고 숏폼으로 쓸 하이라이트 구간 선정
   4. OpenCV        : 얼굴 위치를 찾아 9:16 세로 크롭 위치 결정
   5. ffmpeg        : 구간 자르기 + 세로 변환 + 자막 입히기
+  6. YouTube API   : 자동 업로드 / 예약 공개 (선택, upload.py)
 
 사용 예:
-  python shorts.py "https://www.youtube.com/watch?v=XXXX" --clips 5
-  python shorts.py my_video.mp4 --clips 3 --min 20 --max 45
+  python shorts.py 내영상.mp4 --clips 3 --min 20 --max 45
+  python shorts.py 내영상.mp4 --upload --schedule 2026-11-01T18:00     # 추출 + 하루 1개씩 예약 업로드
+  python shorts.py --watch inbox --upload                              # inbox 폴더에 넣은 영상 자동 처리
 """
 
 from __future__ import annotations
@@ -18,9 +20,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import statistics
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
@@ -59,7 +63,12 @@ def download(source: str, workdir: Path) -> Path:
     if Path(source).exists():
         return Path(source).resolve()
 
-    import yt_dlp
+    if not re.match(r"https?://", source):
+        sys.exit(f"파일을 찾을 수 없습니다: {source}")
+    try:
+        import yt_dlp
+    except ImportError:
+        sys.exit("URL을 받으려면 yt-dlp가 필요합니다: pip install yt-dlp")
 
     out = workdir / "source.mp4"
     if out.exists():
@@ -303,32 +312,20 @@ def slugify(text: str) -> str:
     return re.sub(r"[^\w가-힣]+", "_", text).strip("_")[:40] or "clip"
 
 
-def main() -> None:
-    p = argparse.ArgumentParser(description="YouTube 롱폼에서 숏폼 자동 추출")
-    p.add_argument("source", help="YouTube URL 또는 로컬 영상 파일")
-    p.add_argument("-o", "--out", default="output", help="출력 폴더 (기본: output)")
-    p.add_argument("-n", "--clips", type=int, default=5, help="뽑을 숏폼 개수 (기본: 5)")
-    p.add_argument("--min", dest="min_len", type=int, default=20, help="최소 길이(초)")
-    p.add_argument("--max", dest="max_len", type=int, default=59, help="최대 길이(초)")
-    p.add_argument("--lang", default=None, help="음성 언어 코드 (예: ko, en). 생략 시 자동 감지")
-    p.add_argument("--whisper-model", default="small", help="tiny/base/small/medium/large-v3 (기본: small)")
-    p.add_argument("--model", default="claude-opus-5-5", help="구간 선정에 쓸 Claude 모델")
-    p.add_argument("--prompt", default=None, help="구간 선정 추가 지시 (예: '웃긴 장면 위주로')")
-    p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
-    p.add_argument("--words-per-line", type=int, default=3, help="자막 한 줄에 표시할 단어 수")
-    p.add_argument("--no-subs", action="store_true", help="자막 입히지 않기")
-    p.add_argument("--no-face", action="store_true", help="얼굴 추적 없이 가운데 크롭")
-    p.add_argument("--dry-run", action="store_true", help="구간만 고르고 렌더링하지 않기")
-    args = p.parse_args()
+VIDEO_EXTS = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v"}
 
-    out = Path(args.out)
+
+def process(source: str, args: argparse.Namespace) -> Path:
+    name = Path(source).stem if Path(source).exists() else slugify(source)[-20:]
+    out = Path(args.out) / name  # 영상마다 폴더를 따로 두어 받아쓰기 캐시가 섞이지 않게 함
     out.mkdir(parents=True, exist_ok=True)
 
-    video = download(args.source, out)
+    video = download(source, out)
     width, height, duration = probe(video)
     segments = transcribe(video, out, args.whisper_model, args.lang)
     if not segments:
-        sys.exit("음성을 찾지 못했습니다.")
+        print("음성을 찾지 못했습니다.")
+        return out
 
     clips = select_clips(segments, duration, args.clips, args.min_len, args.max_len, args.model, args.prompt)
     clips.sort(key=lambda c: c.score, reverse=True)
@@ -354,6 +351,68 @@ def main() -> None:
 
     (out / "clips.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"완료! 결과: {out.resolve()} (제목·해시태그는 clips.json 참고)")
+
+    if args.upload and not args.dry_run:
+        from upload import upload_clips
+        upload_clips(out, args.privacy, args.schedule, args.interval, args.footer)
+    return out
+
+
+def watch(inbox: Path, args: argparse.Namespace) -> None:
+    """inbox 폴더를 감시하다가 새 영상이 들어오면 처리하고 inbox/done으로 옮긴다."""
+    done = inbox / "done"
+    done.mkdir(parents=True, exist_ok=True)
+    sizes: dict[Path, int] = {}
+    print(f"📂 {inbox.resolve()} 폴더를 감시 중입니다. 영상을 넣으면 자동으로 처리합니다. (종료: Ctrl+C)")
+    while True:
+        for f in sorted(inbox.iterdir()):
+            if not f.is_file() or f.suffix.lower() not in VIDEO_EXTS:
+                continue
+            size = f.stat().st_size
+            if sizes.get(f) != size:  # 복사가 끝날 때까지(크기가 변하지 않을 때까지) 대기
+                sizes[f] = size
+                continue
+            print(f"\n▶ 새 영상: {f.name}")
+            try:
+                process(str(f), args)
+                shutil.move(str(f), done / f.name)
+            except Exception as e:  # 한 영상이 실패해도 감시는 계속
+                print(f"      ✗ 실패: {e}")
+                f.rename(f.with_suffix(f.suffix + ".failed"))
+            sizes.pop(f, None)
+        time.sleep(args.poll)
+
+
+def main() -> None:
+    from upload import add_upload_args
+
+    p = argparse.ArgumentParser(description="롱폼 영상에서 숏폼 자동 추출 (+ YouTube 자동 업로드)")
+    p.add_argument("source", nargs="?", help="내 영상 파일 (또는 YouTube URL)")
+    p.add_argument("--watch", type=Path, metavar="DIR", help="이 폴더에 들어오는 영상을 계속 자동 처리")
+    p.add_argument("--poll", type=int, default=30, help="--watch 확인 간격(초) (기본: 30)")
+    p.add_argument("-o", "--out", default="output", help="출력 폴더 (영상별 하위 폴더 생성, 기본: output)")
+    p.add_argument("-n", "--clips", type=int, default=5, help="뽑을 숏폼 개수 (기본: 5)")
+    p.add_argument("--min", dest="min_len", type=int, default=20, help="최소 길이(초)")
+    p.add_argument("--max", dest="max_len", type=int, default=59, help="최대 길이(초)")
+    p.add_argument("--lang", default=None, help="음성 언어 코드 (예: ko, en). 생략 시 자동 감지")
+    p.add_argument("--whisper-model", default="small", help="tiny/base/small/medium/large-v3 (기본: small)")
+    p.add_argument("--model", default="claude-opus-5-5", help="구간 선정에 쓸 Claude 모델")
+    p.add_argument("--prompt", default=None, help="구간 선정 추가 지시 (예: '웃긴 장면 위주로')")
+    p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
+    p.add_argument("--words-per-line", type=int, default=3, help="자막 한 줄에 표시할 단어 수")
+    p.add_argument("--no-subs", action="store_true", help="자막 입히지 않기")
+    p.add_argument("--no-face", action="store_true", help="얼굴 추적 없이 가운데 크롭")
+    p.add_argument("--dry-run", action="store_true", help="구간만 고르고 렌더링하지 않기")
+    p.add_argument("--upload", action="store_true", help="추출 후 YouTube에 자동 업로드")
+    add_upload_args(p)
+    args = p.parse_args()
+
+    if args.watch:
+        watch(args.watch, args)
+    elif args.source:
+        process(args.source, args)
+    else:
+        p.error("영상 파일 또는 --watch 폴더를 지정하세요.")
 
 
 if __name__ == "__main__":

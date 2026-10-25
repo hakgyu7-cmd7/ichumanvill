@@ -1,2 +1,5 @@
 output/
+inbox/
 *.mp4
+client_secret*.json
+token.json

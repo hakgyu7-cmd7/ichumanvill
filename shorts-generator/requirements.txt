@@ -1,5 +1,7 @@
 anthropic>=2.3
 faster-whisper>=1.0
-yt-dlp
+# yt-dlp   # YouTube URL에서 바로 받을 때만 필요
+google-api-python-client>=2.0   # 자동 업로드 (--upload)
+google-auth-oauthlib>=1.0
 # OpenCV 5.x에서는 Haar 얼굴 검출기(CascadeClassifier)가 빠져서 4.x로 고정
 opencv-python-headless>=4.8,<5
