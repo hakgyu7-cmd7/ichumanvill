@@ -93,9 +93,13 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 | `--whisper-model` | `tiny` `base` `small` `medium` `large-v3` (클수록 정확하지만 느림) | `small` |
 | `--prompt` | 구간 선정 추가 지시 (예: `"꿀팁 위주로"`) | 없음 |
 | `--font` | 자막 폰트 | `NanumGothic` |
-| `--words-per-line` | 자막 한 줄 단어 수 | 3 |
+| `--font-size` | 자막 글자 크기 | 120 |
+| `--sub-y` | 자막 높이 (화면 아래에서 px, 1920 기준) | face 420 / fit 480 |
+| `--words-per-line` | 자막 한 번에 표시할 단어 수 | 2 |
 | `--no-subs` | 자막 없이 출력 | |
-| `--no-face` | 얼굴 추적 없이 가운데 크롭 | |
+| `--layout` | `face`: 장면마다 인물 따라 크롭 / `fit`: 원본 전체 + 흐린 배경 + 상단 제목 / `center`: 가운데 크롭 | `face` |
+| `--no-title` | `fit`에서 상단 제목 숨기기 | |
+| `--reuse-clips` | 이전에 고른 구간 그대로 다시 렌더링 (설정만 바꿔 다시 뽑을 때) | |
 | `--dry-run` | 구간 선정까지만 (렌더링·업로드 안 함) | |
 | `--upload` | 추출 후 YouTube 업로드 | |
 | `--privacy` | `private` / `unlisted` / `public` | `private` |
@@ -111,6 +115,6 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 
 - **속도**: NVIDIA GPU가 있으면 Whisper가 자동으로 GPU를 씁니다. CPU만 있으면 1시간 영상에 `small` 모델 기준 수십 분 걸릴 수 있습니다.
 - **비용**: 1시간 영상 자막은 대략 15~20k 토큰이라 Claude 호출 한 번에 몇 센트 수준입니다. YouTube API는 무료입니다.
-- **크롭**: 클립마다 가장 큰 얼굴의 평균 위치로 화면을 고정해서 자릅니다. 두 사람이 번갈아 말하는 영상은 `--no-face`와 비교해보세요.
+- **크롭**: 장면(컷)이 바뀔 때마다 가장 큰 얼굴을 찾아 그 위치로 자릅니다 (YuNet 얼굴 인식, 첫 실행 시 자동 다운로드). 두 사람이 한 화면에 나오거나 그림·애니메이션이라 얼굴을 못 찾으면 `--layout fit`이 낫습니다.
 - **처음엔 `--privacy private`로** 몇 번 돌려보고, 고르는 구간이 마음에 들면 예약 공개로 넘어가는 걸 추천합니다.
 - YouTube URL에서 바로 받고 싶다면 `pip install yt-dlp` 후 파일 대신 URL을 넣으면 됩니다.

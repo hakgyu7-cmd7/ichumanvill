@@ -254,50 +254,115 @@ def snap(clip: Clip, segments: list[Segment], duration: float, min_len: int, max
 
 # ---------------------------------------------------------------- 4. 크롭 위치
 
-def face_center_x(video: Path, start: float, end: float, width: int) -> float:
-    """구간에서 얼굴 중심 x좌표의 중앙값. 얼굴이 없으면 화면 중앙."""
-    import cv2
+YUNET_URL = ("https://media.githubusercontent.com/media/opencv/opencv_zoo/main/"
+             "models/face_detection_yunet/face_detection_yunet_2023mar.onnx")
+SAMPLE_STEP = 0.25  # 얼굴/장면 전환 검사 간격(초)
 
-    # OpenCV는 Windows에서 한글 등 비ASCII 경로의 파일을 못 여므로 XML을 Python으로 읽어 메모리에서 로드한다
+
+def load_face_detector():
+    """얼굴 검출 함수(frame → [(cx, 면적), ...])를 돌려준다. YuNet(정확, 옆얼굴도 잡음) → Haar(기본) 순."""
+    import cv2
+    import numpy as np
+
+    # OpenCV는 Windows에서 한글 등 비ASCII 경로의 파일을 못 열므로 모델은 전부 Python으로 읽어 메모리에서 로드한다
+    model = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2023mar.onnx"
+    try:
+        if not model.exists():
+            import urllib.request
+            print("      얼굴 인식 모델(YuNet) 내려받는 중 (처음 한 번)")
+            model.parent.mkdir(exist_ok=True)
+            data = urllib.request.urlopen(YUNET_URL, timeout=30).read()
+            if len(data) < 100_000:
+                raise ValueError("모델 다운로드 실패")
+            model.write_bytes(data)
+        yunet = cv2.FaceDetectorYN.create("onnx", np.frombuffer(model.read_bytes(), np.uint8),
+                                          np.array([], np.uint8), (320, 320), 0.6)
+
+        def detect(frame):
+            h, w = frame.shape[:2]
+            scale = 640 / w
+            small = cv2.resize(frame, (640, int(h * scale)))
+            yunet.setInputSize((small.shape[1], small.shape[0]))
+            _, faces = yunet.detect(small)
+            if faces is None:
+                return []
+            return [((f[0] + f[2] / 2) / scale, f[2] * f[3] / scale ** 2) for f in faces]
+        return detect
+    except Exception as e:
+        print(f"      ⚠ YuNet 사용 불가({e}) → 기본 얼굴 인식 사용")
+
     xml = (Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml").read_text(encoding="utf-8")
     fs = cv2.FileStorage(xml, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
     cascade = cv2.CascadeClassifier()
     cascade.read(fs.getFirstTopLevelNode())
     fs.release()
+
+    def detect(frame):
+        gray = cv2.cvtColor(cv2.resize(frame, None, fx=0.5, fy=0.5), cv2.COLOR_BGR2GRAY)
+        faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=6, minSize=(30, 30))
+        return [((x + w / 2) * 2, w * h * 4) for x, y, w, h in faces]
+    return detect
+
+
+def track_faces(video: Path, start: float, end: float, width: int, detect) -> list[tuple[float, float]]:
+    """장면(컷)마다 주인공 얼굴 위치를 찾는다. 반환: [(클립 기준 장면 시작 초, 얼굴 중심 x), ...]"""
+    import cv2
+
     cap = cv2.VideoCapture(str(video))
-    if cascade.empty() or not cap.isOpened():
-        print("      ⚠ 얼굴 인식을 쓸 수 없어 가운데로 크롭합니다")
-        return width / 2
-    xs: list[float] = []
+    if not cap.isOpened():
+        return [(0.0, width / 2)]
+    scenes: list[tuple[float, list[float]]] = []  # (장면 시작, 그 장면에서 찾은 얼굴 x들)
+    prev_hist = None
     t = start
     while t < end:
         cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
         ok, frame = cap.read()
         if not ok:
             break
-        small = cv2.resize(frame, None, fx=0.5, fy=0.5)
-        gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
-        faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=6, minSize=(30, 30))
-        if len(faces):
-            x, y, w, h = max(faces, key=lambda f: f[2] * f[3])  # 가장 큰 얼굴 = 주 화자
-            xs.append((x + w / 2) * 2)
-        t += 0.5
+        hsv = cv2.cvtColor(cv2.resize(frame, (160, 90)), cv2.COLOR_BGR2HSV)
+        hist = cv2.normalize(cv2.calcHist([hsv], [0, 1], None, [32, 32], [0, 180, 0, 256]), None).flatten()
+        if prev_hist is None or cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL) < 0.6:
+            scenes.append((t - start, []))  # 화면이 크게 바뀜 = 새 장면
+        prev_hist = hist
+        faces = detect(frame)
+        if faces:
+            scenes[-1][1].append(max(faces, key=lambda f: f[1])[0])  # 가장 큰 얼굴 = 주인공
+        t += SAMPLE_STEP
     cap.release()
-    return statistics.median(xs) if xs else width / 2
+
+    result: list[tuple[float, float]] = []
+    last_x = width / 2
+    for i, (st, xs) in enumerate(scenes):
+        # 얼굴이 없는 장면은 직전 위치 유지 (풍경·소품 컷에서 화면이 튀지 않게)
+        x = statistics.median(xs) if xs else last_x
+        if result and abs(x - result[-1][1]) < width * 0.03:
+            continue  # 거의 같은 위치면 합침
+        result.append((round(st, 2), x))
+        last_x = x
+    return result or [(0.0, width / 2)]
 
 
-def crop_filter(video: Path, clip: Clip, width: int, height: int, use_face: bool) -> str:
+def crop_filter(video: Path, clip: Clip, width: int, height: int, layout: str, detect=None) -> str:
     if width / height <= OUT_W / OUT_H + 0.01:  # 이미 세로 영상
         return f"scale={OUT_W}:{OUT_H}:force_original_aspect_ratio=decrease,pad={OUT_W}:{OUT_H}:(ow-iw)/2:(oh-ih)/2"
+    if layout == "fit":  # 원본 전체를 가운데에, 위아래는 흐린 배경 (인물이 잘리지 않음)
+        return (f"split[a][b];[a]scale={OUT_W}:{OUT_H}:force_original_aspect_ratio=increase,"
+                f"crop={OUT_W}:{OUT_H},boxblur=25:3,eq=brightness=-0.15[bg];"
+                f"[b]scale={OUT_W}:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2")
+
     crop_w = int(height * OUT_W / OUT_H) // 2 * 2
-    cx = width / 2
-    if use_face:
+    points = [(0.0, width / 2)]
+    if layout == "face" and detect:
         try:
-            cx = face_center_x(video, clip.start, clip.end, width)
+            points = track_faces(video, clip.start, clip.end, width, detect)
         except Exception as e:  # 얼굴 인식이 실패해도 렌더링은 계속
             print(f"      ⚠ 얼굴 인식 실패({e}) → 가운데 크롭")
-    x = int(min(max(cx - crop_w / 2, 0), width - crop_w))
-    return f"crop={crop_w}:{height}:{x}:0,scale={OUT_W}:{OUT_H}"
+    xs = [int(min(max(cx - crop_w / 2, 0), width - crop_w)) for _, cx in points]
+    # 장면이 바뀔 때마다 크롭 위치를 바꾸는 ffmpeg 식: if(lt(t,2.5),x0,if(lt(t,6.0),x1,x2))
+    expr = str(xs[-1])
+    for (t_next, _), x in zip(reversed(points[1:]), reversed(xs[:-1])):
+        expr = f"if(lt(t,{t_next}),{x},{expr})"
+    return f"crop={crop_w}:{height}:'{expr}':0,scale={OUT_W}:{OUT_H}"
 
 
 # ---------------------------------------------------------------- 5. 자막 + 렌더링
@@ -307,7 +372,8 @@ def ass_time(t: float) -> str:
     return f"{int(t // 3600)}:{int(t % 3600 // 60):02d}:{t % 60:05.2f}"
 
 
-def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int) -> None:
+def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int,
+              font_size: int, sub_y: int, title: bool) -> None:
     words = [w for s in segments for w in s.words if w.end > clip.start and w.start < clip.end]
     lines: list[tuple[float, float, str]] = []
     for i in range(0, len(words), words_per_line):
@@ -325,15 +391,18 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font},86,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,6,2,2,80,80,520,1
+Style: Default,{font},{font_size},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(4, font_size // 14)},3,2,50,50,{sub_y},1
+Style: Title,{font},{int(font_size * 0.9)},&H0000E5FF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(4, font_size // 14)},3,8,60,60,300,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-    body = "".join(
-        f"Dialogue: 0,{ass_time(s)},{ass_time(e)},Default,,0,0,0,,{txt.replace('{', '(').replace('}', ')')}\n"
-        for s, e, txt in lines
-    )
+    def clean(txt: str) -> str:
+        return txt.replace("{", "(").replace("}", ")")
+
+    body = "".join(f"Dialogue: 0,{ass_time(s)},{ass_time(e)},Default,,0,0,0,,{clean(txt)}\n" for s, e, txt in lines)
+    if title:  # fit 레이아웃: 위쪽 빈 공간에 제목 고정
+        body += f"Dialogue: 0,{ass_time(0)},{ass_time(clip.end - clip.start)},Title,,0,0,0,,{clean(clip.title)}\n"
     path.write_text(header + body, encoding="utf-8")
 
 
@@ -376,21 +445,31 @@ def process(source: str, args: argparse.Namespace) -> Path:
         print("음성을 찾지 못했습니다.")
         return out
 
-    clips = select_clips(segments, duration, args.clips, args.min_len, args.max_len, args.model, args.prompt)
+    clips_file = out / "clips.json"
+    if args.reuse_clips and clips_file.exists():
+        print("[3/5] 이전에 고른 구간 재사용 (clips.json)")
+        fields = Clip.__dataclass_fields__
+        clips = [Clip(**{k: v for k, v in c.items() if k in fields}) for c in json.loads(clips_file.read_text(encoding="utf-8"))]
+    else:
+        clips = select_clips(segments, duration, args.clips, args.min_len, args.max_len, args.model, args.prompt)
     clips.sort(key=lambda c: c.score, reverse=True)
     for i, c in enumerate(clips, 1):
         print(f"      #{i} [{fmt_ts(c.start)}~{fmt_ts(c.end)}, {c.end - c.start:.0f}s, {c.score}점] {c.title}")
 
     results = []
     if not args.dry_run:
-        print(f"[4-5/5] 세로 크롭 + 자막 렌더링 ({len(clips)}개)")
+        print(f"[4-5/5] 세로 크롭 + 자막 렌더링 ({len(clips)}개, 레이아웃: {args.layout})")
+        detect = load_face_detector() if args.layout == "face" else None
+        # fit 레이아웃은 영상이 화면 가운데(약 656~1264px)에 오므로 자막을 영상 바로 아래 흐린 영역에 둔다
+        sub_y = args.sub_y if args.sub_y is not None else (480 if args.layout == "fit" else 420)
         for i, c in enumerate(clips, 1):
             name = f"short_{i:02d}_{slugify(c.title)}"
             ass = None
             if not args.no_subs:
                 ass = out / f"{name}.ass"
-                write_ass(ass, c, segments, args.font, args.words_per_line)
-            vf = crop_filter(video, c, width, height, not args.no_face)
+                write_ass(ass, c, segments, args.font, args.words_per_line, args.font_size, sub_y,
+                          title=args.layout == "fit" and not args.no_title)
+            vf = crop_filter(video, c, width, height, args.layout, detect)
             mp4 = out / f"{name}.mp4"
             render(video, c, vf, mp4, ass)
             print(f"      ✓ {mp4}")
@@ -398,7 +477,7 @@ def process(source: str, args: argparse.Namespace) -> Path:
     else:
         results = [asdict(c) for c in clips]
 
-    (out / "clips.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+    clips_file.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"완료! 결과: {out.resolve()} (제목·해시태그는 clips.json 참고)")
 
     if args.upload and not args.dry_run:
@@ -450,9 +529,16 @@ def main() -> None:
     p.add_argument("--model", default="claude-opus-5-5", help="구간 선정에 쓸 Claude 모델")
     p.add_argument("--prompt", default=None, help="구간 선정 추가 지시 (예: '웃긴 장면 위주로')")
     p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
-    p.add_argument("--words-per-line", type=int, default=3, help="자막 한 줄에 표시할 단어 수")
+    p.add_argument("--font-size", type=int, default=120, help="자막 글자 크기 (기본: 120)")
+    p.add_argument("--sub-y", type=int, default=None, help="자막의 화면 아래쪽에서의 높이(px, 1920 기준)")
+    p.add_argument("--words-per-line", type=int, default=2, help="자막 한 번에 표시할 단어 수")
     p.add_argument("--no-subs", action="store_true", help="자막 입히지 않기")
-    p.add_argument("--no-face", action="store_true", help="얼굴 추적 없이 가운데 크롭")
+    p.add_argument("--layout", choices=["face", "center", "fit"], default="face",
+                   help="face: 장면마다 인물 따라 크롭 / center: 가운데 크롭 / fit: 원본 전체 + 흐린 배경 (기본: face)")
+    p.add_argument("--no-face", dest="layout", action="store_const", const="center", help="--layout center와 같음")
+    p.add_argument("--no-title", action="store_true", help="fit 레이아웃에서 상단 제목 숨기기")
+    p.add_argument("--reuse-clips", action="store_true",
+                   help="이전에 고른 구간(clips.json)을 그대로 쓰고 다시 렌더링만 하기")
     p.add_argument("--dry-run", action="store_true", help="구간만 고르고 렌더링하지 않기")
     p.add_argument("--upload", action="store_true", help="추출 후 YouTube에 자동 업로드")
     add_upload_args(p)
