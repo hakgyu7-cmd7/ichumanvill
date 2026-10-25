@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import statistics
@@ -102,6 +103,19 @@ def probe(video: Path) -> tuple[int, int, float]:
 
 # ---------------------------------------------------------------- 2. 받아쓰기
 
+def add_nvidia_dll_dirs() -> None:
+    """Windows에서 pip로 설치한 nvidia-cublas/cudnn의 DLL 폴더를 검색 경로에 추가한다."""
+    if os.name != "nt":
+        return
+    try:
+        import nvidia
+    except ImportError:
+        return
+    for base in nvidia.__path__:
+        for bin_dir in Path(base).glob("*/bin"):
+            os.add_dll_directory(str(bin_dir))
+            os.environ["PATH"] = str(bin_dir) + os.pathsep + os.environ.get("PATH", "")
+
 def transcribe(video: Path, workdir: Path, model_size: str, language: str | None,
                device: str = "auto") -> list[Segment]:
     cache = workdir / "transcript.json"
@@ -111,6 +125,7 @@ def transcribe(video: Path, workdir: Path, model_size: str, language: str | None
         return [Segment(s["start"], s["end"], s["text"], [Word(**w) for w in s["words"]]) for s in data]
 
     import numpy as np
+    add_nvidia_dll_dirs()
     from faster_whisper import WhisperModel
 
     print(f"[2/5] 받아쓰기 중 (whisper {model_size}) — 영상 길이에 따라 오래 걸릴 수 있습니다")
