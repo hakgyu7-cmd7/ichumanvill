@@ -89,6 +89,7 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 | `-n, --clips` | 뽑을 숏폼 개수 | 5 |
 | `--min / --max` | 클립 길이(초) | 20 / 59 |
 | `--lang` | 음성 언어 (`ko`, `en` …) | 자동 감지 |
+| `--device` | 받아쓰기 장치 `auto` `cpu` `cuda` (GPU가 안 되면 자동으로 CPU) | `auto` |
 | `--whisper-model` | `tiny` `base` `small` `medium` `large-v3` (클수록 정확하지만 느림) | `small` |
 | `--prompt` | 구간 선정 추가 지시 (예: `"꿀팁 위주로"`) | 없음 |
 | `--font` | 자막 폰트 | `NanumGothic` |

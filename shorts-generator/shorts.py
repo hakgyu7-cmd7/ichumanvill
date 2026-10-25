@@ -102,7 +102,8 @@ def probe(video: Path) -> tuple[int, int, float]:
 
 # ---------------------------------------------------------------- 2. 받아쓰기
 
-def transcribe(video: Path, workdir: Path, model_size: str, language: str | None) -> list[Segment]:
+def transcribe(video: Path, workdir: Path, model_size: str, language: str | None,
+               device: str = "auto") -> list[Segment]:
     cache = workdir / "transcript.json"
     if cache.exists():
         print(f"[2/5] 받아쓰기 건너뜀 (캐시 사용): {cache}")
@@ -121,15 +122,26 @@ def transcribe(video: Path, workdir: Path, model_size: str, language: str | None
     ).stdout
     audio = np.frombuffer(pcm, np.int16).astype(np.float32) / 32768.0
 
-    model = WhisperModel(model_size, device="auto", compute_type="auto")
-    raw_segments, info = model.transcribe(
-        audio, language=language, word_timestamps=True, vad_filter=True,
-    )
-    segments: list[Segment] = []
-    for s in raw_segments:
-        words = [Word(w.start, w.end, w.word.strip()) for w in (s.words or []) if w.word.strip()]
-        segments.append(Segment(s.start, s.end, s.text.strip(), words))
-        print(f"      {fmt_ts(s.start)} {s.text.strip()[:60]}", end="\r")
+    def run(device: str):
+        model = WhisperModel(model_size, device=device, compute_type="int8" if device == "cpu" else "auto")
+        raw_segments, info = model.transcribe(
+            audio, language=language, word_timestamps=True, vad_filter=True,
+        )
+        segments: list[Segment] = []
+        for s in raw_segments:
+            words = [Word(w.start, w.end, w.word.strip()) for w in (s.words or []) if w.word.strip()]
+            segments.append(Segment(s.start, s.end, s.text.strip(), words))
+            print(f"      {fmt_ts(s.start)} {s.text.strip()[:60]}", end="\r")
+        return segments, info
+
+    try:
+        segments, info = run(device)
+    except RuntimeError as e:
+        # NVIDIA GPU는 있는데 CUDA 라이브러리(cuBLAS/cuDNN)가 없으면 받아쓰기 도중에 실패한다 → CPU로 다시
+        if device == "cpu" or not re.search(r"cublas|cudnn|cuda", str(e), re.I):
+            raise
+        print(f"\n      ⚠ GPU 사용 불가({e}) → CPU로 다시 받아쓰기합니다 (조금 더 느림)")
+        segments, info = run("cpu")
     print(f"\n      언어: {info.language}, 구간 {len(segments)}개")
 
     cache.write_text(json.dumps([asdict(s) for s in segments], ensure_ascii=False, indent=1), encoding="utf-8")
@@ -331,7 +343,7 @@ def process(source: str, args: argparse.Namespace) -> Path:
 
     video = download(source, out)
     width, height, duration = probe(video)
-    segments = transcribe(video, out, args.whisper_model, args.lang)
+    segments = transcribe(video, out, args.whisper_model, args.lang, args.device)
     if not segments:
         print("음성을 찾지 못했습니다.")
         return out
@@ -405,6 +417,8 @@ def main() -> None:
     p.add_argument("--max", dest="max_len", type=int, default=59, help="최대 길이(초)")
     p.add_argument("--lang", default=None, help="음성 언어 코드 (예: ko, en). 생략 시 자동 감지")
     p.add_argument("--whisper-model", default="small", help="tiny/base/small/medium/large-v3 (기본: small)")
+    p.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto",
+                   help="받아쓰기 장치 (기본: auto — GPU가 안 되면 자동으로 CPU)")
     p.add_argument("--model", default="claude-opus-5-5", help="구간 선정에 쓸 Claude 모델")
     p.add_argument("--prompt", default=None, help="구간 선정 추가 지시 (예: '웃긴 장면 위주로')")
     p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
