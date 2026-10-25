@@ -165,6 +165,16 @@ def transcribe(video: Path, workdir: Path, model_size: str, language: str | None
 
 # ---------------------------------------------------------------- 3. 구간 선정
 
+# --preset으로 고르는 구간 선정 기준 (--prompt를 직접 주면 그쪽이 우선)
+PRESETS = {
+    "story": (
+        "이 영상은 시니어가 잠들기 전 듣는 옛날이야기·민담 낭독이다. 숏폼은 새 시청자를 롱폼으로 데려오는 예고편 역할이다. "
+        "첫인사·끝인사·구독 요청 구간은 제외하고, 이야기 속에서 인물의 처지가 바뀌는 순간, 반전, 궁금증이 생기는 장면을 고른다. "
+        "구간은 사건이 시작되는 문장에서 시작하고, 결말은 다 보여주지 말고 '그래서 어떻게 됐을까' 싶은 지점에서 끝낸다. "
+        "title은 이야기 속 인물과 사건이 드러나게 짓는다 (예: '장터에서 쫓겨난 과부의 삼십 년 뒤')."
+    ),
+}
+
 SYSTEM_PROMPT = """당신은 YouTube Shorts / 릴스 / 틱톡 전문 편집자입니다.
 긴 영상의 타임스탬프 자막을 읽고, 그 자체로 완결되어 숏폼으로 올렸을 때 반응이 좋을 구간을 고릅니다.
 
@@ -451,7 +461,8 @@ def process(source: str, args: argparse.Namespace) -> Path:
         fields = Clip.__dataclass_fields__
         clips = [Clip(**{k: v for k, v in c.items() if k in fields}) for c in json.loads(clips_file.read_text(encoding="utf-8"))]
     else:
-        clips = select_clips(segments, duration, args.clips, args.min_len, args.max_len, args.model, args.prompt)
+        prompt = args.prompt or PRESETS.get(args.preset or "")
+        clips = select_clips(segments, duration, args.clips, args.min_len, args.max_len, args.model, prompt)
     clips.sort(key=lambda c: c.score, reverse=True)
     for i, c in enumerate(clips, 1):
         print(f"      #{i} [{fmt_ts(c.start)}~{fmt_ts(c.end)}, {c.end - c.start:.0f}s, {c.score}점] {c.title}")
@@ -528,6 +539,8 @@ def main() -> None:
                    help="받아쓰기 장치 (기본: auto — GPU가 안 되면 자동으로 CPU)")
     p.add_argument("--model", default="claude-opus-5-5", help="구간 선정에 쓸 Claude 모델")
     p.add_argument("--prompt", default=None, help="구간 선정 추가 지시 (예: '웃긴 장면 위주로')")
+    p.add_argument("--preset", choices=sorted(PRESETS), default=None,
+                   help="채널 유형별 구간 선정 기준 (story: 옛날이야기·민담 낭독 채널)")
     p.add_argument("--font", default="NanumGothic", help="자막 폰트 이름 (시스템에 설치된 폰트)")
     p.add_argument("--font-size", type=int, default=120, help="자막 글자 크기 (기본: 120)")
     p.add_argument("--sub-y", type=int, default=None, help="자막의 화면 아래쪽에서의 높이(px, 1920 기준)")
