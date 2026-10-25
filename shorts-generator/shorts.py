@@ -258,8 +258,14 @@ def face_center_x(video: Path, start: float, end: float, width: int) -> float:
     """구간에서 얼굴 중심 x좌표의 중앙값. 얼굴이 없으면 화면 중앙."""
     import cv2
 
-    cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    # OpenCV는 Windows에서 한글 등 비ASCII 경로의 파일을 못 여므로 XML을 Python으로 읽어 메모리에서 로드한다
+    xml = (Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml").read_text(encoding="utf-8")
+    cascade = cv2.CascadeClassifier()
+    cascade.read(cv2.FileStorage(xml, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY).getFirstTopLevelNode())
     cap = cv2.VideoCapture(str(video))
+    if cascade.empty() or not cap.isOpened():
+        print("      ⚠ 얼굴 인식을 쓸 수 없어 가운데로 크롭합니다")
+        return width / 2
     xs: list[float] = []
     t = start
     while t < end:
@@ -282,7 +288,12 @@ def crop_filter(video: Path, clip: Clip, width: int, height: int, use_face: bool
     if width / height <= OUT_W / OUT_H + 0.01:  # 이미 세로 영상
         return f"scale={OUT_W}:{OUT_H}:force_original_aspect_ratio=decrease,pad={OUT_W}:{OUT_H}:(ow-iw)/2:(oh-ih)/2"
     crop_w = int(height * OUT_W / OUT_H) // 2 * 2
-    cx = face_center_x(video, clip.start, clip.end, width) if use_face else width / 2
+    cx = width / 2
+    if use_face:
+        try:
+            cx = face_center_x(video, clip.start, clip.end, width)
+        except Exception as e:  # 얼굴 인식이 실패해도 렌더링은 계속
+            print(f"      ⚠ 얼굴 인식 실패({e}) → 가운데 크롭")
     x = int(min(max(cx - crop_w / 2, 0), width - crop_w))
     return f"crop={crop_w}:{height}:{x}:0,scale={OUT_W}:{OUT_H}"
 
