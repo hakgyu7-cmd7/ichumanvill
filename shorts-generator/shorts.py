@@ -260,8 +260,10 @@ def face_center_x(video: Path, start: float, end: float, width: int) -> float:
 
     # OpenCV는 Windows에서 한글 등 비ASCII 경로의 파일을 못 여므로 XML을 Python으로 읽어 메모리에서 로드한다
     xml = (Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml").read_text(encoding="utf-8")
+    fs = cv2.FileStorage(xml, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
     cascade = cv2.CascadeClassifier()
-    cascade.read(cv2.FileStorage(xml, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY).getFirstTopLevelNode())
+    cascade.read(fs.getFirstTopLevelNode())
+    fs.release()
     cap = cv2.VideoCapture(str(video))
     if cascade.empty() or not cap.isOpened():
         print("      ⚠ 얼굴 인식을 쓸 수 없어 가운데로 크롭합니다")
