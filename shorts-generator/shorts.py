@@ -109,12 +109,21 @@ def transcribe(video: Path, workdir: Path, model_size: str, language: str | None
         data = json.loads(cache.read_text(encoding="utf-8"))
         return [Segment(s["start"], s["end"], s["text"], [Word(**w) for w in s["words"]]) for s in data]
 
+    import numpy as np
     from faster_whisper import WhisperModel
 
     print(f"[2/5] 받아쓰기 중 (whisper {model_size}) — 영상 길이에 따라 오래 걸릴 수 있습니다")
+    # faster-whisper 내장 디코더(PyAV)는 버전 호환 문제가 잦아서 ffmpeg로 16kHz 모노 오디오를 직접 뽑아 넘긴다
+    pcm = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", str(video),
+         "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+        capture_output=True, check=True,
+    ).stdout
+    audio = np.frombuffer(pcm, np.int16).astype(np.float32) / 32768.0
+
     model = WhisperModel(model_size, device="auto", compute_type="auto")
     raw_segments, info = model.transcribe(
-        str(video), language=language, word_timestamps=True, vad_filter=True,
+        audio, language=language, word_timestamps=True, vad_filter=True,
     )
     segments: list[Segment] = []
     for s in raw_segments:
