@@ -97,6 +97,9 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 | `--font-file` | 자막 글꼴 파일 (.ttf/.otf). 설치하지 않아도 됨. 예: `fonts\BMJUA_ttf.ttf` (배달의민족 주아체) | 없음 |
 | `--sub-color` | 자막 글자 색 (RGB) | `FFE400` 노란색 |
 | `--font-size` | 자막 글자 크기 | 140 |
+| `--no-cta` | 끝부분 '전체 이야기 보러 가기' 문구와 움직이는 화살표 끄기 | (켜짐) |
+| `--cta-x` / `--cta-y` | 화살표 끝이 가리킬 위치 (1080×1920 기준). Shorts의 '관련 동영상' 링크 자리에 맞춰 조정 | 150 / 1560 |
+| `--cta-text` / `--cta-seconds` | 화살표 위 문구 / 끝에서 몇 초 동안 보일지 | 전체 이야기 보러 가기 / 6 |
 | `--sub-pos` | 자막 위치: `center` 화면 정중앙 / `bottom` 아래쪽 (Shorts 아래쪽은 제목·버튼에 가려짐) | `center` |
 | `--sub-y` | `bottom`일 때 자막 높이 (화면 아래에서 px, 1920 기준, 클수록 위로) | face 560 / fit 620 |
 | `--words-per-line` | 자막 한 번에 표시할 단어 수 | 2 |

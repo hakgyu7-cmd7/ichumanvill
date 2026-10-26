@@ -417,7 +417,8 @@ def ass_time(t: float) -> str:
 
 
 def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int,
-              font_size: int, sub_y: int, title: bool, color: str = "FFE400", center: bool = True) -> None:
+              font_size: int, sub_y: int, title: bool, color: str = "FFE400", center: bool = True,
+              cta: dict | None = None) -> None:
     words = [w for s in segments for w in s.words if w.end > clip.start and w.start < clip.end]
     lines: list[tuple[float, float, str]] = []
     for i in range(0, len(words), words_per_line):
@@ -437,6 +438,8 @@ WrapStyle: 0
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,{font},{font_size},{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 12)},3,{5 if center else 2},70,70,{0 if center else sub_y},1
 Style: Title,{font},{min(110, int(font_size * 0.8))},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 14)},3,8,60,60,300,1
+Style: Cta,{font},96,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,6,2,1,0,0,0,1
+Style: Arrow,{font},20,{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,6,0,7,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -447,7 +450,30 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     body = "".join(f"Dialogue: 0,{ass_time(s)},{ass_time(e)},Default,,0,0,0,,{clean(txt)}\n" for s, e, txt in lines)
     if title:  # fit 레이아웃: 위쪽 빈 공간에 제목 고정
         body += f"Dialogue: 0,{ass_time(0)},{ass_time(clip.end - clip.start)},Title,,0,0,0,,{clean(clip.title)}\n"
+    if cta:
+        body += cta_events(clip.end - clip.start, **cta)
     path.write_text(header + body, encoding="utf-8")
+
+
+# 아래를 가리키는 화살표 (ASS 벡터 그림, 폭 165 x 높이 225). 글꼴과 상관없이 그려진다
+ARROW = "m 48 0 l 117 0 l 117 123 l 165 123 l 82 225 l 0 123 l 48 123"
+ARROW_W, ARROW_H = 165, 225
+
+
+def cta_events(duration: float, text: str, x: int, y: int, seconds: float) -> str:
+    """끝부분에 '원본 보기' 문구와 위아래로 움직이는 화살표를 넣는다.
+    (x, y)는 화살표 끝이 가리킬 지점 = Shorts 화면에서 '관련 동영상' 링크가 뜨는 자리 (왼쪽 아래)."""
+    start = max(0.0, duration - seconds)
+    top, left = y - ARROW_H, x - ARROW_W // 2  # 화살표 그림의 왼쪽 위
+    events = f"Dialogue: 1,{ass_time(start)},{ass_time(duration)},Cta,,0,0,0,,{{\\pos({left},{top - 50})\\fad(300,0)}}{text}\n"
+    t, down, step, bounce = start, True, 0.35, 40
+    while t < duration:
+        y1, y2 = (top - bounce, top) if down else (top, top - bounce)
+        end = min(duration, t + step)
+        events += (f"Dialogue: 1,{ass_time(t)},{ass_time(end)},Arrow,,0,0,0,,"
+                   f"{{\\move({left},{y1},{left},{y2})\\p1}}{ARROW}{{\\p0}}\n")
+        t, down = end, not down
+    return events
 
 
 def render(video: Path, clip: Clip, vf: str, out: Path, ass: Path | None, fontsdir: str | None = None) -> None:
@@ -528,7 +554,9 @@ def process(source: str, args: argparse.Namespace) -> Path:
                 ass = out / f"{name}.ass"
                 write_ass(ass, c, segments, font, args.words_per_line, args.font_size, sub_y,
                           title=args.layout == "fit" and not args.no_title, color=args.sub_color,
-                          center=args.sub_pos == "center")
+                          center=args.sub_pos == "center",
+                          cta=None if args.no_cta else {"text": args.cta_text, "x": args.cta_x,
+                                                        "y": args.cta_y, "seconds": args.cta_seconds})
             vf = crop_filter(video, c, width, height, args.layout, detect)
             mp4 = out / f"{name}.mp4"
             render(video, c, vf, mp4, ass, fontsdir)
@@ -594,6 +622,11 @@ def main() -> None:
     p.add_argument("--font-file", default=None, help="자막 글꼴 파일 (.ttf/.otf). 예: fonts/BMJUA_ttf.ttf")
     p.add_argument("--font-size", type=int, default=140, help="자막 글자 크기 (기본: 140)")
     p.add_argument("--sub-color", default="FFE400", help="자막 글자 색 RGB (기본: FFE400 노란색, 흰색은 FFFFFF)")
+    p.add_argument("--no-cta", action="store_true", help="끝부분 '원본 보기' 화살표 넣지 않기")
+    p.add_argument("--cta-text", default="전체 이야기 보러 가기", help="화살표 위 문구")
+    p.add_argument("--cta-x", type=int, default=150, help="화살표 끝 x 위치 (1080 기준, 관련 동영상 링크 자리)")
+    p.add_argument("--cta-y", type=int, default=1560, help="화살표 끝 y 위치 (1920 기준, 클수록 아래)")
+    p.add_argument("--cta-seconds", type=float, default=6, help="끝에서 몇 초 동안 화살표를 보일지 (기본: 6)")
     p.add_argument("--sub-pos", choices=["center", "bottom"], default="center",
                    help="자막 위치 (기본: center — 화면 정중앙. Shorts 아래쪽은 제목·버튼에 가려짐)")
     p.add_argument("--sub-y", type=int, default=None, help="--sub-pos bottom일 때 화면 아래쪽에서의 높이(px, 1920 기준)")
