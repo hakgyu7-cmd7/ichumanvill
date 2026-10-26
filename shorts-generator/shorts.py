@@ -171,7 +171,9 @@ PRESETS = {
         "이 영상은 시니어가 잠들기 전 듣는 옛날이야기·민담 낭독이다. 숏폼은 새 시청자를 롱폼으로 데려오는 예고편 역할이다. "
         "첫인사·끝인사·구독 요청 구간은 제외하고, 이야기 속에서 인물의 처지가 바뀌는 순간, 반전, 궁금증이 생기는 장면을 고른다. "
         "구간은 사건이 시작되는 문장에서 시작하고, 결말은 다 보여주지 말고 '그래서 어떻게 됐을까' 싶은 지점에서 끝낸다. "
-        "title은 이야기 속 인물과 사건이 드러나게 짓는다 (예: '장터에서 쫓겨난 과부의 삼십 년 뒤')."
+        "title은 이야기 속 인물과 사건이 드러나게 짓는다 (예: '장터에서 쫓겨난 과부의 삼십 년 뒤'). "
+        "hook은 처음 보는 사람이 넘기지 않게 만드는 한마디다: 인물의 처지와 반전을 대비시키거나 "
+        "('쫓겨난 과부가 웃은 이유'), 질문을 던지거나 ('곳간 열쇠, 누가 내줬을까?'), 결과만 살짝 예고한다."
     ),
 }
 
@@ -185,7 +187,8 @@ SYSTEM_PROMPT = """당신은 YouTube Shorts / 릴스 / 틱톡 전문 편집자�
 - 인사, 광고, 구독 요청, 잡담 구간은 제외
 - 구간끼리 겹치지 않음
 
-title은 숏폼 제목으로 바로 쓸 수 있게 짧고 궁금증을 유발하도록, 영상과 같은 언어로 작성하세요."""
+title은 숏폼 제목으로 바로 쓸 수 있게 짧고 궁금증을 유발하도록, 영상과 같은 언어로 작성하세요.
+hook은 숏폼만을 위한 첫 3초 화면 문구입니다. 스크롤을 멈추게 하는 한마디로, 질문·반전 예고·강한 대비를 쓰고 결말은 말하지 마세요."""
 
 
 def select_clips(segments: list[Segment], duration: float, n: int, min_len: int, max_len: int,
@@ -212,7 +215,7 @@ def select_clips(segments: list[Segment], duration: float, n: int, min_len: int,
                         "start": {"type": "number"},
                         "end": {"type": "number"},
                         "title": {"type": "string"},
-                        "hook": {"type": "string", "description": "첫 문장 / 훅 요약"},
+                        "hook": {"type": "string", "description": "숏폼 첫 3초 동안 화면에 크게 띄울 훅 문구. 8~18자, 제목과 다른 말로, 결말은 숨기고 궁금하게 (예: '이 여인, 삼십 년 뒤 돌아옵니다')"},
                         "reason": {"type": "string", "description": "이 구간을 고른 이유"},
                         "score": {"type": "integer"},
                         "hashtags": {"type": "array", "items": {"type": "string"}},
@@ -352,6 +355,16 @@ def track_faces(video: Path, start: float, end: float, width: int, detect) -> li
     return result or [(0.0, width / 2)]
 
 
+def blur_box_filter(box: str, width: int, height: int) -> str:
+    """원본 영상에 이미 들어 있는 자막 영역을 흐리게 하는 필터 (box = 'x,y,w,h', 화면 비율 0~1)."""
+    x, y, w, h = (float(v) for v in box.split(","))
+    bx, by = int(width * x) // 2 * 2, int(height * y) // 2 * 2
+    bw, bh = int(width * w) // 2 * 2, int(height * h) // 2 * 2
+    bw, bh = min(bw, width - bx), min(bh, height - by)
+    return (f"split[src][box];[box]crop={bw}:{bh}:{bx}:{by},boxblur=24:3,eq=brightness=-0.05[blr];"
+            f"[src][blr]overlay={bx}:{by},")
+
+
 def crop_filter(video: Path, clip: Clip, width: int, height: int, layout: str, detect=None) -> str:
     if width / height <= OUT_W / OUT_H + 0.01:  # 이미 세로 영상
         return f"scale={OUT_W}:{OUT_H}:force_original_aspect_ratio=decrease,pad={OUT_W}:{OUT_H}:(ow-iw)/2:(oh-ih)/2"
@@ -418,7 +431,7 @@ def ass_time(t: float) -> str:
 
 def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int,
               font_size: int, sub_y: int, title: bool, color: str = "FFE400", center: bool = True,
-              cta: dict | None = None) -> None:
+              cta: dict | None = None, hook_seconds: float = 0) -> None:
     words = [w for s in segments for w in s.words if w.end > clip.start and w.start < clip.end]
     lines: list[tuple[float, float, str]] = []
     for i in range(0, len(words), words_per_line):
@@ -438,6 +451,7 @@ WrapStyle: 0
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,{font},{font_size},{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 12)},3,{5 if center else 2},70,70,{0 if center else sub_y},1
 Style: Title,{font},{min(110, int(font_size * 0.8))},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 14)},3,8,60,60,300,1
+Style: Hook,{font},{min(130, font_size)},&H00FFFFFF,&H0000FFFF,&H002E3AB0,&H002E3AB0,-1,0,0,0,100,100,0,0,3,18,0,8,60,60,330,1
 Style: Cta,{font},96,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,6,2,1,0,0,0,1
 Style: Arrow,{font},20,{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,6,0,7,0,0,0,1
 
@@ -448,8 +462,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         return txt.replace("{", "(").replace("}", ")")
 
     body = "".join(f"Dialogue: 0,{ass_time(s)},{ass_time(e)},Default,,0,0,0,,{clean(txt)}\n" for s, e, txt in lines)
-    if title:  # fit 레이아웃: 위쪽 빈 공간에 제목 고정
-        body += f"Dialogue: 0,{ass_time(0)},{ass_time(clip.end - clip.start)},Title,,0,0,0,,{clean(clip.title)}\n"
+    hook_end = min(hook_seconds, clip.end - clip.start) if hook_seconds and clip.hook.strip() else 0
+    if hook_end:  # 숏폼 전용 훅: 처음 몇 초 동안 위쪽에 크게, 톡 튀어나오듯
+        pop = "{\\fscx55\\fscy55\\t(0,160,\\fscx110\\fscy110)\\t(160,280,\\fscx100\\fscy100)}"
+        body += f"Dialogue: 2,{ass_time(0)},{ass_time(hook_end)},Hook,,0,0,0,,{pop}{clean(clip.hook.strip())}\n"
+    if title:  # fit 레이아웃: 위쪽 빈 공간에 제목 고정 (훅이 있으면 훅이 끝난 뒤부터)
+        body += f"Dialogue: 0,{ass_time(hook_end)},{ass_time(clip.end - clip.start)},Title,,0,0,0,,{{\\fad(250,0)}}{clean(clip.title)}\n"
     if cta:
         body += cta_events(clip.end - clip.start, **cta)
     path.write_text(header + body, encoding="utf-8")
@@ -556,8 +574,11 @@ def process(source: str, args: argparse.Namespace) -> Path:
                           title=args.layout == "fit" and not args.no_title, color=args.sub_color,
                           center=args.sub_pos == "center",
                           cta=None if args.no_cta else {"text": args.cta_text, "x": args.cta_x,
-                                                        "y": args.cta_y, "seconds": args.cta_seconds})
+                                                        "y": args.cta_y, "seconds": args.cta_seconds},
+                          hook_seconds=0 if args.no_hook else args.hook_seconds)
             vf = crop_filter(video, c, width, height, args.layout, detect)
+            if not args.no_src_blur:
+                vf = blur_box_filter(args.src_sub_box, width, height) + vf
             mp4 = out / f"{name}.mp4"
             render(video, c, vf, mp4, ass, fontsdir)
             print(f"      ✓ {mp4}")
@@ -622,6 +643,11 @@ def main() -> None:
     p.add_argument("--font-file", default=None, help="자막 글꼴 파일 (.ttf/.otf). 예: fonts/BMJUA_ttf.ttf")
     p.add_argument("--font-size", type=int, default=140, help="자막 글자 크기 (기본: 140)")
     p.add_argument("--sub-color", default="FFE400", help="자막 글자 색 RGB (기본: FFE400 노란색, 흰색은 FFFFFF)")
+    p.add_argument("--hook-seconds", type=float, default=3, help="처음 몇 초 동안 숏폼 전용 훅 문구를 띄울지 (기본: 3)")
+    p.add_argument("--no-hook", action="store_true", help="숏폼 전용 훅 문구 넣지 않기")
+    p.add_argument("--src-sub-box", default="0.06,0.80,0.88,0.18",
+                   help="원본에 박힌 자막 영역 x,y,너비,높이 (화면 비율 0~1, 기본: 아래쪽 띠)")
+    p.add_argument("--no-src-blur", action="store_true", help="원본 자막 영역 흐리게 하지 않기")
     p.add_argument("--no-cta", action="store_true", help="끝부분 '원본 보기' 화살표 넣지 않기")
     p.add_argument("--cta-text", default="전체 이야기 보러 가기", help="화살표 위 문구")
     p.add_argument("--cta-x", type=int, default=150, help="화살표 끝 x 위치 (1080 기준, 관련 동영상 링크 자리)")
