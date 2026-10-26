@@ -417,7 +417,7 @@ def ass_time(t: float) -> str:
 
 
 def write_ass(path: Path, clip: Clip, segments: list[Segment], font: str, words_per_line: int,
-              font_size: int, sub_y: int, title: bool, color: str = "FFE400") -> None:
+              font_size: int, sub_y: int, title: bool, color: str = "FFE400", center: bool = True) -> None:
     words = [w for s in segments for w in s.words if w.end > clip.start and w.start < clip.end]
     lines: list[tuple[float, float, str]] = []
     for i in range(0, len(words), words_per_line):
@@ -435,7 +435,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font},{font_size},{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 12)},3,2,50,50,{sub_y},1
+Style: Default,{font},{font_size},{ass_color(color)},&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 12)},3,{5 if center else 2},70,70,{0 if center else sub_y},1
 Style: Title,{font},{min(110, int(font_size * 0.8))},&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(5, font_size // 14)},3,8,60,60,300,1
 
 [Events]
@@ -527,7 +527,8 @@ def process(source: str, args: argparse.Namespace) -> Path:
             if not args.no_subs:
                 ass = out / f"{name}.ass"
                 write_ass(ass, c, segments, font, args.words_per_line, args.font_size, sub_y,
-                          title=args.layout == "fit" and not args.no_title, color=args.sub_color)
+                          title=args.layout == "fit" and not args.no_title, color=args.sub_color,
+                          center=args.sub_pos == "center")
             vf = crop_filter(video, c, width, height, args.layout, detect)
             mp4 = out / f"{name}.mp4"
             render(video, c, vf, mp4, ass, fontsdir)
@@ -593,7 +594,9 @@ def main() -> None:
     p.add_argument("--font-file", default=None, help="자막 글꼴 파일 (.ttf/.otf). 예: fonts/BMJUA_ttf.ttf")
     p.add_argument("--font-size", type=int, default=140, help="자막 글자 크기 (기본: 140)")
     p.add_argument("--sub-color", default="FFE400", help="자막 글자 색 RGB (기본: FFE400 노란색, 흰색은 FFFFFF)")
-    p.add_argument("--sub-y", type=int, default=None, help="자막의 화면 아래쪽에서의 높이(px, 1920 기준)")
+    p.add_argument("--sub-pos", choices=["center", "bottom"], default="center",
+                   help="자막 위치 (기본: center — 화면 정중앙. Shorts 아래쪽은 제목·버튼에 가려짐)")
+    p.add_argument("--sub-y", type=int, default=None, help="--sub-pos bottom일 때 화면 아래쪽에서의 높이(px, 1920 기준)")
     p.add_argument("--words-per-line", type=int, default=2, help="자막 한 번에 표시할 단어 수")
     p.add_argument("--no-subs", action="store_true", help="자막 입히지 않기")
     p.add_argument("--layout", choices=["face", "center", "fit"], default="face",

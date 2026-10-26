@@ -97,7 +97,8 @@ python upload.py output/내영상 --privacy public   # 2) 확인 후 업로드
 | `--font-file` | 자막 글꼴 파일 (.ttf/.otf). 설치하지 않아도 됨. 예: `fonts\BMJUA_ttf.ttf` (배달의민족 주아체) | 없음 |
 | `--sub-color` | 자막 글자 색 (RGB) | `FFE400` 노란색 |
 | `--font-size` | 자막 글자 크기 | 140 |
-| `--sub-y` | 자막 높이 (화면 아래에서 px, 1920 기준, 클수록 위로) | face 560 / fit 620 |
+| `--sub-pos` | 자막 위치: `center` 화면 정중앙 / `bottom` 아래쪽 (Shorts 아래쪽은 제목·버튼에 가려짐) | `center` |
+| `--sub-y` | `bottom`일 때 자막 높이 (화면 아래에서 px, 1920 기준, 클수록 위로) | face 560 / fit 620 |
 | `--words-per-line` | 자막 한 번에 표시할 단어 수 | 2 |
 | `--no-subs` | 자막 없이 출력 | |
 | `--layout` | `face`: 장면마다 인물 따라 크롭 / `fit`: 원본 전체 + 흐린 배경 + 상단 제목 / `center`: 가운데 크롭 | `face` |
