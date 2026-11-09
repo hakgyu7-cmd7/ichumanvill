@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+projects/*
+!projects/.gitkeep
+assets/*.ttf
+assets/*.otf
+assets/*.ttc

@@ -1,0 +1,177 @@
+네, 요청하신 규격에 맞춰 작성했습니다.
+
+```json
+{
+ "analysis": {
+  "hook_technique": "\"우산을 써도 다리가 젖는다\"는 100% 공감 가능한 사소한 불편으로 1초 만에 시선 확보",
+  "retention_psychology": "해결 장치를 하나 더할 때마다 새 문제가 생기는 점진적 과장(Escalation)을 극도로 진지한 톤으로 전개",
+  "skeleton": "[사소한 불편] → [과도한 공학 장치 1] → [파생 문제 해결 장치 2] → [거대 기계 완성] → [원래 문제로 회귀하는 허무한 반전]"
+ },
+ "plan": {
+  "titles": [
+   "라면 물 550ml 칼같이 맞추려다 공장을 지어버린 사람",
+   "라면 물 조절 실패하는 사람들을 위한 최종 병기",
+   "물 1방울 오차도 용납 못 하는 이과생의 라면 끓이기"
+  ],
+  "description": "라면 끓일 때마다 한강물 만들던 분들 주목하세요. 오차 0.01ml 이하의 유체역학 라면 조리 시스템입니다.",
+  "hashtags": [
+   "#라면물조절",
+   "#병맛",
+   "#공학시뮬레이션",
+   "#피규어",
+   "#디오라마",
+   "#shorts"
+  ]
+ },
+ "top_title": "라면 물 조절 실패하는 사람 필독",
+ "subject_anchor": "a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama",
+ "scenes": [
+  {
+   "id": 1,
+   "beats": [
+    "[0.0~2.5s] 라면 끓일 때마다 물 맞추기 실패한다면",
+    "[2.5~5.0s] 눈대중 대신 냄비 위에",
+    "[5.0~7.5s] 정밀 유량 조절기를 달면 됩니다."
+   ],
+   "frame1": "medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter --no text --ar 9:16",
+   "frame2": "low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim",
+   "cuts": [
+    {
+     "type": "Medium Close-up",
+     "prompt": "Rapid push-in zoom toward the plastic figure's disappointed deadpan face above the flooded pot"
+    },
+    {
+     "type": "Low-angle Tilt",
+     "prompt": "A mechanical steel clamp snaps securely onto the pot rim with brass valves gleaming under a spotlight, micro-camera shake on impact"
+    },
+    {
+     "type": "Tracking Side Profile",
+     "prompt": "A single water droplet drips slowly through a clear glass chamber, sharp freeze at 7.5s"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "beats": [
+    "[0.0~2.5s] 그런데 수압 오차까지 없애려고",
+    "[2.5~5.0s] 항공기용 유압 펌프를 붙였더니",
+    "[5.0~7.5s] 무게 때문에 싱크대가 주저앉았죠."
+   ],
+   "frame1": "medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections --no text --ar 9:16",
+   "frame2": "Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight",
+   "cuts": [
+    {
+     "type": "Tracking Medium Shot",
+     "prompt": "Fast tracking shot along high-pressure hydraulic pipes pulsing with subtle mechanical vibration"
+    },
+    {
+     "type": "Dutch Angle Wide",
+     "prompt": "The miniature counter buckles with a sharp downward tilt, plaster dust falling, dynamic camera shake on impact"
+    },
+    {
+     "type": "Whip-pan Upward",
+     "prompt": "Fast whip-pan upward to the PVC figure standing rigidly with hands on hips, head tilted in disbelief, freeze at 7.5s"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "beats": [
+    "[0.0~2.5s] 붕괴를 막으려 바닥에 철골 기둥을 세우고",
+    "[2.5~5.0s] 증발량 계산용 레이저 센서를",
+    "[5.0~7.5s] 천장 위에도 따로 설치했습니다."
+   ],
+   "frame1": "low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below --no text --ar 9:16",
+   "frame2": "medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface",
+   "cuts": [
+    {
+     "type": "Low-angle Tilt",
+     "prompt": "Smooth upward tilt tracking the heavy red steel support beams holding the sagging structure"
+    },
+    {
+     "type": "Ceiling Angle",
+     "prompt": "A sleek laser sensor rotates smoothly, firing an intricate grid pattern downward into the pot"
+    },
+    {
+     "type": "Whip-pan Downward",
+     "prompt": "Snappy whip-pan downward to the boiling water surface illuminated in green laser light, crisp freeze at 7.5s"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "beats": [
+    "[0.0~2.5s] 기화된 수분은 초저온 냉각 돔으로",
+    "[2.5~5.0s] 0.1ml 단위까지 회수했더니",
+    "[5.0~7.5s] 오차율 0%, 550ml가 완성됐죠."
+   ],
+   "frame1": "medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling --no text --ar 9:16",
+   "frame2": "medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting",
+   "cuts": [
+    {
+     "type": "Dramatic Rush Down",
+     "prompt": "Dramatic camera rush down as the glass condensation dome clamps tightly over the boiling steam"
+    },
+    {
+     "type": "Macro Chamber",
+     "prompt": "A single droplet falls in ultra-slow motion with water ripple physics, glowing softly"
+    },
+    {
+     "type": "Snap Whip-pan",
+     "prompt": "Snappy whip-pan to an automated mechanical valve hissing open, releasing a burst of cooling mist, sharp freeze at 7.5s"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "beats": [
+    "[0.0~2.5s] 문제는 기계에서 나오는 열기 때문에 방 안 온도가",
+    "[2.5~5.0s] 순식간에 사우나 수준인 60도까지",
+    "[5.0~7.5s] 올라간다는 겁니다."
+   ],
+   "frame1": "eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura --no text --ar 9:16",
+   "frame2": "close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama",
+   "cuts": [
+    {
+     "type": "Slow Pull-back",
+     "prompt": "Cinematic slow pull-back revealing the ridiculously oversized industrial piping filling the tiny apartment kitchen"
+    },
+    {
+     "type": "Dutch Tilt Close-up",
+     "prompt": "Heat haze ripples across the camera lens, the plastic figure stands dazed in exhaustion"
+    },
+    {
+     "type": "Whip-pan Downward",
+     "prompt": "Fast whip-pan downward to chopsticks drooping under the intense heat, sharp snap freeze at 7.5s"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "beats": [
+    "[0.0~2.5s] 결국 땀 뻘뻘 흘리며 뚜껑을 열었더니",
+    "[2.5~5.0s] 스프 넣는 걸 깜빡했더라고요.",
+    "[5.0~7.5s] 그러니까 그냥 눈대중으로 드세요."
+   ],
+   "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth --no text --ar 9:16",
+   "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",
+   "cuts": [
+    {
+     "type": "Tracking Forward",
+     "prompt": "Camera tracks forward into the pot showing completely pale, clear broth without seasoning"
+    },
+    {
+     "type": "Close-up Hold",
+     "prompt": "The unopened seasoning packet glints under the lamp while the figure stares deadpan directly into the lens"
+    },
+    {
+     "type": "Push-in Fourth Wall",
+     "prompt": "Snappy push-in zoom toward the figure's unblinking eyes breaking the fourth wall, sudden hard blackout transition at 7.5s"
+    }
+   ]
+  }
+ ]
+}
+```
+
+추가로 수정이 필요하면 말씀해 주세요.

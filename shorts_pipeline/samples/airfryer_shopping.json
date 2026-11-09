@@ -1,0 +1,227 @@
+{
+  "version": 3,
+  "meta": {
+    "topic": "에어프라이어 실리콘 원형 디바이더 팟 (쿠팡 트렌드 꿀템)",
+    "top_title": "아직도 종이호일 태우세요?",
+    "category": "shopping",
+    "category2": "",
+    "format": "",
+    "style": "diorama",
+    "language": "ko",
+    "source_url": "",
+    "source_script": ""
+  },
+  "options": {
+    "zero_text": true,
+    "safe_margin": true
+  },
+  "subject_anchor": "a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron",
+  "analysis": {
+    "hook_technique": "",
+    "retention_psychology": "",
+    "skeleton": ""
+  },
+  "plan": {
+    "titles": [
+      "아직도 에어프라이어 청소 30분씩 하세요? 인생 꿀템 발견!",
+      "종이호일 태우던 사람들이 갈아탄 이유",
+      "설거지 3초 컷 에어프라이어 팟"
+    ],
+    "description": "종이호일 매번 태우고 기름때 벗기느라 스트레스 받으셨던 분들 주목! 내열 실리콘 팟 하나로 설거지 3초 컷.",
+    "hashtags": [
+      "#에어프라이어",
+      "#주방꿀템",
+      "#살림꿀팁",
+      "#쿠팡추천템",
+      "#shorts"
+    ]
+  },
+  "scenes": [
+    {
+      "id": 1,
+      "beats": [
+        "아직도 에어프라이어에 종이호일 깔고",
+        "타서 눌어붙은 기름때 닦느라",
+        "손목 다 나가고 계신가요?"
+      ],
+      "frame1": "medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting",
+      "frame2": "low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer",
+      "cuts": [
+        {
+          "type": "Medium Close-up",
+          "prompt": "Rapid push-in zoom toward the smoking burnt foil and sticky residue"
+        },
+        {
+          "type": "Low-angle Dutch Tilt",
+          "prompt": "Snap cut to the cook looking up at the greasy basket, micro-camera shake"
+        },
+        {
+          "type": "Whip-pan Pull-back",
+          "prompt": "Snappy whip-pan pull-back revealing the whole smoky messy countertop"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "beats": [
+        "기름때는 안 지워지고 코팅은 다 벗겨져서",
+        "비싼 기계 통째로 버릴 뻔한 적",
+        "다들 한 번쯤 있으시죠?"
+      ],
+      "frame1": "top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface",
+      "frame2": "45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting",
+      "cuts": [
+        {
+          "type": "Top-down POV",
+          "prompt": "Fast tracking over the flaking coating as the metal sponge scrapes across it"
+        },
+        {
+          "type": "45-degree Over-the-shoulder",
+          "prompt": "Hard cut to the scratched basket with dust particles floating in the harsh side light"
+        },
+        {
+          "type": "Slow Pull-back",
+          "prompt": "Slow zoom-out revealing the cluttered messy kitchen counter with grease stains"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "beats": [
+        "이제 이거 하나만 넣으세요!",
+        "내열 250도 플래티넘 실리콘 팟",
+        "에어프라이어 전용 분할 디바이더예요."
+      ],
+      "frame1": "front hero shot of the pastel sage-green silicone pot dropping gracefully into the center of the clean air fryer basket, studio spotlight",
+      "frame2": "medium close-up of the grooved wave bottom ridges of the silicone pot with wide negative space around it",
+      "cuts": [
+        {
+          "type": "Front Center Hero",
+          "prompt": "Smooth push-in as the pot lands softly in the middle of the frame with a gentle bounce"
+        },
+        {
+          "type": "Orbiting View",
+          "prompt": "Hard cut to a circular camera orbit around the pot showcasing its grooved bottom ridges"
+        },
+        {
+          "type": "Macro Texture Pull-back",
+          "prompt": "Snap focus on the flexible soft silicone bending smoothly without deformation, then fast pull-back"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "beats": [
+        "가운데 칸막이로 고기와 감자튀김을",
+        "냄새 섞임 없이 동시에 조리하고",
+        "기름은 웨이브 바닥으로 쏙 빠집니다."
+      ],
+      "frame1": "high-angle shot showing the center divider separating sizzling crispy pork belly on one side and golden french fries on the other",
+      "frame2": "medium close-up of hot golden oil draining cleanly down the radial wave grooves away from the food",
+      "cuts": [
+        {
+          "type": "Split-focus Top Angle",
+          "prompt": "Slow tracking glide across both sides of the divider as the food sizzles"
+        },
+        {
+          "type": "Slow-motion Liquid Cut",
+          "prompt": "Hard cut to slow-motion golden oil draining down the wave grooves with fluid ripples"
+        },
+        {
+          "type": "Eye-level Sizzle",
+          "prompt": "Snappy whip-pan to an eye-level shot of delicate steam rising from the golden cooked meal"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "beats": [
+        "다 먹고 뒤집어서 물로 깨끗이 헹구면",
+        "기름이 미끄러지듯 떨어져서",
+        "설거지 3초 컷으로 끝납니다."
+      ],
+      "frame1": "medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface",
+      "frame2": "medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off",
+      "cuts": [
+        {
+          "type": "Dynamic Action Angle",
+          "prompt": "Fast tracking as the hands flip the pot inside-out with a springy snap"
+        },
+        {
+          "type": "High-speed Water Splash",
+          "prompt": "Hard cut to a high-speed water stream splashing across the surface, oil sliding off in one second"
+        },
+        {
+          "type": "Sparkle Clean Hero",
+          "prompt": "Snappy whip-pan to the sparkling clean pot drying on a wooden miniature rack with a gleam effect"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "beats": [
+        "오늘만 반값 특가 진행 중이니",
+        "놓치면 재고 소진이에요.",
+        "제품 정보는 하단 쇼핑 태그와 고정 댓글 확인!"
+      ],
+      "frame1": "wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area",
+      "frame2": "medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area",
+      "cuts": [
+        {
+          "type": "Commercial Hero Display",
+          "prompt": "Smooth push-in on the stacked colorful pots with a shimmering clean kitchen background"
+        },
+        {
+          "type": "Pointer Gesture Cut",
+          "prompt": "Hard cut to the wooden arrow bouncing and pointing downward with a playful motion"
+        },
+        {
+          "type": "Final Lockup",
+          "prompt": "Snappy whip-pan pull-back to a centered wide beauty shot of the whole product set, then hard blackout"
+        }
+      ]
+    }
+  ],
+  "render": {
+    "crop_scale": 1.06,
+    "fit": "cover",
+    "sub_size": 52,
+    "sub_chars_per_line": 18
+  },
+  "metadata": {
+    "ko": {
+      "youtube": {
+        "title": "아직도 에어프라이어 청소 30분씩 하세요? 인생 꿀템 발견!",
+        "caption": "종이호일 매번 태우고 기름때 벗기느라 스트레스 받으셨던 분들 주목! 내열 실리콘 팟 하나로 설거지 3초 컷 끝냈습니다.\n\n#에어프라이어 #주방꿀템 #살림꿀팁 #쿠팡추천템 #생활용품 #shorts",
+        "pinned": "🔥 영상 속 분할 실리콘 팟 구매 링크는 [하단 쇼핑 태그] 및 아래 첫 댓글 공식 링크에서 단독 할인 중입니다! 👇"
+      },
+      "instagram": {
+        "title": "살림 9단만 안다는 에어프라이어 청소 종결템 🍳",
+        "caption": "종이호일의 위험함과 기름때 지옥에서 벗어나세요! 뒤집어서 물만 뿌리면 설거지 완료 ✨\n\n📌 프로필 링크에서 '에어프라이어 팟' 검색!\n#살림스타그램 #주방스타그램 #자취꿀템 #살림팁 #리뷰스타그램",
+        "pinned": "🛍️ 구매 정보: 프로필 상단 링크트리 클릭 후 '1번 실리콘 팟' 확인해 주세요!"
+      },
+      "tiktok": {
+        "title": "이거 쓰고 삶의 질 수직상승함 ㅋㅋㅋ 3초 세척 실화냐?",
+        "caption": "기름때 안 닦여서 고생했던 과거 안녕.. 🖐️ 분할 조리까지 쌉가능 #주방꿀템 #자취생필수템 #추천 #fyp #살림팁",
+        "pinned": "좌측 하단 [노란색 장바구니] 누르시면 오늘 마감 특가로 바로 확인 가능합니다! 🛒"
+      }
+    },
+    "en": {
+      "youtube": {
+        "title": "Stop Ruining Your Air Fryer! This 3-Second Hack Changes Everything",
+        "caption": "Tired of burning parchment paper and scrubbing non-stick residue? Meet the ultimate dual-chamber silicone air fryer divider.\n\n#airfryer #kitchenhacks #amazonfinds #cleantok #kitchengadgets #shorts",
+        "pinned": "🛒 Product link available in the YouTube Shopping Tag below and the pinned link with an exclusive discount! 👇"
+      },
+      "instagram": {
+        "title": "The Ultimate Kitchen Hack for Air Fryer Lovers ✨",
+        "caption": "Dual cooking zones, zero mess, 100% food-grade platinum silicone. Cleans in seconds!\n\nLink in bio to shop now. #kitchenorganization #cleaningmotivation #homefinds",
+        "pinned": "Tap the link in bio to shop this viral silicone pot! 🍳"
+      },
+      "tiktok": {
+        "title": "My air fryer has never been cleaner!! Viral TikTok kitchen find",
+        "caption": "Separates oil automatically and cleans in 3 seconds flat. Check the yellow cart! #tiktokmademebuyit #kitchenfinds #lifehack #foryou",
+        "pinned": "Grab yours now via the yellow basket at bottom left! ⬇️"
+      }
+    }
+  }
+}

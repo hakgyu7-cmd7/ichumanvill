@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Shorts Pipeline Studio</title>
+<style>
+:root{--bg:#0a0d14;--panel:#111622;--card:#161c2c;--card2:#1b2236;--line:#232c42;--line2:#2f3b59;--tx:#e2e8f0;--mut:#94a3b8;--dim:#64748b;
+ --g:#22c55e;--g2:#4ade80;--cy:#22d3ee;--pu:#a855f7;--am:#facc15;--rd:#f87171;--or:#fb923c}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 Pretendard,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#26334d;border-radius:9px}
+.mono{font-family:"Fira Code",Consolas,monospace}
+/* header */
+header.top{position:sticky;top:0;z-index:40;background:rgba(10,13,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 20px}
+.hrow{max-width:1800px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo i{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--g),var(--cy));display:grid;place-items:center;font-style:normal;font-size:20px;color:#000}
+.logo b{font-size:16px}.logo small{display:block;color:var(--mut);font-size:11px}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;border:1px solid var(--line2);color:var(--mut)}
+.badge.g{color:var(--g2);border-color:#14532d;background:#052e16}.badge.a{color:var(--am);border-color:#713f12;background:#2a1f05}
+.badge.r{color:var(--rd);border-color:#7f1d1d;background:#2c0f0f}.badge.c{color:var(--cy);border-color:#155e75;background:#08222b}.badge.p{color:#d8b4fe;border-color:#581c87;background:#1e0f33}
+.metrics{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px 6px;margin-left:auto}
+.metric{padding:2px 12px;text-align:center;border-right:1px solid var(--line)}.metric:last-child{border:0}
+.metric small{display:block;font-size:10px;color:var(--dim);text-transform:uppercase}.metric b{font-size:14px}
+.hbtns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line2);background:#1a2236;border-radius:9px;padding:6px 12px;font-size:12px;font-weight:600;transition:.15s}
+.btn:hover{background:#243050}.btn.pri{background:linear-gradient(90deg,var(--g),var(--g2));color:#031;border:0}.btn.pri:hover{filter:brightness(1.1)}
+.btn.cy{background:#0b3a4a;border-color:#155e75;color:#a5f3fc}.btn.pu{background:#2a1450;border-color:#581c87;color:#e9d5ff}
+.btn.sm{padding:3px 9px;font-size:11px;border-radius:7px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--dim);margin-right:6px}.dot.on{background:var(--g);box-shadow:0 0 8px var(--g)}
+/* stepper */
+nav.steps{position:sticky;top:61px;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 20px}
+.srow{max-width:1800px;margin:0 auto;display:flex;gap:6px;overflow-x:auto}
+.step{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:11px;background:var(--panel);border:1px solid var(--line);text-align:left}
+.step:hover{border-color:var(--line2)}
+.step .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:var(--card2);color:var(--mut);flex:none}
+.step b{display:block;font-size:13px;line-height:1.2}.step small{color:var(--dim);font-size:11px}
+.step.act{border-color:var(--g);background:#0b1f17}.step.act .n{background:var(--g);color:#031}
+.step.ok .n{background:#14532d;color:var(--g2)}.step.warn .n{background:#713f12;color:var(--am)}
+/* layout */
+main{max-width:1800px;margin:0 auto;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media(max-width:1100px){main{grid-template-columns:1fr}.metrics{margin-left:0}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.card h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3 .sp{flex:1}
+.hint{color:var(--mut);font-size:12px;margin:2px 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+label.f{display:block;font-size:12px;font-weight:600;color:#cbd5e1;margin:8px 0 4px}
+input[type=text],input[type=password],input[type=number],select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13px}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--g)}
+textarea{resize:vertical;line-height:1.55}
+textarea.mono,input.mono{font-size:12px}
+input[type=checkbox]{accent-color:var(--g);width:15px;height:15px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row.sp{justify-content:space-between}
+.sub{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.note{border-left:3px solid var(--cy);background:#08222b;border-radius:0 8px 8px 0;padding:8px 12px;font-size:12px;color:#bae6fd;margin:8px 0}
+.note.w{border-color:var(--am);background:#2a1f05;color:#fde68a}.note.e{border-color:var(--rd);background:#2c0f0f;color:#fecaca}.note.g{border-color:var(--g);background:#052e16;color:#bbf7d0}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;border:1px solid var(--line2);background:var(--card);font-size:12px;cursor:pointer;user-select:none}
+.chip.on{border-color:var(--g);background:#0b2a1a;color:var(--g2)}
+/* trend items */
+.titem{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:6px}
+.titem:hover{border-color:var(--line2)}.titem .t{flex:1;min-width:0}.titem .t b{display:block;font-weight:600;font-size:13px}.titem .t small{color:var(--dim)}
+table.tb{width:100%;border-collapse:collapse;font-size:12px}table.tb th{color:var(--dim);text-align:left;font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}table.tb td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+/* scene cards */
+.scene{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px 14px}
+.scene.cur{border-color:var(--g);box-shadow:0 0 0 1px #14532d}
+.scene>summary{list-style:none;cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.scene>summary::-webkit-details-marker{display:none}
+.sn{width:30px;height:30px;border-radius:9px;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--g2)}
+.beat{display:grid;grid-template-columns:78px 1fr 44px;gap:8px;align-items:center;margin-top:6px}.beat small{color:var(--cy);font-size:11px}.beat .c{text-align:right;font-size:11px;color:var(--dim)}
+.final{background:#0b1020;border:1px dashed var(--line2);border-radius:10px;padding:8px 10px;font-size:11.5px;color:#cbd5e1;white-space:pre-wrap;word-break:break-word;max-height:170px;overflow:auto}
+.cutbox{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:8px}
+.bar{height:8px;background:var(--card2);border-radius:9px;overflow:hidden;position:relative}.bar>i{display:block;height:100%;background:var(--g);transition:.2s}
+.bar .zone{position:absolute;top:0;bottom:0;background:rgba(34,197,94,.22);border-left:1px solid var(--g);border-right:1px solid var(--g)}
+.iss{font-size:12px;padding:4px 0;display:flex;gap:6px}.iss.error{color:#fca5a5}.iss.warn{color:#fde68a}.iss.ok{color:#86efac}
+.pre{background:#0b1020;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:11.5px;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;padding:3px 0}
+.chk .m{width:18px;text-align:center}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:10px 0}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 12px;font-size:12px;font-weight:600;color:var(--mut)}
+.tabs button.on{color:var(--g2);border-color:var(--g)}
+.progress{height:12px;background:var(--card2);border-radius:99px;overflow:hidden}.progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--cy));width:0;transition:.3s}
+.drop{border:2px dashed var(--line2);border-radius:12px;padding:12px;text-align:center;color:var(--mut);font-size:12px;background:var(--card)}
+.drop.hot{border-color:var(--g);color:var(--g2);background:#0b2a1a}
+/* preview */
+.sticky{position:sticky;top:132px}
+.phone{width:270px;margin:6px auto 0;border:4px solid #334155;border-radius:26px;overflow:hidden;background:#000;box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.cv{position:relative;width:100%;aspect-ratio:9/16;background:#000;overflow:hidden;font-size:11px}
+.cv .tb{position:absolute;left:0;right:0;top:0;height:12.5%;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px}
+.cv .tb span{color:#ffe500;font-weight:900;font-size:15px;line-height:1.2;text-shadow:0 0 2px #000,0 0 2px #000;white-space:pre-line}
+.cv .vd{position:absolute;left:0;right:0;top:12.5%;height:66.667%;background:radial-gradient(circle at 50% 40%,#1f2d4d,#0b1224);overflow:hidden}
+.cv .vd .ic{position:absolute;inset:0;display:grid;place-items:center;font-size:54px;opacity:.9}
+.cv .vd .ct{position:absolute;left:5px;top:5px;font-size:9px;background:#08222bcc;color:#a5f3fc;border:1px solid #155e75;border-radius:5px;padding:1px 5px;max-width:92%}
+.cv .vd .sf{position:absolute;border:2px solid rgba(74,222,128,.7);border-radius:5px;pointer-events:none;display:flex;align-items:flex-start;justify-content:center}
+.cv .vd .sf.bad{border-color:rgba(251,146,60,.9)}.cv .vd .sf span{font-size:8px;background:#052e16cc;color:#86efac;padding:0 4px;border-radius:3px}
+.cv .vd .pil{position:absolute;top:0;bottom:0;background:#000}
+.cv .bt{position:absolute;left:0;right:0;bottom:0;height:20.833%;display:grid;place-items:center;color:#475569;font-size:9px;text-align:center;border-top:1px dashed #334155}
+.cv .sb{position:absolute;left:0;right:0;bottom:21.875%;display:flex;flex-direction:column;align-items:center;transform:translateY(0)}
+.cv .sb span{background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:12.5px;padding:1px 6px;line-height:1.35;margin-top:-1px}
+.cv .g-off .sf,.cv.noguide .sf,.cv.noguide .bt{display:none}
+.scrub{width:270px;margin:8px auto 0}
+.scrub input[type=range]{width:100%;accent-color:var(--g)}
+.toast{position:fixed;right:20px;bottom:20px;z-index:99;display:flex;flex-direction:column;gap:8px}
+.toast div{background:#052e16;border:1px solid var(--g);color:#bbf7d0;padding:9px 14px;border-radius:11px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:in .2s}
+.toast div.w{background:#2a1f05;border-color:var(--am);color:#fde68a}.toast div.e{background:#2c0f0f;border-color:var(--rd);color:#fecaca}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+details.acc>summary{cursor:pointer;color:var(--cy);font-size:12px;font-weight:600;margin:6px 0}
+.hide{display:none!important}
+a{color:var(--cy)}
+</style>
+</head>
+<body>
+<header class="top"><div class="hrow">
+  <div class="logo"><i>⚡</i><div><b>AI Shorts Pipeline Studio <span class="badge g mono">v3.0</span></b><small>1.2x · 45초 · 6씬 · 방법 B(18컷) · Zero-Text · 1.06x 크롭</small></div></div>
+  <div class="metrics">
+    <div class="metric"><small>대본 분량</small><b id="m-chars" class="mono">0</b></div>
+    <div class="metric"><small>예상 러닝타임</small><b id="m-run" class="mono">0.0초</b></div>
+    <div class="metric"><small>Zero-Text</small><b id="m-zero" class="mono">-</b></div>
+    <div class="metric"><small>쇼핑 CTA</small><b id="m-cta" class="mono">-</b></div>
+    <div class="metric"><small>클립</small><b id="m-clips" class="mono">-</b></div>
+  </div>
+  <div class="hbtns">
+    <span class="badge" id="srv-badge"><span class="dot" id="srv-dot"></span><span id="srv-txt">서버 확인 중</span></span>
+    <select id="sample-sel" class="btn" style="width:auto" title="샘플 불러오기"><option value="">샘플…</option></select>
+    <button class="btn" data-act="newProject">새 프로젝트</button>
+    <button class="btn" data-act="importJson">불러오기</button>
+    <button class="btn" data-act="exportJson">내보내기</button>
+    <button class="btn" data-act="saveServer" id="btn-save-srv" title="서버 projects/ 폴더에 저장">서버 저장</button>
+    <input type="file" id="file-in" accept=".json" class="hide">
+  </div>
+</div></header>
+
+<nav class="steps"><div class="srow" id="stepper"></div></nav>
+
+<main>
+  <div class="col" id="content"></div>
+  <aside class="col sticky" id="side">
+    <section class="card">
+      <h3>📱 최종 화면 미리보기 <span class="sp"></span><button class="btn sm" data-act="toggleGuide">가이드</button></h3>
+      <div class="hint" id="pv-info"></div>
+      <div class="phone"><div class="cv" id="cv">
+        <div class="tb"><span id="pv-title"></span></div>
+        <div class="vd" id="pv-vd"><div class="ic" id="pv-ic"></div><div class="ct" id="pv-ct"></div><div class="sf" id="pv-sf"></div></div>
+        <div class="bt">하단 400px · 쇼츠/릴스/틱톡<br>앱 UI 보호존 (검정 바)</div>
+        <div class="sb" id="pv-sb"></div>
+      </div></div>
+      <div class="scrub">
+        <div class="row sp"><span class="mono" id="pv-time" style="font-size:11px">0.0s / 45.0s</span><span class="row"><button class="btn sm" data-act="pvPlay" id="pv-play">▶ 재생</button></span></div>
+        <input type="range" id="pv-range" min="0" max="44.9" step="0.1" value="0">
+        <div class="row" id="pv-scenes" style="margin-top:6px;gap:4px"></div>
+      </div>
+    </section>
+    <section class="card"><h3>✅ 프로젝트 점검 <span class="sp"></span><span id="iss-count" class="badge"></span></h3><div id="issues"></div></section>
+  </aside>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="pipeline_core.js"></script>
+<script>
+'use strict';
+/* =====================================================================================
+   AI Shorts Pipeline Studio v3 - 영상 제작 순서(소재 → 대본 → 이미지·영상 → 음성 → 합성 → 메타데이터)
+   규칙/템플릿은 config.js(=config.json) + pipeline_core.js(=prompt_engine.py 와 동일 로직) 에서만 가져온다.
+   ===================================================================================== */
+const CFG = window.PIPELINE_CONFIG, SEED = window.PIPELINE_SEED, SAMPLES = window.PIPELINE_SAMPLES, Core = window.PipelineCore;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const p2 = (n) => String(n).padStart(2, '0');
+const LS = 'shorts_pipeline_v3';
+const STEPS = [
+  { id: 'source', label: '소재 발굴', sub: '트렌드 · 떡상 · 벤치마킹', icon: '🔎' },
+  { id: 'script', label: '기획 · 대본', sub: '프롬프트 → Claude → 6씬', icon: '✍️' },
+  { id: 'visual', label: '이미지 · 영상', sub: 'Google Flow / Omni 1.2', icon: '🎬' },
+  { id: 'audio', label: '음성', sub: 'TTS · 1.2배속 · 무음 제거', icon: '🎙️' },
+  { id: 'render', label: '합성', sub: '레터박스 · 자막 · 렌더', icon: '🎞️' },
+  { id: 'meta', label: '메타데이터', sub: '3대 플랫폼 · 4개국어', icon: '🌐' }
+];
+const ICONS = ['🔥', '💥', '🔧', '⚡', '🔄', '🛒'];
+const SHOP_PIN = {
+  ko: { youtube: '🔥 영상 속 상품은 [하단 쇼핑 태그]와 이 고정 댓글 링크에서 확인하세요! 👇', instagram: '🛍️ 구매 정보: 프로필 링크에서 확인해 주세요!', tiktok: '좌측 하단 [노란색 장바구니]를 눌러 확인하세요! 🛒' },
+  en: { youtube: '🛒 Find the product via the shopping tag below and the pinned link! 👇', instagram: '🛍️ Tap the link in bio to shop!', tiktok: '🛒 Tap the yellow cart at the bottom left!' },
+  ja: { youtube: '🛒 動画内の商品は画面下のショッピングタグと固定コメントのリンクから！👇', instagram: '🛍️ プロフィールのリンクからチェック！', tiktok: '🛒 左下の黄色いカートからチェック！' },
+  zh: { youtube: '🛒 點擊下方購物標籤或置頂留言連結查看商品！👇', instagram: '🛍️ 點擊主頁連結查看商品！', tiktok: '🛒 點擊左下角黃色購物車查看！' }
+};
+
+let P;                       // 현재 프로젝트
+const S = {                  // UI/세션 상태 (프로젝트 파일에는 저장하지 않음)
+  tab: 'source', server: null, files: null, status: null, trends: null, outliers: null, trendSrc: { coupang: true, tiktok: true, reddit: true },
+  redditCat: 'history', manual: [], busy: {}, metaLang: 'ko', metaPlat: 'youtube', metaLangs: { ko: true, en: false, ja: false, zh: false },
+  pvScene: 0, pvT: 0, pvTimer: null, guides: true, job: null, ytKey: '', claudeReply: '', metaReply: '', ttsMode: 'beats', openScenes: { 0: true }
+};
+
+/* ------------------------------------------------------------------ utils */
+function toast(msg, kind) {
+  const d = document.createElement('div'); d.textContent = msg; if (kind) d.className = kind;
+  $('#toast').appendChild(d); setTimeout(() => d.remove(), kind === 'e' ? 6000 : 2600);
+}
+function copyText(text, msg) {
+  const done = () => toast(msg || '클립보드에 복사했습니다.');
+  const fallback = () => { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select();
+    try { document.execCommand('copy') ? done() : toast('복사 실패 - 직접 선택해 복사하세요', 'w'); } catch (e) { toast('복사 실패', 'w'); } t.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+}
+function getPath(o, path) { return path.split('.').reduce((a, k) => (a == null ? a : a[k]), o); }
+function setPath(o, path, v) { const ks = path.split('.'); let a = o; for (let i = 0; i < ks.length - 1; i++) a = a[ks[i]]; a[ks[ks.length - 1]] = v; }
+async function api(path, opts) {
+  if (S.server === false) throw new Error('서버가 꺼져 있습니다. python server.py 로 실행하세요.');
+  const r = await fetch(path, opts);
+  let j = null; try { j = await r.json(); } catch (e) { /* ignore */ }
+  if (!r.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+  return j;
+}
+const post = (path, body) => api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+function download(name, text, type) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type || 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+const lang = () => CFG.languages[P.meta.language];
+const style = () => CFG.styles[P.meta.style];
+const unitTxt = () => (lang().unit === 'words' ? '단어' : '자');
+const issues = () => Core.validateProject(CFG, P);
+let saveT = null;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify({ project: P, ytKey: S.ytKey, metaLangs: S.metaLangs })); } catch (e) { /* 저장 불가 환경 */ } }, 300); }
+function setProject(p) { P = Core.normalizeProject(p, CFG); S.pvScene = 0; S.pvT = 0; save(); renderAll(); }
+
+/* ------------------------------------------------------------------ header / stepper / side */
+function counts() {
+  const t = Core.totalUnits(P, CFG);
+  const cl = S.files ? Object.values(S.files.clips).filter(Boolean).length : P.scenes.filter((s) => s.done && s.done.clip).length;
+  return { total: t, clips: cl };
+}
+function stepStatus(id) {
+  const is = issues(); const total = Core.totalUnits(P, CFG);
+  const err = (codes) => is.some((i) => i.level === 'error' && codes.includes(i.code));
+  if (id === 'source') return P.meta.topic.trim() ? 'ok' : 'todo';
+  if (id === 'script') { if (!total) return 'todo'; return err(['total_chars', 'beats', 'cta', 'scene_count']) ? 'warn' : 'ok'; }
+  if (id === 'visual') {
+    const filled = P.scenes.every((s) => s.frame1.trim() && s.frame2.trim() && s.cuts.every((c) => c.prompt.trim()));
+    if (!P.scenes.some((s) => s.frame1.trim() || s.cuts[0].prompt.trim())) return 'todo';
+    return filled && !err(['zero_text_cjk', 'prompt_missing']) ? 'ok' : 'warn';
+  }
+  if (id === 'audio') return S.files && S.files.voice ? 'ok' : (S.files ? 'todo' : 'todo');
+  if (id === 'render') return (S.files && S.files.final) || (S.job && S.job.state === 'done') ? 'ok' : 'todo';
+  if (id === 'meta') { const m = P.metadata.ko && P.metadata.ko.youtube; return m && m.title ? 'ok' : 'todo'; }
+  return 'todo';
+}
+function renderStepper() {
+  $('#stepper').innerHTML = STEPS.map((s, i) => {
+    const st = stepStatus(s.id);
+    return `<button class="step ${S.tab === s.id ? 'act' : ''} ${st}" data-act="tab" data-id="${s.id}"><span class="n">${st === 'ok' ? '✓' : st === 'warn' ? '!' : i + 1}</span><span><b>${s.icon} ${s.label}</b><small>${s.sub}</small></span></button>`;
+  }).join('');
+}
+function renderMetrics() {
+  const c = counts(), L = lang(), is = issues();
+  const el = $('#m-chars'); el.textContent = c.total + unitTxt() + ' / ' + L.min + '~' + L.max;
+  el.style.color = !c.total ? 'var(--mut)' : (c.total >= L.min && c.total <= L.max ? 'var(--g2)' : 'var(--rd)');
+  const run = lang().unit === 'words' ? c.total / (L.max / 45) : c.total / 7.5;
+  $('#m-run').textContent = (c.total ? run.toFixed(1) : '0.0') + '초 (목표 45)';
+  $('#m-zero').textContent = P.options.zero_text ? '적용' : '해제'; $('#m-zero').style.color = P.options.zero_text ? 'var(--g2)' : 'var(--mut)';
+  const shop = Core.isShopping(P, CFG), cta = $('#m-cta');
+  if (!shop) { cta.textContent = '해당 없음'; cta.style.color = 'var(--mut)'; }
+  else if (is.some((i) => i.code === 'cta' && i.level === 'error')) { cta.textContent = '누락!'; cta.style.color = 'var(--rd)'; }
+  else { cta.textContent = '주입 완료'; cta.style.color = 'var(--am)'; }
+  $('#m-clips').textContent = c.clips + '/6'; $('#m-clips').style.color = c.clips === 6 ? 'var(--g2)' : 'var(--mut)';
+}
+function renderIssues() {
+  const is = issues(); const e = is.filter((i) => i.level === 'error').length, w = is.filter((i) => i.level === 'warn').length;
+  $('#iss-count').className = 'badge ' + (e ? 'r' : w ? 'a' : 'g'); $('#iss-count').textContent = e ? `오류 ${e} · 경고 ${w}` : w ? `경고 ${w}` : '이상 없음';
+  const icon = { error: '⛔', warn: '⚠️', ok: '✅' };
+  $('#issues').innerHTML = is.length ? is.map((i) => `<div class="iss ${i.level}"><span>${icon[i.level]}</span><span>${esc(i.msg)}</span></div>`).join('') : '<div class="hint">검사할 내용이 없습니다.</div>';
+}
+function refreshDerived() { renderMetrics(); renderStepper(); renderIssues(); renderPreview(); const f = LIVE[S.tab]; if (f) f(); save(); }
+
+/* ------------------------------------------------------------------ preview (최종 1080x1920 구성 그대로) */
+function geometry() {
+  const z = Number(P.render.crop_scale) || 1, VH = CFG.layout.video_h / CFG.layout.width;           // 1280/1080
+  const srcAspect = 9 / 16;                                                                       // 원본 클립 가정: 9:16
+  if (P.render.fit === 'contain') return { fit: 'contain', visW: 1 / z, visH: 1 / z };
+  const visH = (VH * srcAspect) / z, visW = 1 / z;                                                 // 원본 대비 노출 비율
+  return { fit: 'cover', visW, visH };
+}
+function renderPreview() {
+  const T = S.pvT, sc = Math.min(5, Math.floor(T / 7.5)), within = T - sc * 7.5, beat = Math.min(2, Math.floor(within / 2.5));
+  S.pvScene = sc;
+  const scene = P.scenes[sc], st = style(), g = geometry();
+  const title = (P.meta.top_title || '').trim();
+  $('#pv-title').textContent = title ? wrapPv(title, CFG.layout.title_chars_per_line) : '(상단 타이틀)';
+  $('#pv-ic').textContent = ICONS[sc]; $('#pv-ic').style.filter = 'none';
+  const cut = scene.cuts[beat];
+  $('#pv-ct').textContent = `Scene ${p2(sc + 1)} · Cut ${beat + 1} (${(beat * 2.5).toFixed(1)}~${((beat + 1) * 2.5).toFixed(1)}s)` + (cut && cut.type ? ' · ' + cut.type : '');
+  const txt = (scene.beats[beat] || '').trim();
+  $('#pv-sb').innerHTML = txt ? wrapPv(txt, Math.round(P.render.sub_chars_per_line * (P.meta.language === 'en' ? 1.9 : 1))).split('\n').map((l) => `<span>${esc(l)}</span>`).join('') : '';
+  $('#pv-time').textContent = T.toFixed(1) + 's / 45.0s'; $('#pv-range').value = T;
+  const vd = $('#pv-vd'); $$('.pil', vd).forEach((n) => n.remove());
+  const sf = $('#pv-sf'), cvEl = $('#cv');
+  cvEl.classList.toggle('noguide', !S.guides);
+  if (g.fit === 'contain') {
+    const side = (1 - 720 / 1080) / 2 * 100;
+    [0, 1].forEach((k) => { const d = document.createElement('div'); d.className = 'pil'; d.style.cssText = `${k ? 'right' : 'left'}:0;width:${side}%`; vd.appendChild(d); });
+    sf.style.display = 'none';
+  } else {
+    sf.style.display = '';
+    const sw = CFG.spec.safe_zone_pct / 100;
+    let w = sw / g.visW * 100, h = sw / g.visH * 100; const bad = h > 100 || w > 100; w = Math.min(w, 100); h = Math.min(h, 100);
+    sf.style.cssText = `left:${(100 - w) / 2}%;top:${(100 - h) / 2}%;width:${w}%;height:${h}%`; sf.classList.toggle('bad', bad);
+    sf.title = bad ? '안전구역(원본 중앙 70%) - 세로 일부가 크롭됩니다' : '안전구역 (원본 중앙 70%)';
+    S.safeBad = bad;
+  }
+  $('#pv-info').innerHTML = g.fit === 'cover'
+    ? `1080×1920 합성 결과 그대로. 크롭 후 원본에서 보이는 영역: 가로 <b>${(g.visW * 100).toFixed(1)}%</b> · 세로 <b>${(g.visH * 100).toFixed(1)}%</b> (9:16 원본 기준). 박스 = 피사체 안전구역(원본 중앙 70%)${S.safeBad ? ' - <span style="color:var(--or)">주황: 세로 일부가 크롭되니 피사체를 더 중앙에</span>' : ''}`
+    : '원본 비율 유지(contain) 모드: 좌우에 검은 기둥이 생깁니다.';
+  $$('#pv-scenes button').forEach((b, i) => b.classList.toggle('pri', i === sc));
+}
+function wrapPv(text, width) {
+  text = text.split(/\s+/).join(' '); if (text.length <= width) return text;
+  const lines = []; let cur = '';
+  text.split(' ').forEach((tok) => {
+    while (tok.length > width) { if (cur) { lines.push(cur); cur = ''; } lines.push(tok.slice(0, width)); tok = tok.slice(width); }
+    if (!cur) cur = tok; else if (cur.length + 1 + tok.length <= width) cur += ' ' + tok; else { lines.push(cur); cur = tok; }
+  });
+  if (cur) lines.push(cur); return lines.join('\n');
+}
+function initPreview() {
+  $('#pv-scenes').innerHTML = [0, 1, 2, 3, 4, 5].map((i) => `<button class="btn sm" data-act="pvScene" data-i="${i}">${i + 1}</button>`).join('');
+  $('#pv-range').addEventListener('input', (e) => { S.pvT = parseFloat(e.target.value); renderPreview(); });
+}
+
+/* ------------------------------------------------------------------ tab: 1 소재 발굴 */
+function trendItems() {
+  const seedItems = (SEED.items || []).map((i) => ({ ...i, live: false, sample: true }));
+  const base = S.trends ? S.trends.items : seedItems.filter((i) => ['쿠팡', '틱톡'].includes(i.platform) ? true : i.cat === S.redditCat);
+  return base.concat(S.manual);
+}
+function tabSource() {
+  const items = trendItems(), st = S.trends ? S.trends.status : null;
+  const links = (S.trends ? S.trends.manual_links : SEED.manual_links) || [];
+  const catOpts = Object.entries(CFG.categories).map(([k, c]) => `<option value="${k}" ${S.redditCat === k ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  return `
+  <section class="card"><h3>① 트렌드 소재 수집 <span class="sp"></span><span class="badge ${S.server ? 'g' : 'a'}">${S.server ? '서버 연결됨' : '오프라인: 샘플 표시'}</span></h3>
+    <div class="hint">쿠팡 베스트 · 틱톡 · 레딧에서 소재를 모읍니다. <b>실제로 수집에 성공한 것만 LIVE</b>로 표시하고, 실패/차단 시 샘플로 대체하면서 사유를 알려줍니다.</div>
+    <div class="row">
+      ${['coupang:쿠팡 베스트', 'tiktok:틱톡 급상승', 'reddit:레딧 토픽'].map((x) => { const [k, n] = x.split(':'); return `<label class="chip ${S.trendSrc[k] ? 'on' : ''}"><input type="checkbox" data-src="${k}" ${S.trendSrc[k] ? 'checked' : ''} class="hide">${n}</label>`; }).join('')}
+      <select id="reddit-cat" style="width:auto" title="레딧 토픽 카테고리">${catOpts}</select>
+      <button class="btn pri" data-act="fetchTrends" ${S.busy.trends ? 'disabled' : ''}>${S.busy.trends ? '수집 중…' : '수집 / 새로고침'}</button>
+    </div>
+    ${st ? '<div class="sub">' + Object.entries(st).map(([k, v]) => `<div class="iss ${v.live ? 'ok' : 'warn'}"><span>${v.live ? '🟢' : '🟡'}</span><span><b>${k}</b> (${v.count}건) - ${esc(v.note)}</span></div>`).join('') + '</div>' : ''}
+    <div class="sub" id="trend-list">${items.length ? items.map((it, i) => `
+      <div class="titem"><span class="badge ${it.live ? 'g' : 'a'}">${it.live ? 'LIVE' : '샘플'}</span>
+        <div class="t"><b>${esc(it.title)}</b><small>${esc(it.platform)}${it.score ? ' · 점수 ' + it.score : ''}${it.cat && CFG.categories[it.cat] ? ' · ' + esc(CFG.categories[it.cat].name) : ''}${it.url ? ` · <a href="${esc(it.url)}" target="_blank" rel="noopener">원문</a>` : ''}</small></div>
+        <button class="btn sm pri" data-act="pickTopic" data-i="${i}">소재로 선택</button></div>`).join('') : '<div class="hint">항목이 없습니다.</div>'}</div>
+    <div class="sub"><label class="f">직접 추가 (한 줄에 하나, 쿠팡/틱톡에서 직접 확인한 상품명·키워드를 붙여넣기 - 가장 안정적인 방법)</label>
+      <div class="row"><textarea id="manual-add" rows="2" placeholder="예) 접이식 캠핑 회전 의자&#10;예) 원터치 진공 밀폐용기"></textarea><button class="btn" data-act="addManual">추가</button></div></div>
+    <details class="acc"><summary>수동 탐색 링크 & 가이드</summary>
+      ${links.map((l) => `<div class="iss"><span>🔗</span><span><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a> - ${esc(l.tip)}</span></div>`).join('')}
+    </details>
+  </section>
+
+  <section class="card"><h3>② 떡상(V/S 배율) 영상 탐색 <span class="sp"></span><span class="badge c">YouTube Data API v3</span></h3>
+    <div class="hint">구독자 수 대비 조회수가 폭발한 영상(= 기획력으로 터진 영상)만 골라냅니다. <b>V/S 배율 = 조회수 ÷ 구독자수</b> — 1 미만 제외 · 5배 이상 1차 후보 · <b>10배 이상 추천</b>.</div>
+    <div class="grid4">
+      <div><label class="f">검색 키워드 (영문 권장)</label><input type="text" id="ol-q" placeholder="kitchen gadget / science simulation" value="${esc(S.olQ || '')}"></div>
+      <div><label class="f">기간</label><select id="ol-days"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option></select></div>
+      <div><label class="f">최소 V/S 배율</label><select id="ol-ratio"><option value="5">5배 이상</option><option value="10" selected>10배 이상</option><option value="20">20배 이상</option></select></div>
+      <div><label class="f">지역 (선택)</label><select id="ol-region"><option value="">전체</option><option value="US">미국</option><option value="KR">한국</option><option value="JP">일본</option><option value="TW">대만</option></select></div>
+    </div>
+    <div class="row" style="margin-top:8px"><input type="password" id="ol-key" placeholder="YouTube API 키 (서버에 YOUTUBE_API_KEY 환경변수가 있으면 비워도 됨)" value="${esc(S.ytKey)}" style="flex:1;min-width:220px">
+      <button class="btn pri" data-act="searchOutliers" ${S.busy.ol ? 'disabled' : ''}>${S.busy.ol ? '탐색 중…' : '떡상 영상 탐색'}</button></div>
+    <div class="hint">API 키는 이 브라우저에만 저장됩니다. 호출 1회 ≈ 102 쿼터(무료 일 10,000). 키 발급: Google Cloud Console → YouTube Data API v3.</div>
+    <div id="ol-res">${outlierTable()}</div>
+    <div class="sub"><b style="font-size:12px">V/S 계산기 (직접 확인한 영상용)</b>
+      <div class="row" style="margin-top:6px"><input type="number" id="vs-v" placeholder="조회수" style="width:140px"><span>÷</span><input type="number" id="vs-s" placeholder="구독자수" style="width:140px"><b id="vs-out" class="mono">-</b></div></div>
+  </section>
+
+  <section class="card"><h3>③ 벤치마킹 소스 (대본 역설계) <span class="sp"></span><button class="btn sm pri" data-act="tab" data-id="script">다음: 기획·대본 →</button></h3>
+    <div class="hint">원본 영상의 대본을 가져오면 마스터 프롬프트가 <b>후킹 기법 · 시청 유지 심리 · 반전 구조의 뼈대만 역설계</b>해서 새 소재로 재구성합니다(내용 복제 X). 비워 두면 카테고리 뼈대로 처음부터 설계합니다.</div>
+    <div class="row"><input type="text" data-bind="meta.source_url" data-live value="${esc(P.meta.source_url)}" placeholder="https://www.youtube.com/shorts/…" style="flex:1;min-width:240px">
+      <button class="btn cy" data-act="fetchTranscript" ${S.busy.tr ? 'disabled' : ''}>${S.busy.tr ? '추출 중…' : '자막/대본 자동 추출'}</button></div>
+    <label class="f">원본 대본 텍스트 <span id="src-cnt" class="badge">${P.meta.source_script.length}자</span> <span class="hint">자동 추출이 안 되면 유튜브 설명 더보기 → 스크립트 표시 → 복사 후 직접 붙여넣기</span></label>
+    <textarea data-bind="meta.source_script" data-live rows="6" placeholder="원본 영상의 자막/대본을 붙여넣으세요 (선택)">${esc(P.meta.source_script)}</textarea>
+    <div class="note">현재 소재: <b>${esc(P.meta.topic || '(미선택)')}</b> — 위 목록에서 [소재로 선택]하거나 다음 단계에서 직접 입력하세요. 유튜브 링크가 자막을 못 읽는 환경이면(API 제한 등) 자막 텍스트 2~3줄만 붙여도 분석 정확도가 충분합니다.</div>
+  </section>`;
+}
+function outlierTable() {
+  if (!S.outliers) return '';
+  if (!S.outliers.length) return '<div class="note w">조건에 맞는 영상이 없습니다. 기간을 늘리거나 최소 배율을 낮춰 보세요.</div>';
+  const gb = { viral: 'g', good: 'c', ok: '', normal: '' };
+  return `<table class="tb" style="margin-top:10px"><tr><th>V/S</th><th>제목 / 채널</th><th>조회수 / 구독자</th><th></th></tr>${S.outliers.map((o, i) => `<tr>
+    <td><span class="badge ${gb[o.grade] || ''} mono">${o.ratio}x</span></td><td><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a><br><small style="color:var(--dim)">${esc(o.channel)}</small></td>
+    <td class="mono">${o.views.toLocaleString()} / ${o.subscribers.toLocaleString()}</td><td><button class="btn sm pri" data-act="pickOutlier" data-i="${i}">벤치마킹으로 선택</button></td></tr>`).join('')}</table>`;
+}
+
+/* ------------------------------------------------------------------ tab: 2 기획 · 대본 */
+function tabScript() {
+  const catOpt = (sel, withNone) => (withNone ? `<option value="" ${!sel ? 'selected' : ''}>없음 (단일 모드)</option>` : '') +
+    Object.entries(CFG.categories).map(([k, c]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${c.shopping ? '🛒 ' : ''}${esc(c.name)}</option>`).join('');
+  const styleOpt = Object.entries(CFG.styles).sort((a, b) => a[1].number - b[1].number).map(([k, s]) => `<option value="${k}" ${P.meta.style === k ? 'selected' : ''}>${s.number}. ${esc(s.name)}${s.default ? ' (기본 권장)' : ''}</option>`).join('');
+  const fmtOpt = '<option value="">없음</option>' + Object.entries(CFG.formats).map(([k, f]) => `<option value="${k}" ${P.meta.format === k ? 'selected' : ''}>${esc(f.name)}</option>`).join('');
+  const langOpt = Object.entries(CFG.languages).map(([k, l]) => `<option value="${k}" ${P.meta.language === k ? 'selected' : ''}>${l.name} (${k})</option>`).join('');
+  const m = Core.recommendedModel(CFG, P, 'script');
+  return `
+  <section class="card"><h3>① 기획 설정</h3>
+    <div class="grid2"><div><label class="f">타깃 소재 / 상품명</label><input type="text" data-bind="meta.topic" data-live value="${esc(P.meta.topic)}" placeholder="예) 에어프라이어 실리콘 분할 팟"></div>
+      <div><label class="f">상단 노란 타이틀 배너 문구 <span class="hint">(15자 내외 후킹 · 합성 단계에서 영상 위에 입혀짐)</span></label><input type="text" data-bind="meta.top_title" data-live value="${esc(P.meta.top_title)}" style="color:var(--am);font-weight:700"></div></div>
+    <div class="grid3">
+      <div><label class="f">1차 카테고리 (훅 & 문제)</label><select data-bind="meta.category" data-re>${catOpt(P.meta.category, false)}</select></div>
+      <div><label class="f">2차 카테고리 (반전 & 결말) <span class="hint">선택 시 합성</span></label><select data-bind="meta.category2" data-re>${catOpt(P.meta.category2, true)}</select></div>
+      <div><label class="f">트렌드 포맷 (선택)</label><select data-bind="meta.format" data-re>${fmtOpt}</select></div>
+    </div>
+    <div class="note">${esc(CFG.categories[P.meta.category].flow)}<br><span style="opacity:.8">심리 트리거: ${esc(CFG.categories[P.meta.category].psychology)} · 소재 공급처: ${esc(CFG.categories[P.meta.category].sourcing)}</span></div>
+    <div class="grid3">
+      <div><label class="f">영상 화풍 (전 씬 100% 고정)</label><select data-bind="meta.style" data-re>${styleOpt}</select><div class="hint" style="margin-top:4px">${style().icon} ${esc(style().desc)} · 추천: ${esc(style().recommended)}</div></div>
+      <div><label class="f">발화 언어</label><select data-bind="meta.language" data-re>${langOpt}</select><div class="hint" style="margin-top:4px">${esc(lang().length_rule)}</div></div>
+      <div><label class="f">주인공/제품 외형 앵커 (영문, 선택)</label><input type="text" data-bind="subject_anchor" data-live value="${esc(P.subject_anchor)}" placeholder="a 30-year-old Korean man in a dusty grey hoodie"><div class="hint" style="margin-top:4px">Claude가 JSON 으로 채워주기도 합니다. 전 씬 프레임에 자동 삽입.</div></div>
+    </div>
+    <div class="row sub"><label class="row"><input type="checkbox" data-check="options.zero_text" data-re ${P.options.zero_text ? 'checked' : ''}> Zero-Text 네거티브 접미사 자동 삽입</label>
+      <label class="row"><input type="checkbox" data-check="options.safe_margin" data-re ${P.options.safe_margin ? 'checked' : ''}> 워터마크 크롭 안전 마진(중앙 70% · 여백 15%) 문구 삽입</label>
+      <span class="badge ${Core.isShopping(P, CFG) ? 'a' : ''}">${Core.isShopping(P, CFG) ? '🛒 쇼핑 카테고리 → Scene 06 제휴 CTA 강제' : '쇼핑 CTA 해당 없음'}</span></div>
+  </section>
+
+  <section class="card"><h3>② 마스터 프롬프트 → Claude <span class="sp"></span><span class="badge p">권장 모델: ${esc(m.name)}</span></h3>
+    <div class="hint">${esc(m.use)}. 아래 프롬프트를 복사해 Claude(웹/앱)에 붙여넣으면 <b>6씬 × 3비트 대본 + Frame1/Frame2 + 3컷 프롬프트</b>가 JSON 으로 나옵니다. 화풍 앵커·안전 마진·--no 접미사는 대시보드가 자동 합성하므로 Claude는 순수 묘사만 씁니다.</div>
+    <div class="row" style="margin-bottom:8px"><button class="btn pri" data-act="copyMaster">📋 마스터 프롬프트 복사</button>
+      <button class="btn pu ${S.status && S.status.claude_cli ? '' : 'hide'}" data-act="runClaude" ${S.busy.claude ? 'disabled' : ''}>${S.busy.claude ? '실행 중…(최대 10분)' : '⚡ 이 PC의 Claude CLI로 바로 실행 (실험)'}</button>
+      <span class="hint" id="master-len"></span></div>
+    <textarea id="master-box" class="mono" rows="9" readonly></textarea>
+  </section>
+
+  <section class="card"><h3>③ Claude 응답 붙여넣기 → 씬 가져오기</h3>
+    <textarea id="claude-reply" class="mono" rows="5" placeholder="Claude 가 출력한 json 코드블록 응답 전체를 붙여넣으세요 (앞뒤 설명 문장이 있어도 됩니다)">${esc(S.claudeReply)}</textarea>
+    <div class="row" style="margin-top:8px"><button class="btn pri" data-act="importReply">씬 가져오기 (6씬 · 프롬프트 · 분석 · 제목 후보)</button><button class="btn" data-act="injectCta">Scene 06 CTA 자동 삽입</button></div>
+    ${analysisBlock()}
+  </section>
+
+  <section class="card"><h3>④ 대본 편집 (6씬 × 3비트) <span class="sp"></span><span class="badge" id="tot-badge"></span></h3>
+    <div class="hint">비트 = 2.5초 호흡 단위(자막 한 번에 표시). 글자수는 <b>${esc(lang().length_rule)}</b></div>
+    <div class="bar" id="tot-bar" style="margin:6px 0 12px"></div>
+    <div class="col" style="gap:10px">${P.scenes.map((sc, i) => `
+      <div class="scene ${i === S.pvScene ? 'cur' : ''}"><div class="row sp"><div class="row"><span class="sn">${p2(i + 1)}</span><b>${esc(CFG.scene_roles[i].role)}</b><span class="badge c mono">${CFG.scene_roles[i].time}</span></div>
+        <div class="row"><span class="badge mono" id="cnt-s${i}"></span><button class="btn sm" data-act="pvJump" data-i="${i}">👁️ 미리보기</button></div></div>
+        ${[0, 1, 2].map((j) => `<div class="beat"><small>${['0.0~2.5s', '2.5~5.0s', '5.0~7.5s'][j]}</small><input type="text" data-bind="scenes.${i}.beats.${j}" data-live value="${esc(sc.beats[j])}"><span class="c mono" id="cnt-b${i}-${j}"></span></div>`).join('')}
+      </div>`).join('')}</div>
+  </section>`;
+}
+function analysisBlock() {
+  const a = P.analysis, pl = P.plan;
+  if (!(a.hook_technique || a.skeleton || (pl.titles && pl.titles.length))) return '';
+  return `<div class="sub"><div class="grid3">
+    <div><label class="f">후킹 기법</label><div class="pre">${esc(a.hook_technique)}</div></div>
+    <div><label class="f">시청 유지 심리</label><div class="pre">${esc(a.retention_psychology)}</div></div>
+    <div><label class="f">차용한 핵심 구조</label><div class="pre">${esc(a.skeleton)}</div></div></div>
+    ${pl.titles && pl.titles.length ? `<label class="f">후킹 제목 후보 (클릭 → 상단 타이틀/유튜브 제목으로)</label><div class="row">${pl.titles.map((t, i) => `<button class="chip" data-act="pickTitle" data-i="${i}">${esc(t)}</button>`).join('')}</div>` : ''}
+    ${pl.description ? `<label class="f">설명란</label><div class="pre">${esc(pl.description)} ${esc((pl.hashtags || []).join(' '))}</div>` : ''}</div>`;
+}
+
+/* ------------------------------------------------------------------ tab: 3 이미지 · 영상 */
+function tabVisual() {
+  const g = geometry();
+  return `
+  <section class="card"><h3>🎬 Google Flow (Omni 1.2) 제작 가이드 <span class="sp"></span><button class="btn pri" data-act="copyAllPrompts">📋 전체 프롬프트 복사</button></h3>
+    <div class="grid3" style="margin-top:6px">
+      <div class="note"><b>1) 이미지 2장/씬</b><br>Frame 1(0s), Frame 2(2.5s) 프롬프트로 9:16 이미지를 각각 생성</div>
+      <div class="note"><b>2) 영상 1개/씬 (방법 B)</b><br>Omni 1.2 에 두 이미지 + 영상 프롬프트 → 7.5초 클립 (2.5초마다 컷 전환, 총 18컷)</div>
+      <div class="note"><b>3) 저장/업로드</b><br>scene1.mp4 ~ scene6.mp4 로 저장하거나 아래에서 바로 업로드</div></div>
+    <div class="hint">현재 화풍: <b>${style().icon} ${style().number}. ${esc(style().name)}</b> — 앵커가 모든 프레임에 자동 삽입됩니다(화풍을 바꾸면 전 씬 프롬프트가 즉시 바뀝니다).
+      ${g.fit === 'cover' ? `크롭 후 노출 영역은 원본의 가로 ${(g.visW * 100).toFixed(0)}% · 세로 <b>${(g.visH * 100).toFixed(0)}%</b> 이므로 <b>피사체는 세로로 중앙 약 60% 안</b>에 두세요(오른쪽 미리보기의 초록 박스).` : ''}</div>
+    <details class="acc"><summary>화풍 앵커 / 비디오 질감 전문 보기</summary><div class="pre">${esc(style().anchor)}\n\n[video_feel] ${esc(style().video_feel)}\n\n[Zero-Text 접미사] ${esc(CFG.suffix.zero_text)}\n[안전 마진] ${esc(CFG.suffix.safe_margin)}</div></details>
+  </section>
+  ${P.scenes.map((sc, i) => sceneVisual(sc, i)).join('')}`;
+}
+function sceneVisual(sc, i) {
+  const done = sc.done || {}, clip = S.files ? S.files.clips[i + 1] : null, clipOk = S.files ? !!clip : !!done.clip;
+  const chips = `<span class="badge ${done.f1 ? 'g' : ''}">이미지1 ${done.f1 ? '✓' : '–'}</span> <span class="badge ${done.f2 ? 'g' : ''}">이미지2 ${done.f2 ? '✓' : '–'}</span> <span class="badge ${clipOk ? 'g' : ''}">클립 ${clipOk ? '✓' : '–'}</span>`;
+  return `<details class="scene ${i === S.pvScene ? 'cur' : ''}" data-scene="${i}" ${S.openScenes[i] ? 'open' : ''}>
+    <summary><span class="sn">${p2(i + 1)}</span><b>${esc(CFG.scene_roles[i].role)}</b><span class="badge c mono">${CFG.scene_roles[i].time}</span>${chips}<span class="hint" style="flex:1;margin:0;min-width:120px">${esc(Core.sceneText(sc).slice(0, 60))}</span></summary>
+    <div class="note" style="margin-top:10px">🎙️ ${esc(Core.sceneText(sc) || '(대본 없음 - 2단계에서 작성)')}</div>
+    <div class="grid2">
+      ${['frame1', 'frame2'].map((k, n) => `<div><label class="f">Frame ${n + 1} (${n ? '2.5s 전환 기준' : '0s 시작 기준'}) — 장면 묘사 (영문)
+          <label class="row" style="display:inline-flex;margin-left:8px"><input type="checkbox" data-check="scenes.${i}.done.${n ? 'f2' : 'f1'}" ${done[n ? 'f2' : 'f1'] ? 'checked' : ''}> 생성함</label></label>
+        <textarea data-bind="scenes.${i}.${k}" data-live data-scene-live="${i}" rows="3" class="mono">${esc(sc[k])}</textarea>
+        <div class="row sp" style="margin:4px 0 2px"><small class="hint" style="margin:0">완성 프롬프트 (그대로 복사)</small><button class="btn sm" data-act="copyFin" data-i="${i}" data-k="${k}">복사</button></div>
+        <div class="final" id="fin-${i}-${k}"></div></div>`).join('')}
+    </div>
+    <label class="f">Omni 1.2 모션 — 2.5초 간격 3컷 (화각/카메라 무빙)</label>
+    <div class="grid3">${[0, 1, 2].map((j) => `<div class="cutbox"><div class="row sp"><small class="mono" style="color:var(--cy)">Cut ${j + 1} · ${['0.0~2.5s', '2.5~5.0s', '5.0~7.5s'][j]}</small>
+        <input type="text" data-bind="scenes.${i}.cuts.${j}.type" data-live data-scene-live="${i}" value="${esc(sc.cuts[j].type)}" placeholder="화각" style="width:120px;padding:2px 7px;font-size:11px"></div>
+        <textarea data-bind="scenes.${i}.cuts.${j}.prompt" data-live data-scene-live="${i}" rows="3" class="mono" style="margin-top:6px">${esc(sc.cuts[j].prompt)}</textarea></div>`).join('')}</div>
+    <div class="row sp" style="margin:8px 0 2px"><small class="hint" style="margin:0">Omni 1.2 영상 프롬프트 (연결 문구·화풍 질감 자동 합성)</small><span class="row"><button class="btn sm" data-act="copyFin" data-i="${i}" data-k="omni">복사</button><button class="btn sm pri" data-act="copyScene" data-i="${i}">씬 전체 복사</button></span></div>
+    <div class="final" id="fin-${i}-omni"></div>
+    <div class="row sub"><div id="clip-${i}" style="flex:1;min-width:240px">${clipBox(i)}</div></div>
+    <div id="sc-iss-${i}"></div></details>`;
+}
+function clipBox(i) {
+  const f = S.files ? S.files.clips[i + 1] : null, sc = P.scenes[i], done = sc.done || {};
+  if (S.server) {
+    return `<div class="drop" data-drop="${i}">${f ? `✅ <b>${esc(f.name)}</b> · ${(f.size / 1048576).toFixed(1)}MB${f.duration ? ' · ' + f.duration.toFixed(1) + '초' : ''}` : 'scene' + (i + 1) + '.mp4 를 여기로 끌어놓거나'}
+      <label class="btn sm" style="margin-left:8px">파일 선택<input type="file" accept="video/*" class="hide" data-upload="clip" data-i="${i}"></label>
+      ${f ? `<button class="btn sm" data-act="delClip" data-i="${i}">삭제</button>` : ''}</div>
+      ${f ? `<video src="/media/input/${esc(f.name)}?t=${f.size}" controls muted style="width:150px;margin-top:8px;border-radius:10px;background:#000"></video>` : ''}
+      ${f && f.duration && Math.abs(f.duration - 7.5) > 0.6 ? `<div class="note w">클립 길이 ${f.duration.toFixed(1)}초 — 7.5초 규격과 다릅니다(자막 타이밍은 실제 길이 기준으로 자동 보정).</div>` : ''}`;
+  }
+  return `<label class="row"><input type="checkbox" data-check="scenes.${i}.done.clip" ${done.clip ? 'checked' : ''}> 클립(scene${i + 1}.mp4) input/ 폴더에 저장함</label>`;
+}
+const LIVE = {};
+LIVE.visual = function () {
+  P.scenes.forEach((sc, i) => {
+    const pk = Core.scenePackage(CFG, P, i);
+    const set = (id, v) => { const el = $('#fin-' + i + '-' + id); if (el) el.textContent = v; };
+    set('frame1', pk.frame1); set('frame2', pk.frame2); set('omni', pk.omni);
+    const box = $('#sc-iss-' + i);
+    if (box) box.innerHTML = issues().filter((x) => x.scene === i + 1 && x.level !== 'ok').map((x) => `<div class="iss ${x.level}"><span>${x.level === 'error' ? '⛔' : '⚠️'}</span><span>${esc(x.msg)}</span></div>`).join('');
+  });
+};
+LIVE.script = function () {
+  const L = lang(), total = Core.totalUnits(P, CFG), u = unitTxt();
+  const b = $('#tot-badge'); if (b) { b.className = 'badge mono ' + (!total ? '' : total >= L.min && total <= L.max ? 'g' : 'r'); b.textContent = `총 ${total}${u} / 목표 ${L.min}~${L.max}${u}`; }
+  const bar = $('#tot-bar');
+  if (bar) { const max = L.max * 1.25; bar.innerHTML = `<div class="zone" style="left:${L.min / max * 100}%;width:${(L.max - L.min) / max * 100}%"></div><i style="width:${Math.min(100, total / max * 100)}%;background:${total >= L.min && total <= L.max ? 'var(--g)' : total > L.max ? 'var(--rd)' : 'var(--am)'}"></i>`; }
+  P.scenes.forEach((sc, i) => {
+    const n = Core.countUnits(Core.sceneText(sc), P.meta.language, CFG), el = $('#cnt-s' + i);
+    if (el) { el.textContent = `${n}${u} (권장 ${L.scene_min}~${L.scene_max})`; el.className = 'badge mono ' + (!n ? '' : n >= L.scene_min && n <= L.scene_max ? 'g' : 'a'); }
+    sc.beats.forEach((t, j) => { const c = $('#cnt-b' + i + '-' + j); if (c) c.textContent = Core.countUnits(t, P.meta.language, CFG) || ''; });
+  });
+  const mb = $('#master-box');
+  if (mb) { const txt = Core.buildMasterPrompt(CFG, P); mb.value = txt; $('#master-len').textContent = txt.length.toLocaleString() + '자'; }
+};
+LIVE.source = function () { const c = $('#src-cnt'); if (c) c.textContent = P.meta.source_script.length + '자'; };
+LIVE.audio = function () { const t = $('#tts-text'); if (t) t.value = ttsText(); const s = $('#tts-stat'); if (s) s.innerHTML = ttsStat(); };
+
+/* ------------------------------------------------------------------ tab: 4 음성 */
+function ttsText() {
+  if (S.ttsMode === 'one') return P.scenes.map((s) => Core.sceneText(s)).join(' ');
+  if (S.ttsMode === 'scene') return P.scenes.map((s) => Core.sceneText(s)).join('\n');
+  return P.scenes.map((s) => s.beats.filter((b) => b.trim()).join('\n')).join('\n\n');
+}
+function ttsStat() {
+  const total = Core.totalUnits(P, CFG), L = lang(), est = L.unit === 'words' ? total / (L.max / 45) : total / 7.5;
+  return `총 <b class="mono">${total}${unitTxt()}</b> → 1.2배속·무음 제거 기준 약 <b class="mono">${est.toFixed(1)}초</b> (목표 45초 · 허용 43~46초)`;
+}
+function tabAudio() {
+  const v = S.files && S.files.voice, raw = S.files && S.files.voice_raw;
+  const dur = v && v.duration, okDur = dur && Math.abs(dur - 45) <= 3;
+  return `
+  <section class="card"><h3>🎙️ ① TTS 입력 대본 <span class="sp"></span><button class="btn pri" data-act="copyTts">📋 대본 복사</button></h3>
+    <div class="hint">Pinokio Qwen3-TTS(0.6B/1.7B) 같은 로컬 TTS에 붙여넣어 음성을 만드세요. <b>속도 1.2배 · 숨소리/무음 제거</b>가 규격입니다(TTS가 속도 옵션이 없으면 아래 ②에서 처리).</div>
+    <div class="row">${[['beats', '비트마다 줄바꿈'], ['scene', '씬마다 줄바꿈'], ['one', '한 덩어리']].map(([k, n]) => `<label class="chip ${S.ttsMode === k ? 'on' : ''}"><input type="radio" name="ttsm" value="${k}" ${S.ttsMode === k ? 'checked' : ''} class="hide">${n}</label>`).join('')}</div>
+    <textarea id="tts-text" rows="10" readonly style="margin-top:8px"></textarea><div class="hint" id="tts-stat" style="margin-top:6px"></div>
+    <div class="note ${P.meta.language === 'ko' ? '' : 'w'}">발화 언어: <b>${esc(lang().name)}</b>. 대본 언어와 TTS 음성 언어가 일치해야 합니다. edge-tts(무료·인터넷 필요)는 ${S.status && S.status.edge_tts ? '설치됨' : '미설치(pip install edge-tts)'}.</div>
+    <div class="row"><button class="btn cy ${S.status && S.status.edge_tts ? '' : 'hide'}" data-act="edgeTts" ${S.busy.tts ? 'disabled' : ''}>${S.busy.tts ? '생성 중…' : 'edge-tts 로 음성 생성(실험)'}</button></div>
+  </section>
+  <section class="card"><h3>🎧 ② 음성 파일 → 무음 제거 + 1.2배속 → voice.mp3</h3>
+    ${S.server ? `
+    <div class="grid2">
+      <div><label class="f">TTS 원본 음성 (voice_raw)</label><div class="drop" data-drop-voice="voice_raw">${raw ? '✅ <b>' + esc(raw) + '</b>' : '원본 음성 파일을 끌어놓거나'}<label class="btn sm" style="margin-left:8px">선택<input type="file" accept="audio/*" class="hide" data-upload="voice_raw"></label></div>
+        <div class="row" style="margin-top:8px"><label>속도 <input type="number" id="au-speed" value="1.2" step="0.05" min="1" max="2" style="width:80px"></label><label class="row"><input type="checkbox" id="au-sil" checked> 무음 제거</label>
+          <button class="btn pri" data-act="processVoice" ${raw && !S.busy.au ? '' : 'disabled'}>${S.busy.au ? '처리 중…' : '처리 → voice.mp3'}</button></div></div>
+      <div><label class="f">최종 음성 (voice) — 이미 처리된 파일이면 직접 업로드</label><div class="drop" data-drop-voice="voice">${v ? '✅ <b>' + esc(v.name) + '</b>' : '완성된 voice.mp3 를 끌어놓거나'}<label class="btn sm" style="margin-left:8px">선택<input type="file" accept="audio/*" class="hide" data-upload="voice"></label></div>
+        ${v ? `<div class="note ${okDur ? 'g' : 'w'}" style="margin-top:8px">길이 <b class="mono">${dur ? dur.toFixed(1) : '?'}초</b> ${okDur ? '— 45초 규격 OK' : '— 45±3초를 벗어났습니다. 대본 분량/속도를 점검하세요.'}</div><audio controls src="/media/input/${esc(v.name)}?t=${dur}" style="width:100%"></audio>` : ''}</div>
+    </div>` : `<div class="note w">서버 없이는 자동 처리를 못 합니다. 터미널에서 직접 실행하세요:</div>
+      <div class="pre">ffmpeg -i voice_raw.mp3 -af "silenceremove=start_periods=1:start_threshold=-45dB:stop_periods=-1:stop_duration=0.15:stop_threshold=-45dB,atempo=1.2" input/voice.mp3</div>
+      <label class="row" style="margin-top:8px"><input type="checkbox" data-check="progress_voice" ${S.localVoice ? 'checked' : ''}> input/voice.mp3 준비 완료</label>`}
+  </section>`;
+}
+
+/* ------------------------------------------------------------------ tab: 5 합성 */
+function tabRender() {
+  const f = S.files, is = issues(), errs = is.filter((i) => i.level === 'error').length;
+  const row = (ok, txt, hint) => `<div class="chk"><span class="m">${ok === null ? '⏳' : ok ? '✅' : '❌'}</span><span>${txt}${ok === false && hint ? ` <small style="color:var(--dim)">→ ${hint}</small>` : ''}</span></div>`;
+  const job = S.job;
+  return `
+  <section class="card"><h3>🧾 렌더 전 점검 <span class="sp"></span><button class="btn sm" data-act="refreshFiles">새로고침</button></h3>
+    ${S.server ? `${row(!!f && f.ffmpeg, 'FFmpeg 설치', 'winget install Gyan.FFmpeg 후 새 터미널')}
+    ${row(!!f && f.missing_clips.length === 0, f ? `씬 클립 ${6 - f.missing_clips.length}/6` + (f.missing_clips.length ? ` (없음: ${f.missing_clips.join(', ')})` : '') : '확인 중', '3단계에서 scene1~6.mp4 업로드')}
+    ${row(!!(f && f.voice), '음성 voice.mp3' + (f && f.voice && f.voice.duration ? ` (${f.voice.duration.toFixed(1)}초)` : ''), '4단계에서 음성 준비 (없으면 무음 영상)')}
+    ${row(!!(f && f.font), '한글 폰트' + (f ? `: ${f.font || '없음'}${f.pretendard ? '' : ' (대체 폰트 - assets/ 에 Pretendard 권장)'}` : ''), 'assets/ 에 Pretendard-Black.ttf / Bold.ttf')}
+    ${row(errs === 0, '대본/프롬프트 규칙 오류 ' + errs + '건', '오른쪽 프로젝트 점검 확인')}` : `<div class="note w">서버가 꺼져 있어 파일 점검을 못 합니다. 아래 [CLI 명령]을 사용하세요.</div>`}
+  </section>
+  <section class="card"><h3>⚙️ 합성 설정</h3>
+    <div class="grid4">
+      <div><label class="f">상단 타이틀 (노란 바)</label><input type="text" data-bind="meta.top_title" data-live value="${esc(P.meta.top_title)}" style="color:var(--am);font-weight:700"></div>
+      <div><label class="f">영상 채움 방식</label><select data-bind="render.fit" data-re><option value="cover" ${P.render.fit === 'cover' ? 'selected' : ''}>cover — 1080 가로 꽉 채움 (권장)</option><option value="contain" ${P.render.fit === 'contain' ? 'selected' : ''}>contain — 원본 비율(좌우 검은 기둥)</option></select></div>
+      <div><label class="f">워터마크 크롭 배율</label><input type="number" data-bind="render.crop_scale" data-num data-live step="0.01" min="1" max="1.3" value="${P.render.crop_scale}"></div>
+      <div><label class="f">자막 크기 / 줄당 글자</label><div class="row" style="flex-wrap:nowrap"><input type="number" data-bind="render.sub_size" data-num data-live min="30" max="90" value="${P.render.sub_size}"><input type="number" data-bind="render.sub_chars_per_line" data-num data-live min="8" max="40" value="${P.render.sub_chars_per_line}"></div></div>
+    </div>
+    <div class="hint" style="margin-top:8px">레이아웃(1080×1920): 상단 검정 바 <b>0~240px</b>(노란 타이틀) · 영상 <b>240~1520px</b>(1280px, 1.06x 크롭) · 자막은 하단 바 바로 위 <b>y=1500</b> 기준 아래 정렬(최대 ~1360 까지) · 하단 검정 바 <b>1520~1920px</b>(쇼츠/릴스/틱톡 UI 보호존). 자막은 씬 클립 실제 길이를 3등분한 2.5초 비트 단위로 표시됩니다.</div>
+  </section>
+  <section class="card"><h3>🎞️ 렌더링 <span class="sp"></span><label class="row" style="font-size:12px"><input type="checkbox" id="rd-partial"> 있는 클립만 미리보기 렌더</label></h3>
+    <div class="row"><button class="btn pri" data-act="startRender" ${S.server && !(job && job.state === 'running') ? '' : 'disabled'}>${job && job.state === 'running' ? '렌더링 중…' : '▶ 최종 렌더링 시작'}</button>
+      <button class="btn" data-act="exportJson">프로젝트 JSON 내보내기</button><button class="btn" data-act="copyCli">CLI 명령 복사</button></div>
+    <div class="progress" style="margin-top:10px"><i id="rd-bar" style="width:${job ? Math.round(job.progress * 100) : 0}%"></i></div>
+    <div class="pre" id="rd-log" style="margin-top:8px;max-height:140px">${job ? esc((job.log || []).join('\n') + (job.error ? '\n[오류] ' + job.error : '')) : '대기 중'}</div>
+    ${(S.files && S.files.final) || (job && job.state === 'done') ? `<div class="sub"><b>결과 영상</b> <a href="/media/output/final_shorts.mp4" download class="btn sm" style="text-decoration:none">다운로드</a>
+      <video controls src="/media/output/final_shorts.mp4?t=${Date.now()}" style="display:block;width:240px;margin-top:8px;border-radius:12px;background:#000"></video></div>` : ''}
+    <div class="note" style="margin-top:10px">서버 없이 실행: 프로젝트 JSON 을 <code>projects/내프로젝트.json</code> 으로 저장한 뒤<br><code>python shorts_stitcher.py --project projects/내프로젝트.json</code></div>
+  </section>`;
+}
+
+/* ------------------------------------------------------------------ tab: 6 메타데이터 */
+function tabMeta() {
+  const L = S.metaLang, Pf = S.metaPlat, m = ((P.metadata[L] || {})[Pf]) || { title: '', caption: '', pinned: '' };
+  const shop = Core.isShopping(P, CFG);
+  const mdl = CFG.models.metadata;
+  return `
+  <section class="card"><h3>① 메타데이터 프롬프트 <span class="sp"></span><span class="badge p">권장 모델: ${esc(mdl.name)}</span></h3>
+    <div class="hint">${esc(mdl.use)}. 확정 대본을 바탕으로 <b>YouTube Shorts · Instagram Reels · TikTok</b> 제목/캡션/고정댓글을 언어별로 생성합니다(직역 아닌 현지화). 자동 업로드는 하지 않습니다.</div>
+    <div class="row">${Object.entries(CFG.languages).map(([k, l]) => `<label class="chip ${S.metaLangs[k] ? 'on' : ''}"><input type="checkbox" data-mlang="${k}" ${S.metaLangs[k] ? 'checked' : ''} class="hide">${l.name}</label>`).join('')}
+      <button class="btn pri" data-act="copyMetaPrompt">📋 메타데이터 프롬프트 복사</button></div>
+    <label class="f">Claude/Haiku 응답(JSON) 붙여넣기</label><textarea id="meta-reply" rows="3" class="mono" placeholder="Claude/Haiku 가 출력한 json 코드블록을 붙여넣으세요">${esc(S.metaReply)}</textarea>
+    <div class="row" style="margin-top:6px"><button class="btn pri" data-act="importMeta">응답 적용</button>${shop ? '<button class="btn" data-act="fillShopPin">쇼핑 고정댓글 기본 문구 채우기</button>' : ''}</div>
+  </section>
+  <section class="card"><h3>② 플랫폼별 메타데이터 편집</h3>
+    <div class="tabs">${Object.entries(CFG.languages).map(([k, l]) => `<button class="${L === k ? 'on' : ''}" data-act="metaLang" data-k="${k}">${l.name}</button>`).join('')}</div>
+    <div class="tabs">${Object.entries(CFG.platforms).map(([k, p]) => `<button class="${Pf === k ? 'on' : ''}" data-act="metaPlat" data-k="${k}">${esc(p.name)}</button>`).join('')}</div>
+    <div class="row sp"><label class="f" style="margin:0">제목 <span class="badge mono" id="mt-c1">${m.title.length}자</span></label><button class="btn sm" data-act="copyMeta" data-k="title">복사</button></div>
+    <input type="text" data-meta="title" value="${esc(m.title)}">
+    <div class="row sp"><label class="f" style="margin-bottom:0">본문 캡션 & 해시태그</label><button class="btn sm" data-act="copyMeta" data-k="caption">복사</button></div>
+    <textarea data-meta="caption" rows="5">${esc(m.caption)}</textarea>
+    <div class="row sp"><label class="f" style="margin-bottom:0;color:var(--am)">고정 댓글${shop ? ' (쇼핑 제휴 CTA)' : ''}</label><button class="btn sm" data-act="copyMeta" data-k="pinned">복사</button></div>
+    <textarea data-meta="pinned" rows="3" style="border-color:#713f12">${esc(m.pinned)}</textarea>
+    <div class="sub"><b style="font-size:12px">수동 업로드 체크리스트</b>
+      <div class="chk"><input type="checkbox"> YouTube Studio 업로드 → 제목/설명 붙여넣기 ${shop ? '→ 쇼핑 태그 연결 → 고정 댓글' : '→ 고정 댓글'}</div>
+      <div class="chk"><input type="checkbox"> Instagram Reels 업로드 → 캡션 ${shop ? '→ 프로필 링크 확인' : ''}</div>
+      <div class="chk"><input type="checkbox"> TikTok 업로드 → 캡션 ${shop ? '→ 좌측 하단 노란 장바구니(상품 링크)' : ''}</div></div>
+  </section>`;
+}
+
+/* ------------------------------------------------------------------ router / render */
+const TABS = { source: tabSource, script: tabScript, visual: tabVisual, audio: tabAudio, render: tabRender, meta: tabMeta };
+function renderTab() { $('#content').innerHTML = TABS[S.tab](); const f = LIVE[S.tab]; if (f) f(); }
+function renderAll() { renderStepper(); renderTab(); renderMetrics(); renderIssues(); renderPreview(); }
+function gotoTab(id) { S.tab = id; renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (id === 'visual' || id === 'render' || id === 'audio') refreshFiles(); }
+
+/* ------------------------------------------------------------------ server calls */
+async function detectServer() {
+  if (location.protocol === 'file:') { S.server = false; paintServer(); return; }
+  try { S.status = await api('/api/status'); S.server = true; } catch (e) { S.server = false; }
+  paintServer(); if (S.server) refreshFiles(true);
+}
+function paintServer() {
+  $('#srv-dot').className = 'dot' + (S.server ? ' on' : ''); $('#srv-txt').textContent = S.server ? '서버 연결됨' : (location.protocol === 'file:' ? '오프라인 (python server.py 로 실행하면 전체 기능)' : '서버 없음');
+  $('#btn-save-srv').classList.toggle('hide', !S.server); renderTab();
+}
+async function refreshFiles(silent) {
+  if (!S.server) return;
+  try { S.files = await api('/api/files'); } catch (e) { if (!silent) toast(e.message, 'e'); return; }
+  renderMetrics(); renderStepper();
+  if (['visual', 'audio', 'render'].includes(S.tab)) { const y = window.scrollY; renderTab(); window.scrollTo(0, y); }
+}
+async function uploadFile(kind, file, scene) {
+  if (!file) return;
+  toast(`${file.name} 업로드 중… (${(file.size / 1048576).toFixed(1)}MB)`);
+  try {
+    const q = `kind=${kind}&name=${encodeURIComponent(file.name)}` + (scene !== undefined ? `&scene=${scene + 1}` : '');
+    const r = await fetch('/api/upload?' + q, { method: 'POST', body: file, headers: { 'Content-Type': 'application/octet-stream' } });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    toast(`저장됨: ${j.saved}`); await refreshFiles();
+  } catch (e) { toast('업로드 실패: ' + e.message, 'e'); }
+}
+async function pollRender() {
+  try { S.job = await api('/api/render/status'); } catch (e) { return; }
+  if (S.tab === 'render') { const b = $('#rd-bar'), l = $('#rd-log'); if (b) b.style.width = Math.round(S.job.progress * 100) + '%'; if (l) { l.textContent = (S.job.log || []).join('\n') + (S.job.error ? '\n[오류] ' + S.job.error : ''); l.scrollTop = l.scrollHeight; } }
+  if (S.job.state === 'running') setTimeout(pollRender, 700);
+  else { await refreshFiles(true); if (S.job.state === 'done') toast('렌더링 완료!'); else if (S.job.state === 'error') toast('렌더 실패 - 로그 확인', 'e'); renderTab(); renderStepper(); }
+}
+
+/* ------------------------------------------------------------------ actions */
+const ACT = {
+  tab: (d) => gotoTab(d.id),
+  toggleGuide: () => { S.guides = !S.guides; renderPreview(); },
+  pvPlay: () => {
+    if (S.pvTimer) { clearInterval(S.pvTimer); S.pvTimer = null; $('#pv-play').textContent = '▶ 재생'; return; }
+    $('#pv-play').textContent = '⏸ 정지'; if (S.pvT >= 44.8) S.pvT = 0;
+    S.pvTimer = setInterval(() => { S.pvT += 0.1; if (S.pvT >= 44.9) { S.pvT = 44.9; ACT.pvPlay(); } renderPreview(); }, 100);
+  },
+  pvScene: (d) => { S.pvT = Number(d.i) * 7.5; renderPreview(); },
+  pvJump: (d) => { S.pvT = Number(d.i) * 7.5; renderPreview(); },
+  newProject: () => { if (confirm('현재 프로젝트를 지우고 새로 시작할까요? (먼저 [내보내기]로 저장해 두세요)')) setProject(Core.defaultProject(CFG)); },
+  exportJson: () => { const n = (P.meta.topic || 'shorts_project').replace(/[^\w가-힣]+/g, '_').slice(0, 30); download(`${n}_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(P, null, 2)); toast('프로젝트 JSON 을 내보냈습니다.'); },
+  importJson: () => $('#file-in').click(),
+  saveServer: async () => { const name = (P.meta.topic || 'project').replace(/[^\w가-힣\-. ]+/g, '_').slice(0, 50) || 'project'; try { await post('/api/project', { name, project: P }); toast(`projects/${name}.json 저장됨`); } catch (e) { toast(e.message, 'e'); } },
+  // --- source
+  fetchTrends: async () => {
+    S.busy.trends = true; renderTab();
+    try { const src = Object.keys(S.trendSrc).filter((k) => S.trendSrc[k]).join(','); S.trends = await api(`/api/trends?sources=${src}&cat=${S.redditCat}`); }
+    catch (e) { toast(e.message, 'e'); }
+    S.busy.trends = false; renderTab();
+  },
+  pickTopic: (d) => {
+    const it = trendItems()[Number(d.i)]; if (!it) return;
+    P.meta.topic = it.title; if (it.cat && CFG.categories[it.cat]) P.meta.category = it.cat; if (it.url && /youtu/.test(it.url)) P.meta.source_url = it.url;
+    toast(`소재 선택: ${it.title}`); save(); gotoTab('script');
+  },
+  addManual: () => {
+    const lines = $('#manual-add').value.split('\n').map((x) => x.trim()).filter(Boolean);
+    lines.forEach((t) => S.manual.push({ platform: '직접', title: t, keyword: t, cat: '', live: true })); renderTab();
+  },
+  searchOutliers: async () => {
+    S.ytKey = $('#ol-key').value.trim(); S.olQ = $('#ol-q').value.trim(); save(); S.busy.ol = true; renderTab();
+    try { const r = await post('/api/outliers', { query: S.olQ, days: +$('#ol-days').value, min_ratio: +$('#ol-ratio').value, region: $('#ol-region').value, api_key: S.ytKey }); S.outliers = r.items; }
+    catch (e) { toast(e.message, 'e'); }
+    S.busy.ol = false; renderTab();
+  },
+  pickOutlier: async (d) => {
+    const o = S.outliers[Number(d.i)]; P.meta.source_url = o.url; renderTab(); save(); toast(`벤치마킹 선택 (V/S ${o.ratio}x) - 자막 추출 시도`); ACT.fetchTranscript();
+  },
+  fetchTranscript: async () => {
+    const url = P.meta.source_url.trim(); if (!url) return toast('유튜브 링크를 입력하세요.', 'w');
+    S.busy.tr = true; renderTab();
+    try { const r = await post('/api/transcript', { url }); P.meta.source_script = r.text; toast(`대본 추출 성공 (${r.method}, ${r.text.length}자)`); }
+    catch (e) { toast('자동 추출 실패 - 아래 안내대로 직접 붙여넣어 주세요', 'w'); alert(e.message); }
+    S.busy.tr = false; renderTab(); save();
+  },
+  // --- script
+  copyMaster: () => copyText(Core.buildMasterPrompt(CFG, P), '마스터 프롬프트를 복사했습니다. Claude 에 붙여넣으세요.'),
+  runClaude: async () => {
+    S.busy.claude = true; renderTab();
+    try { const m = Core.recommendedModel(CFG, P, 'script'); const r = await post('/api/claude', { prompt: Core.buildMasterPrompt(CFG, P) }); S.claudeReply = r.text; toast(`Claude CLI 응답 수신 (${m.name} 권장 - 사용 모델은 CLI 설정 기준)`); }
+    catch (e) { toast(e.message, 'e'); }
+    S.busy.claude = false; renderTab();
+  },
+  importReply: () => {
+    const txt = $('#claude-reply').value; S.claudeReply = txt;
+    try { P = Core.normalizeProject(Core.applyResponse(P, Core.parseClaudeResponse(txt, CFG)), CFG); toast('6씬 · 프롬프트 · 분석을 가져왔습니다.'); save(); renderAll(); }
+    catch (e) { toast(e.message, 'e'); }
+  },
+  injectCta: () => { P = Core.normalizeProject(Core.injectCta(CFG, P), CFG); renderAll(); toast('Scene 06 CTA 를 확인/삽입했습니다.'); },
+  pickTitle: (d) => { const t = P.plan.titles[Number(d.i)]; P.meta.top_title = t.length > 18 ? t.slice(0, 18) : t; (P.metadata.ko = P.metadata.ko || {}).youtube = Object.assign({ title: '', caption: '', pinned: '' }, P.metadata.ko.youtube, { title: t }); toast('상단 타이틀/유튜브 제목에 반영했습니다 (타이틀은 18자로 줄었을 수 있으니 확인).'); save(); renderAll(); },
+  // --- visual
+  copyAllPrompts: () => copyText(Core.allPromptsText(CFG, P), '전체 6씬 프롬프트를 복사했습니다.'),
+  copyFin: (d) => { const pk = Core.scenePackage(CFG, P, Number(d.i)); copyText(pk[d.k], `Scene ${p2(Number(d.i) + 1)} ${d.k === 'omni' ? 'Omni 프롬프트' : d.k === 'frame1' ? 'Frame 1' : 'Frame 2'} 복사됨`); },
+  copyScene: (d) => { const i = Number(d.i), pk = Core.scenePackage(CFG, P, i); copyText(`[Scene ${p2(i + 1)}] ${pk.narration}\n\n[Frame 1 (0s)]\n${pk.frame1}\n\n[Frame 2 (2.5s)]\n${pk.frame2}\n\n[Omni 1.2]\n${pk.omni}`, `Scene ${p2(i + 1)} 전체 프롬프트 복사됨`); },
+  delClip: async (d) => { try { await post('/api/delete-file', { kind: 'clip', scene: Number(d.i) + 1 }); await refreshFiles(); } catch (e) { toast(e.message, 'e'); } },
+  // --- audio
+  copyTts: () => copyText(ttsText(), 'TTS 입력 대본을 복사했습니다.'),
+  processVoice: async () => {
+    S.busy.au = true; renderTab();
+    try { const r = await post('/api/audio/process', { speed: +$('#au-speed').value, remove_silence: $('#au-sil').checked }); toast(`처리 완료: ${r.before ? r.before.toFixed(1) : '?'}초 → ${r.after ? r.after.toFixed(1) : '?'}초`); }
+    catch (e) { toast(e.message, 'e'); }
+    S.busy.au = false; await refreshFiles();
+  },
+  edgeTts: async () => { S.busy.tts = true; renderTab(); try { await post('/api/tts', { text: ttsText().replace(/\n+/g, ' '), language: P.meta.language }); toast('voice_raw.mp3 생성됨 - ②에서 처리하세요'); } catch (e) { toast(e.message, 'e'); } S.busy.tts = false; await refreshFiles(); },
+  // --- render
+  refreshFiles: () => refreshFiles(),
+  startRender: async () => {
+    try { await post('/api/render', { project: P, partial: $('#rd-partial') && $('#rd-partial').checked }); S.job = { state: 'running', progress: 0, log: ['시작…'] }; renderTab(); pollRender(); }
+    catch (e) { toast(e.message, 'e'); }
+  },
+  copyCli: () => copyText('python shorts_stitcher.py --project projects/내프로젝트.json', 'CLI 명령 복사됨 (프로젝트 JSON 을 먼저 내보내세요)'),
+  // --- meta
+  copyMetaPrompt: () => { const l = Object.keys(S.metaLangs).filter((k) => S.metaLangs[k]); if (!l.length) return toast('언어를 하나 이상 선택하세요.', 'w'); copyText(Core.buildMetadataPrompt(CFG, P, l), '메타데이터 프롬프트 복사됨'); },
+  importMeta: () => {
+    const txt = $('#meta-reply').value; S.metaReply = txt; const data = Core.extractJson(txt);
+    if (!data || typeof data !== 'object') return toast('JSON 을 찾지 못했습니다.', 'e');
+    let n = 0; Object.keys(CFG.languages).forEach((l) => { if (data[l]) Object.keys(CFG.platforms).forEach((p) => { if (data[l][p]) { (P.metadata[l] = P.metadata[l] || {})[p] = Object.assign({ title: '', caption: '', pinned: '' }, data[l][p]); n++; } }); });
+    toast(`${n}개 항목 적용`); save(); renderAll();
+  },
+  fillShopPin: () => { Object.keys(CFG.languages).forEach((l) => Object.keys(CFG.platforms).forEach((p) => { const m = ((P.metadata[l] = P.metadata[l] || {})[p] = Object.assign({ title: '', caption: '', pinned: '' }, (P.metadata[l] || {})[p])); if (!m.pinned) m.pinned = SHOP_PIN[l][p]; })); toast('빈 고정댓글에 쇼핑 문구를 채웠습니다.'); save(); renderTab(); },
+  metaLang: (d) => { S.metaLang = d.k; renderTab(); },
+  metaPlat: (d) => { S.metaPlat = d.k; renderTab(); },
+  copyMeta: (d) => { const m = ((P.metadata[S.metaLang] || {})[S.metaPlat]) || {}; copyText(m[d.k] || '', '복사했습니다.'); }
+};
+
+/* ------------------------------------------------------------------ events (delegation) */
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const fn = ACT[b.dataset.act]; if (fn) { e.preventDefault(); fn(b.dataset); }
+});
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset.bind) {
+    let v = t.value; if (t.dataset.num !== undefined) v = parseFloat(v) || 0;
+    setPath(P, t.dataset.bind, v);
+    if (t.dataset.bind === 'meta.top_title') $$('[data-bind="meta.top_title"]').forEach((x) => { if (x !== t) x.value = v; });
+    refreshDerived();
+  } else if (t.dataset.meta) {
+    const m = ((P.metadata[S.metaLang] = P.metadata[S.metaLang] || {})[S.metaPlat] = Object.assign({ title: '', caption: '', pinned: '' }, (P.metadata[S.metaLang] || {})[S.metaPlat]));
+    m[t.dataset.meta] = t.value; if (t.dataset.meta === 'title') { const c = $('#mt-c1'); if (c) c.textContent = t.value.length + '자'; } save(); renderStepper();
+  } else if (t.id === 'vs-v' || t.id === 'vs-s') {
+    const v = +$('#vs-v').value, s = +$('#vs-s').value, o = $('#vs-out');
+    if (v > 0 && s > 0) { const r = (v / s).toFixed(1), g = r >= 10 ? '🔥 초특급 타깃' : r >= 5 ? '👍 1차 후보' : r >= 1 ? '보통' : '제외'; o.textContent = `${r}배 ${g}`; } else o.textContent = '-';
+  } else if (t.id === 'claude-reply') S.claudeReply = t.value; else if (t.id === 'meta-reply') S.metaReply = t.value; else if (t.id === 'ol-key') { S.ytKey = t.value; save(); }
+});
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.dataset.bind && (t.tagName === 'SELECT' || t.dataset.re !== undefined)) {
+    setPath(P, t.dataset.bind, t.dataset.num !== undefined ? parseFloat(t.value) || 0 : t.value);
+    if (t.dataset.bind === 'meta.category2' && t.value === P.meta.category) P.meta.category2 = '';
+    save(); renderAll();
+  } else if (t.dataset.check) {
+    if (t.dataset.check === 'progress_voice') { S.localVoice = t.checked; return; }
+    const path = t.dataset.check; const ks = path.split('.');
+    if (ks[0] === 'scenes' && ks[2] === 'done') { const sc = P.scenes[+ks[1]]; sc.done = sc.done || {}; sc.done[ks[3]] = t.checked; save(); renderStepper(); const sum = t.closest('details'); if (sum) { const i = +ks[1]; S.openScenes[i] = true; } return; }
+    setPath(P, path, t.checked); save(); renderAll();
+  } else if (t.dataset.src) { S.trendSrc[t.dataset.src] = t.checked; renderTab(); }
+  else if (t.id === 'reddit-cat') { S.redditCat = t.value; S.trends = null; renderTab(); }
+  else if (t.dataset.mlang) { S.metaLangs[t.dataset.mlang] = t.checked; save(); renderTab(); }
+  else if (t.name === 'ttsm') { S.ttsMode = t.value; renderTab(); }
+  else if (t.dataset.upload) { uploadFile(t.dataset.upload, t.files[0], t.dataset.i !== undefined ? Number(t.dataset.i) : undefined); t.value = ''; }
+  else if (t.id === 'file-in') importFile(t.files[0], t);
+  else if (t.id === 'sample-sel') { if (t.value && confirm('샘플을 불러오면 현재 프로젝트가 대체됩니다. 계속할까요?')) { setProject(clone(SAMPLES[t.value])); toast('샘플을 불러왔습니다.'); } t.value = ''; }
+});
+document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.scene !== undefined) S.openScenes[d.dataset.scene] = d.open; }, true);
+['dragover', 'dragleave', 'drop'].forEach((ev) => document.addEventListener(ev, (e) => {
+  const z = e.target.closest('[data-drop],[data-drop-voice]'); if (!z) return;
+  e.preventDefault(); z.classList.toggle('hot', ev === 'dragover');
+  if (ev === 'drop') { const f = e.dataTransfer.files[0]; if (z.dataset.drop !== undefined) uploadFile('clip', f, Number(z.dataset.drop)); else uploadFile(z.dataset.dropVoice, f); }
+}));
+document.addEventListener('keydown', (e) => { if (e.target.id === 'ol-q' && e.key === 'Enter') ACT.searchOutliers(); });
+
+function importFile(file, input) {
+  if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      let j = JSON.parse(rd.result);
+      if (!j || !Array.isArray(j.scenes)) throw new Error('scenes 배열이 없는 JSON 입니다.');
+      if (!j.meta && (j.topic !== undefined || j.topTitle !== undefined)) j = convertLegacy(j);   // v2(제미나이 대시보드) 내보내기 호환
+      setProject(j); toast('프로젝트를 불러왔습니다.');
+    } catch (err) { toast('불러오기 실패: ' + err.message, 'e'); }
+    input.value = '';
+  };
+  rd.readAsText(file);
+}
+function splitEvenly(text) {
+  const w = text.trim().split(/\s+/); if (w.length < 3) return [text.trim(), '', ''];
+  const per = Math.ceil(w.length / 3); return [0, 1, 2].map((k) => w.slice(k * per, (k + 1) * per).join(' '));
+}
+function convertLegacy(j) {   // 제미나이가 만든 v2.6 대시보드 JSON -> v3
+  const p = Core.defaultProject(CFG);
+  Object.assign(p.meta, { topic: j.topic || '', top_title: j.topTitle || '', style: j.selectedStyle || p.meta.style });
+  p.options.zero_text = j.zeroTextEnabled !== false; p.options.safe_margin = j.safeMarginEnabled !== false;
+  p.scenes = j.scenes.map((s, i) => ({ id: i + 1, beats: Array.isArray(s.beats) ? s.beats : splitEvenly(s.script || ''),
+    frame1: '', frame2: '', cuts: (s.angles || []).slice(0, 3).map((a) => ({ type: a.type || '', prompt: a.prompt || '' })) }));
+  if (j.metadata) p.metadata = j.metadata;
+  toast('v2 대시보드 JSON 을 변환했습니다. Frame1/Frame2 프롬프트와 비트 분할은 직접 확인하세요.', 'w');
+  return p;
+}
+
+/* ------------------------------------------------------------------ boot */
+(function boot() {
+  let saved = null; try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* ignore */ }
+  if (saved && saved.project) { P = Core.normalizeProject(saved.project, CFG); S.ytKey = saved.ytKey || ''; if (saved.metaLangs) S.metaLangs = saved.metaLangs; }
+  else P = Core.normalizeProject(clone(SAMPLES.airfryer_shopping || {}), CFG);
+  $('#sample-sel').innerHTML = '<option value="">샘플…</option>' + Object.entries(SAMPLES).map(([k, s]) => `<option value="${k}">${esc(s.meta.topic)}</option>`).join('');
+  initPreview(); renderAll(); detectServer();
+})();
+</script>
+</body>
+</html>

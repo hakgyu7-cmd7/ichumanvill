@@ -1,0 +1,156 @@
+{
+ "topic": "에어프라이어 팟",
+ "topTitle": "아직도 종이호일 태우세요?",
+ "selectedStyle": "diorama",
+ "zeroTextEnabled": true,
+ "safeMarginEnabled": true,
+ "scenes": [
+  {
+   "id": 1,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Scene",
+   "duration": 7.5,
+   "script": "아직도 에어프라이어에 타기 쉬운 종이호일 쓰며 찌꺼기 닦느라 고생하시나요?",
+   "angles": [
+    {
+     "time": "0.0s - 2.5s",
+     "type": "Extreme Close-up",
+     "prompt": "Extreme macro close-up of a dirty basket"
+    },
+    {
+     "time": "2.5s - 5.0s",
+     "type": "Low Angle",
+     "prompt": "Low-angle shot"
+    },
+    {
+     "time": "5.0s - 7.5s",
+     "type": "Rapid Pan-in",
+     "prompt": "Quick push-in"
+    }
+   ]
+  }
+ ],
+ "metadata": {
+  "ko": {
+   "youtube": {
+    "title": "제목",
+    "caption": "캡션",
+    "pinned": "고정"
+   }
+  }
+ }
+}
