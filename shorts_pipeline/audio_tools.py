@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
@@ -59,14 +60,37 @@ def build_filter(speed: float = 1.2, remove_silence: bool = True, threshold_db: 
     return ",".join(parts) if parts else "anull"
 
 
+def _run(cmd: List[str]) -> None:
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise AudioError("ffmpeg 오류: " + r.stderr.strip()[-400:])
+
+
 def process_voice(src: Path, dst: Path, speed: float = 1.2, remove_silence: bool = True,
-                  threshold_db: float = -45.0, min_silence: float = 0.15) -> Dict[str, Optional[float]]:
+                  threshold_db: float = -45.0, min_silence: float = 0.15,
+                  fit_seconds: Optional[float] = None) -> Dict[str, Optional[float]]:
+    """원본 음성 -> (무음 제거) -> 속도 변경 -> dst.
+    fit_seconds 를 주면 무음 제거 후 길이를 측정해 정확히 그 길이가 되도록 속도를 자동 계산한다(0.5~2.0배 범위로 제한)."""
     if not have_ffmpeg():
         raise AudioError("ffmpeg/ffprobe 가 설치되어 있지 않습니다 (winget install Gyan.FFmpeg).")
     src, dst = Path(src), Path(dst)
     if not src.exists():
         raise AudioError(f"원본 음성이 없습니다: {src}")
     dst.parent.mkdir(parents=True, exist_ok=True)
+    before = probe_duration(src)
+    base_len, clamped, speed_used = before, False, speed
+    if fit_seconds:
+        if fit_seconds <= 0:
+            raise AudioError("목표 길이는 0보다 커야 합니다.")
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td) / "base.wav"
+            _run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-vn", "-af", build_filter(1.0, remove_silence, threshold_db, min_silence), str(tmp)])
+            base_len = probe_duration(tmp)
+        if not base_len:
+            raise AudioError("음성 길이를 읽을 수 없습니다.")
+        want = base_len / fit_seconds
+        speed_used = max(0.5, min(2.0, want))
+        clamped = abs(speed_used - want) > 1e-6
     enc = _encoders()
     if dst.suffix.lower() == ".mp3" and "libmp3lame" in enc:
         codec = ["-c:a", "libmp3lame", "-q:a", "2"]
@@ -74,11 +98,8 @@ def process_voice(src: Path, dst: Path, speed: float = 1.2, remove_silence: bool
         raise AudioError("이 ffmpeg 에는 mp3 인코더가 없습니다. 출력 확장자를 .m4a 로 바꾸세요.")
     else:
         codec = ["-c:a", "aac", "-b:a", "192k"]
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-vn", "-af", build_filter(speed, remove_silence, threshold_db, min_silence), *codec, str(dst)]
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        raise AudioError("ffmpeg 오류: " + r.stderr.strip()[-400:])
-    return {"before": probe_duration(src), "after": probe_duration(dst)}
+    _run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-vn", "-af", build_filter(speed_used, remove_silence, threshold_db, min_silence), *codec, str(dst)])
+    return {"before": before, "after": probe_duration(dst), "speed": round(speed_used, 3), "base_len": base_len, "fit_clamped": clamped}
 
 
 def check_voice(path: Path, target: float = 45.0, tolerance: float = 3.0) -> Dict[str, object]:
@@ -111,6 +132,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="TTS 음성 -> 무음 제거 + 1.2배속")
     ap.add_argument("src"); ap.add_argument("dst", nargs="?", default="input/voice.mp3")
     ap.add_argument("--speed", type=float, default=1.2); ap.add_argument("--keep-silence", action="store_true")
+    ap.add_argument("--fit", type=float, help="목표 길이(초)에 맞춰 속도 자동 계산 (예: --fit 45)")
     a = ap.parse_args()
-    res = process_voice(Path(a.src), Path(a.dst), a.speed, not a.keep_silence)
+    res = process_voice(Path(a.src), Path(a.dst), a.speed, not a.keep_silence, fit_seconds=a.fit)
     print(res, check_voice(Path(a.dst))["msg"])

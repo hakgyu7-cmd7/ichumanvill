@@ -21,8 +21,12 @@ const out = cases.map((c) => {
     refs: core.referencePrompts(cfg, p),
     asset_prompt: core.buildAssetPrompt(cfg, p),
     linked: core.linkAssets(p),
-    suggest: core.suggestRecurring(cfg, p)
+    suggest: core.suggestRecurring(cfg, p),
+    range: core.charRange(cfg, p),
+    length_rule: core.lengthRuleText(cfg, p),
+    policy_fix: p.scenes.map((_, i) => core.buildPolicyFixPrompt(cfg, p, i))
   };
+  if (c.scene_fix) { r.scene_fixed = core.applySceneFix(p, c.scene_fix.idx, c.scene_fix.text); }
   if (c.assets_response) { const pa = core.parseAssetsResponse(c.assets_response, cfg); r.parsed_assets = pa; r.applied_assets = core.applyAssets(p, pa); }
   if (c.response) { const parsed = core.parseClaudeResponse(c.response, cfg); r.parsed = parsed; r.applied = core.applyResponse(p, parsed); }
   return r;

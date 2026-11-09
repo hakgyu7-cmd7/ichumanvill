@@ -183,7 +183,7 @@
         "제품 정보는 하단 쇼핑 태그와 고정 댓글 확인!"
       ],
       "frame1": "wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area",
-      "frame2": "medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area",
+      "frame2": "medium shot of a miniature wooden pointing arrow indicating downward toward the lower safe area",
       "cuts": [
         {
           "type": "Commercial Hero Display",
@@ -260,7 +260,7 @@
       "type": "character",
       "name": "요리하는 주인공",
       "label": "the PVC home cook figure",
-      "appearance": "a small PVC figure of a home cook with short brown hair and a cream apron",
+      "appearance": "a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron",
       "keywords": "손목, 설거지, 나, 사람",
       "done": false
     },

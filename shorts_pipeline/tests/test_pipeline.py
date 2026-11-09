@@ -63,6 +63,18 @@ def variants():
     pa["assets"][1]["appearance"] = "한글 appearance"
     pa["scenes"][2]["refs"] = ["pot", "nope", "pot"]
     cases.append({"name": "assets-en-bad", "project": pa, "assets_response": areply})
+    pt = copy.deepcopy(RAMEN)
+    pt["timing"] = {"chars_per_sec": 11.6}
+    cases.append({"name": "timing", "project": pt})
+    pw = copy.deepcopy(RAMEN)
+    pw["options"] = {"camera_warn": False, "adult_safe": False}
+    pw["timing"] = {"chars_per_sec": "7.456"}
+    cases.append({"name": "timing-en", "project": dict(pw, meta=dict(pw["meta"], language="en"))})
+    pp = copy.deepcopy(RAMEN)
+    pp["scenes"][1]["frame1"] = "a little boy and a CUTE girl, naked, extreme close-up, young adult"
+    pp["scenes"][5]["cuts"][1]["prompt"] = "Students and kids with a teenager and a baby-faced man"
+    pp["assets"][0]["appearance"] = "a cute young kid figure"
+    cases.append({"name": "policy", "project": pp, "scene_fix": {"idx": 1, "text": '```json\n{"frame1": "an adult man --no text", "cuts": [{"type": "Wide", "prompt": "adult walks"}, "second", {"prompt": ""}], "assets": [{"id": "hero", "appearance": "a 35-year-old adult man --ar 9:16"}, {"id": "zzz", "appearance": "x"}]}\n```'}})
     return cases
 
 
@@ -303,6 +315,111 @@ class EngineTests(unittest.TestCase):
         self.assertIn("no_assets", [i["code"] for i in pe.validate_project(CFG, none)])
         self.assertNotIn("no_assets", [i["code"] for i in pe.validate_project(CFG, pe.normalize_project(RAMEN, CFG))])
 
+    def test_render_defaults_and_partial_merge(self):
+        p = pe.normalize_project({"render": {"sub_size": 70, "title_color": "00FF00"}}, CFG)
+        r = p["render"]
+        self.assertEqual((r["sub_size"], r["title_color"]), (70, "00FF00"))
+        for k in ("top_bar", "bottom_bar", "bar_color", "title_font", "title_size", "title_outline", "title_y", "sub_font", "sub_color", "sub_outline",
+                  "sub_box", "sub_box_color", "sub_box_alpha", "sub_box_border", "sub_gap", "sub_bottom", "sub_chars_per_line", "crop_scale", "fit"):
+            self.assertIn(k, r, k)
+        self.assertEqual((r["top_bar"], r["bottom_bar"], r["sub_bottom"]), (240, 400, 0))
+        self.assertNotIn("width", r)
+
+    def test_measured_speed_changes_target_range(self):
+        base = pe.normalize_project(RAMEN, CFG)
+        self.assertEqual(pe.char_range(CFG, base)["custom"], False)
+        base["timing"] = {"chars_per_sec": 11.6}
+        rg = pe.char_range(CFG, base)
+        self.assertEqual((rg["min"], rg["max"], rg["custom"]), (496, 548, True))     # 11.6 x 45s = 522 +-5%
+        self.assertEqual((rg["scene_min"], rg["scene_max"]), (80, 94))               # 522/6 = 87 +-8%
+        self.assertIn("496~548자", pe.build_master_prompt(CFG, base))
+        self.assertIn("초당 약 11.6자", pe.build_master_prompt(CFG, base))
+        errs = [i for i in pe.validate_project(CFG, base) if i["code"] == "total_chars"]
+        self.assertEqual(errs[0]["level"], "error")                                  # 330자는 이 속도면 너무 짧음
+        self.assertIn("실측 TTS 속도", errs[0]["msg"])
+        long = pe.normalize_project(RAMEN, CFG)
+        long["timing"] = {"chars_per_sec": 11.6}
+        for sc in long["scenes"]:
+            sc["beats"][0] += " 그리고" * 8                                         # 씬마다 +32자 -> 총 522자 (실측 속도 목표)
+        self.assertEqual(pe.validate_project(CFG, long)[0]["level"], "ok")
+        self.assertEqual(pe.normalize_project({"timing": {"chars_per_sec": "abc"}}, CFG)["timing"]["chars_per_sec"], 0)
+        self.assertEqual(pe.normalize_project({"timing": {"chars_per_sec": -3}}, CFG)["timing"]["chars_per_sec"], 0)
+        self.assertEqual(pe.normalize_project({"timing": {"chars_per_sec": 7.456}}, CFG)["timing"]["chars_per_sec"], 7.46)
+
+    def test_camera_warning_is_narrow_and_switchable(self):
+        def codes(proj):
+            return [i["code"] for i in pe.validate_project(CFG, proj)]
+        p = pe.normalize_project(RAMEN, CFG)
+        p["scenes"][2]["cuts"][0]["type"] = "Macro Close-up"
+        p["scenes"][2]["frame1"] = "macro close-up of a pot lid"
+        self.assertNotIn("extreme_closeup", codes(p))                                # 흔한 매크로/클로즈업 표현은 경고하지 않음
+        p["scenes"][2]["frame1"] = "extreme close-up of a pot lid"
+        p["scenes"][2]["cuts"][1]["type"] = "Tight Macro"
+        self.assertEqual(codes(p).count("extreme_closeup"), 2)
+        p["options"]["camera_warn"] = False
+        self.assertNotIn("extreme_closeup", codes(p))
+
+    def test_policy_lint_words_and_adult_marker(self):
+        h = pe.policy_hits(CFG, "A little boy, CUTE girls and a naked kid; young adult; student")
+        self.assertEqual(h["minor"], ["girls", "kid", "little boy", "student"])
+        self.assertEqual(h["ambiguous"], ["cute", "young"])
+        self.assertEqual(h["sexual"], ["naked"])
+        self.assertEqual(pe.policy_hits(CFG, "an adult man in a kitchen")["minor"], [])
+        self.assertEqual(pe.policy_hits(CFG, "skidding boyfriend")["minor"], [])          # 단어 경계
+        for ok in ("a 30-year-old man", "an adult figure", "a middle-aged cook", "elderly man"):
+            self.assertTrue(pe.has_adult_marker(CFG, ok), ok)
+        for no in ("a male figure", "a 12-year-old", "young man"):
+            self.assertFalse(pe.has_adult_marker(CFG, no), no)
+        p = pe.normalize_project(RAMEN, CFG)
+        p["scenes"][5]["cuts"][1]["prompt"] = "kids and a baby in the kitchen"
+        p["assets"][0]["appearance"] = "a cute male figure"
+        found = [(i["code"], i["level"]) for i in pe.validate_project(CFG, p)]
+        for want in (("policy_minor", "error"), ("policy_ambiguous", "warn"), ("asset_age", "warn")):
+            self.assertIn(want, found)
+
+    def test_adult_clause_only_with_character_assets(self):
+        proj = pe.normalize_project(RAMEN, CFG)
+        clause = CFG["suffix"]["adult"]
+        sc = proj["scenes"][0]
+        self.assertIn(clause, pe.compose_frame(CFG, proj, "x", sc["refs"]))
+        self.assertIn(clause, pe.compose_omni(CFG, proj, sc))
+        by = {a["id"]: a for a in proj["assets"]}
+        self.assertIn(clause, pe.compose_reference(CFG, proj, by["hero"], "main"))
+        self.assertNotIn(clause, pe.compose_reference(CFG, proj, by["pot"], "main"))   # 사물에는 붙이지 않음
+        self.assertNotIn(clause, pe.compose_frame(CFG, proj, "x", ["pot"]))
+        self.assertNotIn(clause, pe.compose_frame(CFG, proj, "x", []))
+        proj["options"]["adult_safe"] = False
+        self.assertNotIn(clause, pe.compose_frame(CFG, proj, "x", sc["refs"]))
+        self.assertNotIn(clause, pe.compose_omni(CFG, proj, sc))
+
+    def test_master_prompt_has_policy_section(self):
+        m = pe.build_master_prompt(CFG, pe.normalize_project({"meta": {"topic": "t"}}, CFG))
+        self.assertIn("콘텐츠 정책 안전", m)
+        self.assertIn("명백한 성인", m)
+        self.assertIn("a 30-year-old adult", m)
+
+    def test_policy_fix_prompt_and_apply(self):
+        p = pe.normalize_project(RAMEN, CFG)
+        p["scenes"][1]["frame1"] = "a little boy standing"
+        fx = pe.build_policy_fix_prompt(CFG, p, 1)
+        self.assertIn("Scene 02", fx)
+        self.assertIn("little boy", fx)
+        self.assertIn("hero:", fx)
+        self.assertNotIn("{{", fx)
+        clean = pe.build_policy_fix_prompt(CFG, pe.normalize_project(RAMEN, CFG), 0)
+        self.assertNotIn("자동 검사에서 발견된 위험 단어", clean)
+        out = pe.apply_scene_fix(p, 1, '```json\n{"frame1": "an adult man standing --no text", "cuts": [{"type": "Wide", "prompt": "adult walks"}, "second", {"prompt": ""}], '
+                                      '"assets": [{"id": "hero", "appearance": "a 35-year-old adult man --ar 9:16"}, {"id": "zzz", "appearance": "x"}]}\n```')
+        sc = out["scenes"][1]
+        self.assertEqual(sc["frame1"], "an adult man standing")
+        self.assertEqual((sc["cuts"][0]["type"], sc["cuts"][0]["prompt"]), ("Wide", "adult walks"))
+        self.assertEqual(sc["cuts"][1]["prompt"], "second")
+        self.assertEqual(sc["cuts"][2]["prompt"], "")
+        self.assertEqual(out["assets"][0]["appearance"], "a 35-year-old adult man")
+        self.assertEqual(sc["frame2"], p["scenes"][1]["frame2"])                      # 안 준 필드는 유지
+        with self.assertRaises(ValueError):
+            pe.apply_scene_fix(p, 1, "json 없음")
+
     def test_legacy_keys(self):
         p = pe.normalize_project({"meta": {"style": "피규어_디오라마", "category": "쇼핑_꿀템", "category2": "B급_병맛", "language": "xx"}}, CFG)
         self.assertEqual((p["meta"]["style"], p["meta"]["category"], p["meta"]["category2"], p["meta"]["language"]), ("diorama", "shopping", "bgrade", "ko"))
@@ -339,6 +456,11 @@ class ParityTests(unittest.TestCase):
             self.assertEqual(j["asset_prompt"], pe.build_asset_prompt(CFG, p), f"asset prompt 불일치: {n}")
             self.assertEqual(j["linked"], pe.link_assets(p), f"link 불일치: {n}")
             self.assertEqual(j["suggest"], pe.suggest_recurring(CFG, p), f"suggest 불일치: {n}")
+            self.assertEqual(j["range"], pe.char_range(CFG, p), f"char_range 불일치: {n}")
+            self.assertEqual(j["length_rule"], pe.length_rule_text(CFG, p), f"length_rule 불일치: {n}")
+            self.assertEqual(j["policy_fix"], [pe.build_policy_fix_prompt(CFG, p, i) for i in range(6)], f"policy fix 불일치: {n}")
+            if "scene_fix" in case:
+                self.assertEqual(j["scene_fixed"], pe.apply_scene_fix(p, case["scene_fix"]["idx"], case["scene_fix"]["text"]), "scene fix 불일치")
             if "assets_response" in case:
                 pa_ = pe.parse_assets_response(case["assets_response"], CFG)
                 self.assertEqual(j["parsed_assets"], pa_, "parse_assets 불일치")

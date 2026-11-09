@@ -234,6 +234,19 @@ class Handler(BaseHTTPRequestHandler):
             if u.path == "/api/trends":
                 srcs = [s for s in (q.get("sources") or "coupang,tiktok,reddit").split(",") if s]
                 return self._json(TrendCrawler.get_all_trends(srcs, live=q.get("live", "1") != "0", cat=q.get("cat", "history")))
+            if u.path == "/api/fonts":
+                return self._json({"fonts": st.list_fonts(app.assets_dir)})
+            if u.path == "/api/font-file":
+                spec = q.get("spec", "")
+                f = None
+                if spec.startswith("assets:"):
+                    cand = app.assets_dir / Path(spec[7:]).name
+                    f = cand if cand.exists() and cand.suffix.lower() in st.FONT_EXTS else None
+                elif spec.startswith("system:"):
+                    f = st.find_system_font(spec[7:])
+                if not f:
+                    raise ApiError("폰트를 찾을 수 없습니다.", 404)
+                return self._file(f, "font/otf" if f.suffix.lower() == ".otf" else "font/ttf")
             if u.path == "/api/render/status":
                 return self._json(app.job)
             if u.path == "/api/projects":
@@ -303,8 +316,9 @@ class Handler(BaseHTTPRequestHandler):
                 if not raw:
                     raise ApiError("input/voice_raw.* (TTS 원본 음성)가 없습니다. 먼저 업로드하세요.")
                 try:
+                    fit = float(b["fit_seconds"]) if b.get("fit_seconds") else None
                     res = audio_tools.process_voice(raw, app.input_dir / "voice.mp3", float(b.get("speed", 1.2)), bool(b.get("remove_silence", True)),
-                                                    float(b.get("threshold_db", -45)), float(b.get("min_silence", 0.15)))
+                                                    float(b.get("threshold_db", -45)), float(b.get("min_silence", 0.15)), fit_seconds=fit)
                 except audio_tools.AudioError as e:
                     raise ApiError(str(e), 500)
                 return self._json({**res, **audio_tools.check_voice(app.input_dir / "voice.mp3", app.cfg["spec"]["total_seconds"])})
@@ -368,6 +382,12 @@ class Handler(BaseHTTPRequestHandler):
             for e in audio_tools.AUDIO_EXTS:
                 (app.input_dir / f"{kind}{e}").unlink(missing_ok=True)
             dest = app.input_dir / f"{kind}{ext}"
+        elif kind == "font":
+            fname = re.sub(r"[^\w\-. ]", "_", Path(q.get("name", "")).name)
+            if ext not in st.FONT_EXTS or not fname.strip("._ "):
+                raise ApiError("폰트 확장자(ttf/otf/ttc)를 확인하세요.")
+            app.assets_dir.mkdir(parents=True, exist_ok=True)
+            dest = app.assets_dir / fname
         elif kind == "ref":
             rid = q.get("id", "")
             if not REF_ID_RE.match(rid) or ext not in REF_EXTS:
@@ -376,7 +396,7 @@ class Handler(BaseHTTPRequestHandler):
                 (app.refs_dir / f"{rid}{e}").unlink(missing_ok=True)
             dest = app.refs_dir / f"{rid}{ext}"
         else:
-            raise ApiError("kind 는 clip / voice / voice_raw / ref 중 하나여야 합니다.")
+            raise ApiError("kind 는 clip / voice / voice_raw / ref / font 중 하나여야 합니다.")
         tmp = dest.with_suffix(dest.suffix + ".part")
         left = n
         with open(tmp, "wb") as f:
@@ -390,7 +410,7 @@ class Handler(BaseHTTPRequestHandler):
             tmp.unlink(missing_ok=True)
             raise ApiError("업로드가 중간에 끊겼습니다.")
         tmp.replace(dest)
-        return {"saved": dest.name, "size": n}
+        return {"saved": dest.name, "size": n, **({"spec": f"assets:{dest.name}"} if kind == "font" else {})}
 
     def _delete(self, b: Dict[str, Any]) -> Dict[str, Any]:
         app = self.app

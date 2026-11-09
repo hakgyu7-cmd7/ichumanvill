@@ -66,7 +66,7 @@ class StitcherUnit(unittest.TestCase):
         cmd, files = self._cmd(RAMEN)
         fc = cmd[cmd.index("-filter_complex") + 1]
         self.assertIn("concat=n=6:v=1:a=0[cat]", fc)
-        self.assertIn("pad=1080:1920:0:240:color=black", fc)  # 상단 240px
+        self.assertIn("pad=1080:1920:0:240:color=0x000000", fc)  # 상단 240px
         self.assertIn("scale=w=1145:h=1357:force_original_aspect_ratio=increase,crop=1080:1280", fc)  # 1.06x cover
         self.assertEqual(fc.count("drawtext="), len(files))
         self.assertIn("gte(t,0.0)*lt(t,2.5)", fc)
@@ -76,6 +76,59 @@ class StitcherUnit(unittest.TestCase):
         self.assertIn("6:a", cmd)       # 음성은 7번째 입력
         self.assertEqual(cmd[cmd.index("-t") + 1], "45.000")
         self.assertTrue(all(len(c.split("\n")) == 1 for c in files.values()))  # 줄마다 별도 파일 (줄별 중앙정렬)
+
+    def test_custom_letterbox_title_and_subtitle_style(self):
+        p = json.loads(json.dumps(RAMEN))
+        p["render"].update({"top_bar": 300, "bottom_bar": 200, "bar_color": "#112233", "title_size": 80, "title_color": "00ff00", "title_outline": 0,
+                            "title_y": -20, "sub_size": 40, "sub_color": "#FFFF00", "sub_outline": 3, "sub_outline_color": "FF0000", "sub_box": False,
+                            "sub_gap": 4})
+        cmd, files = self._cmd(p)
+        fc = cmd[cmd.index("-filter_complex") + 1]
+        self.assertIn("scale=w=1145:h=1505:force_original_aspect_ratio=increase,crop=1080:1420", fc)   # 영상 높이 = 1920-300-200 = 1420
+        self.assertIn("pad=1080:1920:0:300:color=0x112233", fc)
+        self.assertIn("fontsize=80:fontcolor=0x00FF00:", fc)
+        self.assertIn("y=(300-(2*text_h+1*8))/2+0*(text_h+8)+-20", fc)
+        self.assertNotIn("bordercolor=0x000000:x=(w-text_w)/2:y=(300", fc)                         # 타이틀 외곽선 0 -> 없음
+        self.assertIn("fontsize=40:fontcolor=0xFFFF00:borderw=3:bordercolor=0xFF0000:x=(w-text_w)/2:y=1700-0-", fc)  # 자막 하단 = 1920-200-20, 박스 없음 -> 패딩 0
+        self.assertNotIn("box=1", fc)
+
+    def test_subtitle_bottom_manual_and_box_options(self):
+        p = json.loads(json.dumps(RAMEN))
+        p["render"].update({"sub_bottom": 1400, "sub_box_color": "202020", "sub_box_alpha": 0.5, "sub_box_border": 20})
+        fc = self._cmd(p)[0][self._cmd(p)[0].index("-filter_complex") + 1]
+        self.assertIn("boxcolor=0x202020@0.5:boxborderw=20:", fc)
+        self.assertIn("y=1400-20-", fc)
+
+    def test_render_settings_validation_and_fallbacks(self):
+        p = json.loads(json.dumps(RAMEN))
+        p["render"].update({"top_bar": 900, "bottom_bar": 900})
+        with self.assertRaises(st.StitchError) as cm:
+            st.render_settings(CFG, p)
+        self.assertIn("영상 높이", str(cm.exception))
+        q = json.loads(json.dumps(RAMEN))
+        q["render"].update({"title_color": "not-a-color", "sub_size": "abc", "bar_color": None, "sub_box_alpha": 9, "crop_scale": 5})
+        S = st.render_settings(CFG, q)
+        self.assertEqual((S["title_color"], S["sub_size"], S["bar"], S["sub_box_alpha"], S["zoom"]), ("FFE500", 52, "000000", 1.0, 1.5))
+        self.assertEqual((S["top"], S["bottom"], S["video_h"], S["sub_bottom"]), (240, 400, 1280, 1500))
+        q["render"]["bottom_bar"] = 100
+        self.assertEqual(st.render_settings(CFG, q)["sub_bottom"], 1800)                           # 자동 위치는 하단 바 변경을 따라감
+
+    def test_font_resolution_and_listing(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            (td / "MyFont.ttf").write_bytes(b"x")
+            (td / "readme.txt").write_text("x")
+            f, pre = st.resolve_font("assets:MyFont.ttf", td, "bold")
+            self.assertEqual((f.name, pre), ("MyFont.ttf", False))
+            f2, _ = st.resolve_font("assets:../../etc/passwd", td, "bold")                       # 경로 탈출 시도는 자동 선택으로 대체
+            self.assertNotEqual(f2.name if f2 else None, "passwd")
+            f3, _ = st.resolve_font("assets:Missing.ttf", td, "bold")
+            self.assertEqual(f3.name if f3 else None, "MyFont.ttf")                               # 없으면 assets 안의 다른 폰트로 대체
+            lst = st.list_fonts(td)
+            self.assertEqual(lst[0], {"spec": "assets:MyFont.ttf", "name": "MyFont", "group": "assets"})
+            self.assertTrue(all(x["group"] in ("assets", "system") for x in lst))
+            self.assertNotIn("readme", [x["name"] for x in lst])
+            self.assertIsNone(st.find_system_font("definitely-not-a-font-xyz.ttf"))
 
     def test_command_contain_and_no_voice(self):
         p = json.loads(json.dumps(RAMEN))
@@ -131,6 +184,23 @@ class StitcherRender(unittest.TestCase):
             self.assertTrue(any("음성" in l and "경고" in l for l in logs))
             self.assertFalse((st.BASE / "output" / "_tmp").exists(), "임시 텍스트 파일이 정리되어야 함")
 
+    def test_custom_style_render_end_to_end(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            inp = td / "in"
+            inp.mkdir()
+            make_clip(inp / "scene1.mp4")
+            p = json.loads(json.dumps(RAMEN))
+            p["render"].update({"top_bar": 300, "bottom_bar": 300, "bar_color": "301020", "sub_box": False, "sub_outline": 2, "title_color": "00FFAA"})
+            res = st.render(p, inp, td / "out", ROOT / "assets", partial=True, log=lambda m: None)
+            r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", res["output"]], capture_output=True, text=True)
+            v = json.loads(r.stdout)["streams"][0]
+            self.assertEqual((v["width"], v["height"]), (1080, 1920))
+            frame = td / "f.png"
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", "0.3", "-i", res["output"], "-frames:v", "1", "-vf", "crop=4:4:500:20,scale=1:1", "-pix_fmt", "rgb24", "-f", "rawvideo", str(frame)], check=True)
+            got = list(frame.read_bytes())[:3]                                                       # 상단 바 색(301020)이 실제로 칠해짐 (YUV 변환 오차 허용)
+            self.assertTrue(all(abs(g - w) <= 3 for g, w in zip(got, [0x30, 0x10, 0x20])), got)
+
     def test_missing_clips_error_lists_scenes(self):
         with tempfile.TemporaryDirectory() as td:
             with self.assertRaises(st.StitchError) as cm:
@@ -175,6 +245,44 @@ class AudioTests(unittest.TestCase):
             self.assertAlmostEqual(res["before"], 3.0, delta=0.1)
             self.assertAlmostEqual(res["after"], 2.0 / 1.2, delta=0.2)  # 무음 1초 제거 + 1.2배속
             self.assertEqual(audio_tools.check_voice(td / "voice.mp3", 45)["ok"], False)
+
+    def _gap_wav(self, td):
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono:d=1",
+                        "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-filter_complex", "[0][1][2]concat=n=3:v=0:a=1", str(td / "raw.wav")], check=True)
+        return td / "raw.wav"
+
+    def test_settings_actually_change_the_result(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            raw = self._gap_wav(td)
+            a = audio_tools.process_voice(raw, td / "a.mp3", speed=1.0, remove_silence=False)
+            b = audio_tools.process_voice(raw, td / "b.mp3", speed=1.0, remove_silence=True)
+            c = audio_tools.process_voice(raw, td / "c.mp3", speed=2.0, remove_silence=True)
+            d = audio_tools.process_voice(raw, td / "d.mp3", speed=0.8, remove_silence=True)
+            e = audio_tools.process_voice(raw, td / "e.mp3", speed=1.0, remove_silence=True, min_silence=0.02)
+            self.assertAlmostEqual(a["after"], 3.0, delta=0.15)       # 무음 유지 + 원속도
+            self.assertTrue(2.0 <= b["after"] <= 2.35, b)             # 무음 제거(문장 사이 min_silence 만큼은 남김)
+            self.assertAlmostEqual(c["after"], b["after"] / 2, delta=0.12)    # 2배속
+            self.assertAlmostEqual(d["after"], b["after"] / 0.8, delta=0.15)  # 0.8배속(느리게)
+            self.assertLess(e["after"], b["after"])                   # min_silence 를 줄이면 더 짧아짐
+
+    def test_fit_seconds_picks_speed_automatically(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            raw = self._gap_wav(td)
+            r = audio_tools.process_voice(raw, td / "f.mp3", remove_silence=True, fit_seconds=4.0)
+            self.assertAlmostEqual(r["speed"], r["base_len"] / 4.0, places=2)     # 무음 제거 후 길이 / 목표 길이
+            self.assertAlmostEqual(r["after"], 4.0, delta=0.25)
+            self.assertFalse(r["fit_clamped"])
+            r2 = audio_tools.process_voice(raw, td / "g.mp3", remove_silence=True, fit_seconds=1.0)   # 2배속 초과 필요 -> 2.0 으로 제한
+            self.assertEqual((r2["speed"], r2["fit_clamped"]), (2.0, True))
+            r3 = audio_tools.process_voice(raw, td / "h.mp3", remove_silence=True, fit_seconds=0.5)
+            self.assertEqual((r3["speed"], r3["fit_clamped"]), (2.0, True))
+            r4 = audio_tools.process_voice(raw, td / "i.mp3", remove_silence=False, fit_seconds=6.0)  # 무음 유지 3.0초 -> 6초 = 0.5배속
+            self.assertAlmostEqual(r4["speed"], 0.5, places=2)
+            self.assertFalse(r4["fit_clamped"])
+            with self.assertRaises(audio_tools.AudioError):
+                audio_tools.process_voice(raw, td / "j.mp3", fit_seconds=-1)
 
     def test_missing_source(self):
         with self.assertRaises(audio_tools.AudioError):
@@ -406,6 +514,50 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(r["removed"], ["hero.jpg"])
         self.assertEqual(self.req("POST", "/api/delete-file", {"kind": "ref", "id": "../x"})[0], 400)
         self.assertEqual(self.req("GET", "/api/files")[1]["refs"], {})
+
+    def test_fonts_endpoints_and_upload(self):
+        s, r, _ = self.req("GET", "/api/fonts")
+        self.assertEqual(s, 200)
+        self.assertIsInstance(r["fonts"], list)
+        s, r, _ = self.req("POST", "/api/upload?kind=font&name=" + "My%20Font!.TTF", raw=b"FAKEFONTDATA")
+        self.assertEqual(s, 200)
+        self.assertEqual(r["spec"], "assets:My Font_.TTF")
+        self.assertTrue((Path(self.tmp.name) / "assets" / "My Font_.TTF").exists())
+        fonts = self.req("GET", "/api/fonts")[1]["fonts"]
+        self.assertEqual(fonts[0]["spec"], "assets:My Font_.TTF")
+        import urllib.parse
+        s, data, resp = self.req("GET", "/api/font-file?spec=" + urllib.parse.quote("assets:My Font_.TTF"))
+        self.assertEqual((s, data), (200, b"FAKEFONTDATA"))
+        self.assertEqual(self.req("GET", "/api/font-file?spec=" + urllib.parse.quote("assets:../../config.json"))[0], 404)
+        self.assertEqual(self.req("GET", "/api/font-file?spec=system:nope-xyz.ttf")[0], 404)
+        self.assertEqual(self.req("GET", "/api/font-file?spec=/etc/passwd")[0], 404)
+        for bad in ("kind=font&name=a.exe", "kind=font&name=..", "kind=font"):
+            self.assertEqual(self.req("POST", "/api/upload?" + bad, raw=b"x")[0], 400, bad)
+
+    @unittest.skipUnless(HAVE_FFMPEG, "ffmpeg 없음")
+    def test_audio_process_respects_posted_settings(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono:d=1",
+                            "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-filter_complex", "[0][1][2]concat=n=3:v=0:a=1", str(td / "raw.wav")], check=True)
+            self.assertEqual(self.req("POST", "/api/upload?kind=voice_raw&name=r.wav", raw=(td / "raw.wav").read_bytes())[0], 200)
+            try:
+                def run(**kw):
+                    st_, r, _ = self.req("POST", "/api/audio/process", kw)
+                    self.assertEqual(st_, 200, r)
+                    return r
+                a = run(speed=1.0, remove_silence=False)
+                b = run(speed=1.0, remove_silence=True)
+                c = run(speed=2.0, remove_silence=True)
+                self.assertAlmostEqual(a["after"], 3.0, delta=0.2)
+                self.assertTrue(2.0 <= b["after"] <= 2.4, b)
+                self.assertAlmostEqual(c["after"], b["after"] / 2, delta=0.15)
+                f = run(speed=1.2, remove_silence=True, fit_seconds=4)
+                self.assertAlmostEqual(f["after"], 4.0, delta=0.3)
+                self.assertAlmostEqual(f["speed"], f["base_len"] / 4, places=2)
+            finally:
+                self.req("POST", "/api/delete-file", {"kind": "voice_raw"})
+                self.req("POST", "/api/delete-file", {"kind": "voice"})
 
     def test_project_save_load(self):
         self.assertEqual(self.req("POST", "/api/project", {"name": "../evil", "project": {}})[0], 400)

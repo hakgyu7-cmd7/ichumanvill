@@ -16,7 +16,8 @@ window.PIPELINE_CONFIG = {
  "suffix": {
   "zero_text": "--no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16",
   "safe_margin": "subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up",
-  "zero_text_core": "--no text, letters, words, typography, subtitles, font, signage, watermark"
+  "zero_text_core": "--no text, letters, words, typography, subtitles, font, signage, watermark",
+  "adult": "all characters are clearly adult"
  },
  "cut_connectors": [
   "Start from Frame 1.",
@@ -450,13 +451,14 @@ window.PIPELINE_CONFIG = {
    "max": 350,
    "scene_min": 50,
    "scene_max": 58,
-   "desc": "한국어 (자연스러운 숏폼 구어체, 1.2배속 기준 공백 포함 320~350자)",
+   "desc": "한국어 (자연스러운 숏폼 구어체, 1.2배속 발화)",
    "length_rule": "공백 포함 총 320~350자 엄수 (초당 약 7.5자), 씬당 50~58자.",
    "cta": "제품 정보는 하단 쇼핑 태그와 고정 댓글 확인!",
    "cta_markers": [
     "쇼핑 태그",
     "고정 댓글"
-   ]
+   ],
+   "count_note": "공백 포함 "
   },
   "en": {
    "name": "English",
@@ -471,7 +473,8 @@ window.PIPELINE_CONFIG = {
    "cta_markers": [
     "shopping tag",
     "pinned comment"
-   ]
+   ],
+   "count_note": ""
   },
   "ja": {
    "name": "日本語",
@@ -486,7 +489,8 @@ window.PIPELINE_CONFIG = {
    "cta_markers": [
     "ショッピングタグ",
     "固定コメント"
-   ]
+   ],
+   "count_note": "공백 제외 "
   },
   "zh": {
    "name": "中文",
@@ -501,7 +505,8 @@ window.PIPELINE_CONFIG = {
    "cta_markers": [
     "購物標籤",
     "置頂留言"
-   ]
+   ],
+   "count_note": "공백 제외 "
   }
  },
  "models": {
@@ -536,16 +541,28 @@ window.PIPELINE_CONFIG = {
   "width": 1080,
   "height": 1920,
   "top_bar": 240,
-  "video_h": 1280,
   "bottom_bar": 400,
-  "title_color": "FFE500",
+  "bar_color": "000000",
+  "title_font": "",
   "title_size": 66,
+  "title_color": "FFE500",
+  "title_outline": 2,
+  "title_outline_color": "000000",
+  "title_y": 0,
   "title_chars_per_line": 15,
+  "sub_font": "",
   "sub_size": 52,
-  "sub_chars_per_line": 18,
-  "sub_bottom": 1500,
+  "sub_color": "FFFFFF",
+  "sub_outline": 0,
+  "sub_outline_color": "000000",
+  "sub_box": true,
+  "sub_box_color": "000000",
   "sub_box_alpha": 0.65,
-  "sub_box_border": 14
+  "sub_box_border": 14,
+  "sub_gap": 8,
+  "sub_bottom": 0,
+  "sub_bottom_gap": 20,
+  "sub_chars_per_line": 18
  },
  "master_template": [
   "# [시스템 지침] 쇼츠 알고리즘 분석가 & 고성능 비주얼 디렉터",
@@ -570,6 +587,11 @@ window.PIPELINE_CONFIG = {
   "- 구글 플로우 우측 하단 워터마크를 {{crop_scale}}배 확대 크롭으로 밀어내므로, 극단적 익스트림 클로즈업(Extreme/Tight Close-up)을 쓰지 않습니다.",
   "- 주요 피사체는 화면 중앙 {{safe_pct}}% 구역 안에, 가장자리(특히 우측 하단)에는 {{margin_pct}}% 이상 여백을 둡니다. 'Medium close-up with generous negative space'처럼 한 단계 후퇴한 화각을 씁니다.",
   "- 손/머리/제품 일부가 화면 끝에 걸치는 구도는 피합니다.",
+  "",
+  "## 3-2. [CRITICAL] Google Flow(Veo) 콘텐츠 정책 안전 (생성 차단 방지)",
+  "- 모든 인물·피규어·캐릭터는 명백한 성인으로 설정하고, 외형(appearance)에 반드시 연령을 명시하세요(예: a 30-year-old adult). 성인 신체 비율과 성인 의상을 씁니다.",
+  "- child, kid, boy, girl, teen, student, baby 등 미성년으로 읽힐 수 있는 단어와 young, little, cute, childlike, baby-faced 같은 유아적 표현, 귀여움/순수함 강조는 쓰지 않습니다. (장난감/피규어/인형 캐릭터도 같은 규칙입니다.)",
+  "- 노골적 노출·선정적 묘사, 유혈·잔혹 묘사, 실존 인물·유명인의 얼굴/이름은 쓰지 않습니다.",
   "",
   "## 4. 비주얼 규격 (방법 B: 씬당 7.5초 단일 클립 내 2.5초 간격 화각 전환)",
   "- 씬마다 frame1(0s 시작 기준 이미지), frame2(2.5s 전환 기준 이미지), cuts 3개(각 2.5초 구간의 카메라 무빙/동작)를 출력합니다.",
@@ -675,6 +697,7 @@ window.PIPELINE_CONFIG = {
   "- 선택된 화풍: {{style_name}} (화풍 키워드는 appearance 에 쓰지 않습니다. 시스템이 화풍 앵커를 자동 삽입합니다.)",
   "- id: 영문 소문자·숫자·_ / type: character | object | place / name: 한국어 이름 / label: 영문 짧은 호칭(예: the plastic cook figure)",
   "- appearance: 영문 외형 고정 키워드(성별·연령·체형·의상·색·재질·크기·특징 등을 구체적으로, 40단어 이내). 배경·동작·화각은 제외하고, 한글/글자/간판/로고 묘사는 금지합니다.",
+  "- 인물(character)의 appearance 에는 반드시 성인 연령을 명시하세요(예: a 30-year-old adult). 피규어/인형 캐릭터도 동일하며, child/kid/boy/girl/young/cute 등 어려 보이는 표현은 금지입니다.",
   "- keywords: 한국어 대본이나 묘사에서 이 대상을 가리키는 단어들을 쉼표로 나열합니다.",
   "{{existing_assets}}",
   "",
@@ -882,6 +905,95 @@ window.PIPELINE_CONFIG = {
   "heavy",
   "sharp",
   "tight"
+ ],
+ "timing": {
+  "tolerance": 0.05,
+  "scene_tolerance": 0.08
+ },
+ "policy": {
+  "minor_terms": [
+   "child",
+   "children",
+   "kid",
+   "kids",
+   "boy",
+   "boys",
+   "girl",
+   "girls",
+   "teen",
+   "teens",
+   "teenager",
+   "teenagers",
+   "teenage",
+   "minor",
+   "minors",
+   "baby",
+   "babies",
+   "toddler",
+   "toddlers",
+   "infant",
+   "infants",
+   "newborn",
+   "schoolboy",
+   "schoolgirl",
+   "student",
+   "students",
+   "elementary",
+   "kindergarten",
+   "preschool",
+   "juvenile",
+   "underage",
+   "little girl",
+   "little boy",
+   "young girl",
+   "young boy",
+   "loli",
+   "shota"
+  ],
+  "ambiguous_terms": [
+   "young",
+   "youthful",
+   "childlike",
+   "childish",
+   "baby-faced",
+   "innocent",
+   "cute",
+   "adorable"
+  ],
+  "sexual_terms": [
+   "nude",
+   "naked",
+   "nudity",
+   "topless",
+   "sexy",
+   "erotic",
+   "lingerie",
+   "bikini",
+   "underwear",
+   "seductive",
+   "cleavage"
+  ],
+  "adult_regex": "\\badult\\b|\\b(?:2\\d|[3-6]\\d)[- ]year[- ]old\\b|\\bmiddle[- ]aged\\b|\\bsenior\\b|\\belderly\\b"
+ },
+ "policy_fix_template": [
+  "# [정책 안전 재작성] Google Flow(Veo) 콘텐츠 정책 차단 대응",
+  "아래 Scene {{scene_no}} 의 프롬프트가 Google 의 콘텐츠 정책(미성년자 관련 등)에 걸려 생성이 차단되었습니다. 의미와 카메라 컷 구조는 유지하되, 정책에 걸릴 수 있는 요소를 제거해 영문 프롬프트를 다시 써 주세요.",
+  "- 모든 등장인물/피규어/캐릭터는 명백한 성인(예: a 30-year-old adult)으로 표현하고, 성인 신체 비율과 성인 의상을 쓰세요.",
+  "- 아이·어린이·청소년·학생·아기·소년·소녀, young/little/cute/childlike/baby-faced 등 미성년으로 읽힐 수 있는 표현과 유아적 비율, 귀여움/순수함 강조를 모두 제거하세요.",
+  "- 노골적 노출·선정, 유혈·잔혹 묘사, 실존 인물/유명인을 제거하세요.",
+  "- 화풍 키워드·안전 마진 문구·--no 접미사는 시스템이 자동 추가하므로 쓰지 않습니다. 글자/간판/텍스트 묘사 금지, 영문만 사용합니다.",
+  "{{flagged}}",
+  "",
+  "## 현재 Scene {{scene_no}}",
+  "등장 대상(기준 이미지): {{assets}}",
+  "{{scene_text}}",
+  "",
+  "## 출력 (JSON 하나만 ```json 코드블록으로, 설명 금지)",
+  "```json",
+  "{\"frame1\": \"...\", \"frame2\": \"...\", \"cuts\": [{\"type\": \"...\", \"prompt\": \"...\"}, {\"type\": \"...\", \"prompt\": \"...\"}, {\"type\": \"...\", \"prompt\": \"...\"}],",
+  " \"assets\": [{\"id\": \"asset id\", \"appearance\": \"연령/표현을 고친 영문 외형\"}]}",
+  "```",
+  "- assets 는 이 씬에 연결된 등장 대상 중 외형(appearance)의 연령/표현을 고쳐야 하는 것만 포함합니다(없으면 빈 배열)."
  ]
 };
 window.PIPELINE_SEED = {
@@ -1089,7 +1201,12 @@ window.PIPELINE_SAMPLES = {
   },
   "options": {
    "zero_text": true,
-   "safe_margin": true
+   "safe_margin": true,
+   "adult_safe": true,
+   "camera_warn": true
+  },
+  "timing": {
+   "chars_per_sec": 0
   },
   "assets": [
    {
@@ -1106,7 +1223,7 @@ window.PIPELINE_SAMPLES = {
     "type": "character",
     "name": "요리하는 주인공",
     "label": "the PVC home cook figure",
-    "appearance": "a small PVC figure of a home cook with short brown hair and a cream apron",
+    "appearance": "a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron",
     "keywords": "손목, 설거지, 나, 사람",
     "done": false
    },
@@ -1288,7 +1405,7 @@ window.PIPELINE_SAMPLES = {
      "제품 정보는 하단 쇼핑 태그와 고정 댓글 확인!"
     ],
     "frame1": "wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area",
-    "frame2": "medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area",
+    "frame2": "medium shot of a miniature wooden pointing arrow indicating downward toward the lower safe area",
     "refs": [
      "pot"
     ],
@@ -1311,7 +1428,28 @@ window.PIPELINE_SAMPLES = {
   "render": {
    "crop_scale": 1.06,
    "fit": "cover",
+   "top_bar": 240,
+   "bottom_bar": 400,
+   "bar_color": "000000",
+   "title_font": "",
+   "title_size": 66,
+   "title_color": "FFE500",
+   "title_outline": 2,
+   "title_outline_color": "000000",
+   "title_y": 0,
+   "title_chars_per_line": 15,
+   "sub_font": "",
    "sub_size": 52,
+   "sub_color": "FFFFFF",
+   "sub_outline": 0,
+   "sub_outline_color": "000000",
+   "sub_box": true,
+   "sub_box_color": "000000",
+   "sub_box_alpha": 0.65,
+   "sub_box_border": 14,
+   "sub_gap": 8,
+   "sub_bottom": 0,
+   "sub_bottom_gap": 20,
    "sub_chars_per_line": 18
   },
   "metadata": {
@@ -1366,7 +1504,12 @@ window.PIPELINE_SAMPLES = {
   },
   "options": {
    "zero_text": true,
-   "safe_margin": true
+   "safe_margin": true,
+   "adult_safe": true,
+   "camera_warn": true
+  },
+  "timing": {
+   "chars_per_sec": 0
   },
   "assets": [
    {
@@ -1374,7 +1517,7 @@ window.PIPELINE_SAMPLES = {
     "type": "character",
     "name": "주인공 피규어",
     "label": "the deadpan PVC man figure",
-    "appearance": "a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
+    "appearance": "a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
     "keywords": "남자, 주인공, 사람, 나",
     "done": false
    },
@@ -1569,7 +1712,7 @@ window.PIPELINE_SAMPLES = {
      "스프 넣는 걸 깜빡했더라고요.",
      "그러니까 그냥 눈대중으로 드세요."
     ],
-    "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth",
+    "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with plain yellow noodles and zero soup broth",
     "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",
     "refs": [
      "hero",
@@ -1594,7 +1737,28 @@ window.PIPELINE_SAMPLES = {
   "render": {
    "crop_scale": 1.06,
    "fit": "cover",
+   "top_bar": 240,
+   "bottom_bar": 400,
+   "bar_color": "000000",
+   "title_font": "",
+   "title_size": 66,
+   "title_color": "FFE500",
+   "title_outline": 2,
+   "title_outline_color": "000000",
+   "title_y": 0,
+   "title_chars_per_line": 15,
+   "sub_font": "",
    "sub_size": 52,
+   "sub_color": "FFFFFF",
+   "sub_outline": 0,
+   "sub_outline_color": "000000",
+   "sub_box": true,
+   "sub_box_color": "000000",
+   "sub_box_alpha": 0.65,
+   "sub_box_border": 14,
+   "sub_gap": 8,
+   "sub_bottom": 0,
+   "sub_bottom_gap": 20,
    "sub_chars_per_line": 18
   },
   "metadata": {}

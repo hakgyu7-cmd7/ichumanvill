@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -47,7 +48,7 @@ BANNED_PROMPT_WORDS = [
     "signage", "sign", "signs", "writing", "written", "typography", "font", "logo", "logos",
     "label", "banner", "headline", "headlines", "poster", "newspaper", "slogan", "handwriting",
 ]
-EXTREME_CLOSEUP_RE = re.compile(r"\b(extreme|tight)[- ](close[- ]?up|macro)\b|\bmacro close[- ]?up\b", re.I)
+EXTREME_CLOSEUP_RE = re.compile(r"\b(extreme|tight)[- ](close[- ]?up|macro)\b", re.I)
 CJK_RE = re.compile(r"[ᄀ-ᇿ぀-ヿ㄰-㆏㐀-䶿一-鿿가-힯]")
 TIME_MARKER_RE = re.compile(r"^\s*\[[^\]]*\]\s*")
 
@@ -99,6 +100,12 @@ def empty_scene(i: int) -> Dict[str, Any]:
             "cuts": [{"type": "", "prompt": ""} for _ in range(3)]}
 
 
+def default_render(cfg: Dict[str, Any]) -> Dict[str, Any]:
+    r = {"crop_scale": cfg["spec"]["crop_scale"], "fit": "cover"}
+    r.update({k: v for k, v in cfg["layout"].items() if k not in ("width", "height")})
+    return r
+
+
 def default_project(cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     cfg = cfg or load_config()
     return {
@@ -107,13 +114,13 @@ def default_project(cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             "topic": "", "top_title": "", "category": cfg.get("default_category", "general"), "category2": "", "format": "",
             "style": default_style_id(cfg), "language": "ko", "source_url": "", "source_script": "",
         },
-        "options": {"zero_text": True, "safe_margin": True},
+        "options": {"zero_text": True, "safe_margin": True, "adult_safe": True, "camera_warn": True},
+        "timing": {"chars_per_sec": 0},
         "assets": [],
         "analysis": {"hook_technique": "", "retention_psychology": "", "skeleton": ""},
         "plan": {"titles": [], "description": "", "hashtags": []},
         "scenes": [empty_scene(i) for i in range(1, cfg["spec"]["scenes"] + 1)],
-        "render": {"crop_scale": cfg["spec"]["crop_scale"], "fit": "cover",
-                   "sub_size": cfg["layout"]["sub_size"], "sub_chars_per_line": cfg["layout"]["sub_chars_per_line"]},
+        "render": default_render(cfg),
         "metadata": {},
     }
 
@@ -123,11 +130,16 @@ def normalize_project(p: Dict[str, Any], cfg: Optional[Dict[str, Any]] = None) -
     cfg = cfg or load_config()
     base = default_project(cfg)
     out = copy.deepcopy(base)
-    for k in ("meta", "options", "analysis", "plan", "render"):
+    for k in ("meta", "options", "timing", "analysis", "plan", "render"):
         if isinstance(p.get(k), dict):
             out[k].update(p[k])
     if "metadata" in p:
         out["metadata"] = p["metadata"]
+    try:
+        cps = float(out["timing"].get("chars_per_sec") or 0)
+    except (TypeError, ValueError):
+        cps = 0.0
+    out["timing"] = {"chars_per_sec": math.floor(cps * 100 + 0.5) / 100 if cps > 0 else 0}
     m = out["meta"]
     m["style"] = LEGACY_STYLE_KEYS.get(m["style"], m["style"])
     m["category"] = LEGACY_CATEGORY_KEYS.get(m["category"], m["category"])
@@ -252,6 +264,34 @@ def count_units(text: str, lang: str, cfg: Dict[str, Any]) -> int:
     return len(re.sub(r"\s+", "", text))
 
 
+def _round(x: float) -> int:
+    return int(math.floor(x + 0.5))
+
+
+def char_range(cfg: Dict[str, Any], project: Dict[str, Any]) -> Dict[str, Any]:
+    """목표 분량 범위. project.timing.chars_per_sec(실측 TTS 속도)가 있으면 그 속도로 45초를 채우는 범위, 없으면 언어 기본값."""
+    lang = cfg["languages"][project["meta"]["language"]]
+    cps = float((project.get("timing") or {}).get("chars_per_sec") or 0)
+    if cps > 0:
+        total = cps * cfg["spec"]["total_seconds"]
+        per = total / cfg["spec"]["scenes"]
+        tol, stol = cfg["timing"]["tolerance"], cfg["timing"]["scene_tolerance"]
+        return {"min": _round(total * (1 - tol)), "max": _round(total * (1 + tol)), "scene_min": _round(per * (1 - stol)),
+                "scene_max": _round(per * (1 + stol)), "cps": cps, "custom": True}
+    return {"min": lang["min"], "max": lang["max"], "scene_min": lang["scene_min"], "scene_max": lang["scene_max"],
+            "cps": (lang["min"] + lang["max"]) / 2 / cfg["spec"]["total_seconds"], "custom": False}
+
+
+def length_rule_text(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
+    lang = cfg["languages"][project["meta"]["language"]]
+    rg = char_range(cfg, project)
+    if not rg["custom"]:
+        return lang["length_rule"]
+    uw = "단어" if lang["unit"] == "words" else "자"
+    return (f"{lang['count_note']}총 {rg['min']}~{rg['max']}{uw} 엄수 (초당 약 {rg['cps']:g}{uw}, 실측 TTS 속도 기준), "
+            f"씬당 {rg['scene_min']}~{rg['scene_max']}{uw}.")
+
+
 def total_units(project: Dict[str, Any], cfg: Dict[str, Any]) -> int:
     lang = project["meta"]["language"]
     return sum(count_units(scene_text(s), lang, cfg) for s in project["scenes"])
@@ -277,6 +317,11 @@ def scene_assets(project: Dict[str, Any], refs: Optional[List[str]]) -> List[Dic
     return [a for a in project.get("assets", []) if a["id"] in ids]
 
 
+def _has_character(project: Dict[str, Any], refs: Optional[List[str]]) -> bool:
+    """정책 안전: 이 씬에 인물(character) 기준 대상이 있고 adult_safe 옵션이 켜져 있으면 성인 명시 문구를 붙인다."""
+    return bool(project["options"].get("adult_safe", True)) and any(a["type"] == "character" for a in scene_assets(project, refs))
+
+
 def compose_frame(cfg: Dict[str, Any], project: Dict[str, Any], desc: str, refs: Optional[List[str]] = None) -> str:
     """화풍 앵커 -> 이 씬에 등장하는 기준 이미지 대상들의 외형 -> 장면 묘사 -> 안전 마진 -> --no 접미사."""
     style = cfg["styles"][project["meta"]["style"]]
@@ -286,6 +331,8 @@ def compose_frame(cfg: Dict[str, Any], project: Dict[str, Any], desc: str, refs:
             parts.append(_trim(a["appearance"]))
     if (desc or "").strip():
         parts.append(_trim(desc))
+    if _has_character(project, refs):
+        parts.append(cfg["suffix"]["adult"])
     if project["options"].get("safe_margin", True):
         parts.append(cfg["suffix"]["safe_margin"])
     text = ", ".join(parts)
@@ -300,6 +347,8 @@ def compose_reference(cfg: Dict[str, Any], project: Dict[str, Any], asset: Dict[
     parts = [cfg["styles"][project["meta"]["style"]]["anchor"]]
     if asset["appearance"].strip():
         parts.append(_trim(asset["appearance"]))
+    if asset["type"] == "character" and project["options"].get("adult_safe", True):
+        parts.append(cfg["suffix"]["adult"])
     parts.append(ref["types"][asset["type"]][kind])
     text = ", ".join(parts)
     if project["options"].get("zero_text", True):
@@ -329,6 +378,8 @@ def compose_omni(cfg: Dict[str, Any], project: Dict[str, Any], scene: Dict[str, 
     polish = [style["video_feel"], om["polish_base"]]
     if safe:
         polish.append(om["polish_safe"])
+    if _has_character(project, scene.get("refs")):
+        polish.append(cfg["suffix"]["adult"])
     if zero:
         polish.append(om["polish_zero"])
     lines.append("Visual Polish: " + ", ".join(polish) + ".")
@@ -388,7 +439,7 @@ def _asset_rule(project: Dict[str, Any]) -> str:
     if not project.get("assets"):
         return ("- [기준 이미지 규칙] 2개 이상의 씬에 등장하거나 스토리의 핵심인 인물·사물·장소는 assets 배열에 정의하세요. "
                 "각 asset: id(영문 소문자·숫자·_), type(character/object/place), name(한국어 이름), label(영문 짧은 호칭 예: the plastic cook figure), "
-                "appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외), "
+                "appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외. 인물은 반드시 성인 연령을 명시: a 30-year-old adult), "
                 "keywords(대본에서 이 대상을 가리키는 한국어 단어들을 쉼표로). 각 씬의 refs 에 그 씬에 등장하는 asset id 를 넣으세요. "
                 "시스템이 appearance 를 해당 씬의 모든 프레임 프롬프트에 자동 삽입하고 기준 이미지 프롬프트도 자동 생성하므로, "
                 "씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭합니다.")
@@ -437,7 +488,7 @@ def build_master_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
     schema = fill(cfg["schema_template"], {"lang_name": lang["name"]})
     return fill(cfg["master_template"], {
         "task_line": task,
-        "length_rule": lang["length_rule"],
+        "length_rule": length_rule_text(cfg, project),
         "lang_desc": lang["desc"],
         "crop_scale": f"{spec['crop_scale']:g}",
         "safe_pct": str(spec["safe_zone_pct"]),
@@ -464,6 +515,73 @@ def recommended_model(cfg: Dict[str, Any], project: Dict[str, Any], task: str = 
     if m.get("category2") and m["category2"] != m["category"]:
         return cfg["models"]["crossover"]
     return cfg["models"]["default"]
+
+
+# --------------------------------------------------------------------------- 정책 안전 (Google Flow/Veo)
+POLICY_MSG = [
+    ("minor", "policy_minor", "error", "Google 정책 위험 단어 '{w}' - 미성년자 관련 콘텐츠로 차단될 수 있습니다. 모든 인물을 명백한 성인으로 바꾸세요."),
+    ("ambiguous", "policy_ambiguous", "warn", "어려 보일 수 있는 표현 '{w}' - 성인임을 분명히 하세요(adult / 30-year-old)."),
+    ("sexual", "policy_sexual", "warn", "선정/노출로 오인될 수 있는 단어 '{w}' - 정책에 걸릴 수 있습니다."),
+]
+
+
+def _term_re(terms: List[str]) -> "re.Pattern[str]":
+    return re.compile(r"\b(?:" + "|".join(re.escape(t) for t in terms) + r")\b", re.I)
+
+
+def policy_hits(cfg: Dict[str, Any], text: str) -> Dict[str, List[str]]:
+    low = (text or "").lower()
+    return {cat: sorted({m.group(0).lower() for m in _term_re(cfg["policy"][cat + "_terms"]).finditer(low)}) for cat in ("minor", "ambiguous", "sexual")}
+
+
+def has_adult_marker(cfg: Dict[str, Any], text: str) -> bool:
+    return bool(re.search(cfg["policy"]["adult_regex"], text or "", re.I))
+
+
+def build_policy_fix_prompt(cfg: Dict[str, Any], project: Dict[str, Any], idx: int) -> str:
+    sc = project["scenes"][idx]
+    found: set = set()
+    texts = [sc["frame1"], sc["frame2"]] + [c["prompt"] for c in sc["cuts"]]
+    assets = scene_assets(project, sc.get("refs"))
+    texts += [a["appearance"] + " " + a["label"] for a in assets]
+    for t in texts:
+        for words in policy_hits(cfg, t).values():
+            found.update(words)
+    lines = [f"Scene {idx + 1:02d} 대사: {scene_text(sc)}", f"frame1: {sc['frame1']}", f"frame2: {sc['frame2']}"]
+    for j, c in enumerate(sc["cuts"], start=1):
+        lines.append(f"cut{j} [{c['type']}]: {c['prompt']}")
+    return fill(cfg["policy_fix_template"], {
+        "scene_no": f"{idx + 1:02d}",
+        "flagged": ("- 자동 검사에서 발견된 위험 단어: " + ", ".join(sorted(found))) if found else "",
+        "assets": "; ".join(f"{a['id']}: {a['appearance']}" for a in assets) or "(없음)",
+        "scene_text": "\n".join(lines),
+    })
+
+
+def apply_scene_fix(project: Dict[str, Any], idx: int, text: str) -> Dict[str, Any]:
+    data = extract_json(text)
+    if not isinstance(data, dict):
+        raise ValueError("응답에서 JSON 을 찾지 못했습니다.")
+    p = copy.deepcopy(project)
+    sc = p["scenes"][idx]
+    for k in ("frame1", "frame2"):
+        if isinstance(data.get(k), str):
+            sc[k] = strip_suffix(data[k])
+    if isinstance(data.get("cuts"), list):
+        for j, c in enumerate(data["cuts"][:3]):
+            if isinstance(c, str):
+                c = {"prompt": c}
+            if isinstance(c, dict):
+                if isinstance(c.get("type"), str) and c["type"].strip():
+                    sc["cuts"][j]["type"] = c["type"].strip()
+                if isinstance(c.get("prompt"), str):
+                    sc["cuts"][j]["prompt"] = strip_suffix(c["prompt"])
+    if isinstance(data.get("assets"), list):
+        by_id = {a["id"]: a for a in p["assets"]}
+        for a in data["assets"]:
+            if isinstance(a, dict) and str(a.get("id")) in by_id and isinstance(a.get("appearance"), str):
+                by_id[str(a["id"])]["appearance"] = strip_suffix(a["appearance"])
+    return p
 
 
 # --------------------------------------------------------------------------- 기준 이미지(등장 대상) 분석
@@ -630,24 +748,26 @@ def validate_project(cfg: Dict[str, Any], project: Dict[str, Any]) -> List[Dict[
     m = project["meta"]
     lang = cfg["languages"][m["language"]]
     unit = "단어" if lang["unit"] == "words" else "자"
+    rg = char_range(cfg, project)
+    cam = project["options"].get("camera_warn", True)
     n = len(project["scenes"])
     if n != cfg["spec"]["scenes"]:
         add("error", "scene_count", f"씬이 {n}개입니다. 정확히 {cfg['spec']['scenes']}개여야 합니다.")
     total = total_units(project, cfg)
     if total == 0:
         add("warn", "empty_script", "대본이 비어 있습니다.")
-    elif total < lang["min"] or total > lang["max"]:
-        add("error", "total_chars", f"총 {total}{unit} - 목표 {lang['min']}~{lang['max']}{unit} 범위를 벗어났습니다 (45초 1.2배속 기준).")
+    elif total < rg["min"] or total > rg["max"]:
+        add("error", "total_chars", f"총 {total}{unit} - 목표 {rg['min']}~{rg['max']}{unit} 범위를 벗어났습니다 ({'실측 TTS 속도' if rg['custom'] else '45초 1.2배속'} 기준).")
     else:
-        add("ok", "total_chars", f"총 {total}{unit} (목표 {lang['min']}~{lang['max']}{unit})")
+        add("ok", "total_chars", f"총 {total}{unit} (목표 {rg['min']}~{rg['max']}{unit})")
 
     for i, sc in enumerate(project["scenes"], start=1):
         filled = [b for b in sc["beats"] if b.strip()]
         if total and len(filled) != 3:
             add("error", "beats", f"Scene {i:02d}: 비트가 {len(filled)}개입니다 (3개 필요: 0~2.5s / 2.5~5s / 5~7.5s).", i)
         u = count_units(scene_text(sc), m["language"], cfg)
-        if total and (u < lang["scene_min"] or u > lang["scene_max"]):
-            add("warn", "scene_chars", f"Scene {i:02d}: {u}{unit} (권장 {lang['scene_min']}~{lang['scene_max']}{unit})", i)
+        if total and (u < rg["scene_min"] or u > rg["scene_max"]):
+            add("warn", "scene_chars", f"Scene {i:02d}: {u}{unit} (권장 {rg['scene_min']}~{rg['scene_max']}{unit})", i)
         prompts = [("frame1", sc["frame1"]), ("frame2", sc["frame2"])] + [(f"cut{j + 1}", c["prompt"]) for j, c in enumerate(sc["cuts"])]
         has_any = any(p.strip() for _, p in prompts)
         for name, ptxt in prompts:
@@ -659,10 +779,14 @@ def validate_project(cfg: Dict[str, Any], project: Dict[str, Any]) -> List[Dict[
             words = sorted({w for w in re.findall(r"[A-Za-z]+", ptxt.lower()) if w in BANNED_PROMPT_WORDS})
             if words:
                 add("warn", "zero_text_word", f"Scene {i:02d} {name}: 문자 연상 단어 {', '.join(words)} - AI가 글자를 그려 넣을 수 있습니다.", i)
-            if EXTREME_CLOSEUP_RE.search(ptxt):
+            if cam and EXTREME_CLOSEUP_RE.search(ptxt):
                 add("warn", "extreme_closeup", f"Scene {i:02d} {name}: 익스트림 클로즈업은 1.06배 크롭 시 피사체 잘림 위험 (Medium close-up + 여백 권장).", i)
+            hits = policy_hits(cfg, ptxt)
+            for cat, code, level, msg in POLICY_MSG:
+                if hits[cat]:
+                    add(level, code, f"Scene {i:02d} {name}: " + msg.format(w=", ".join(hits[cat])), i)
         for j, c in enumerate(sc["cuts"]):
-            if EXTREME_CLOSEUP_RE.search(c.get("type", "")):
+            if cam and EXTREME_CLOSEUP_RE.search(c.get("type", "")):
                 add("warn", "extreme_closeup", f"Scene {i:02d} cut{j + 1} 화각 '{c['type']}': 안전 마진 규칙과 충돌합니다.", i)
 
     linked = {r for sc in project["scenes"] for r in sc.get("refs", [])}
@@ -672,6 +796,12 @@ def validate_project(cfg: Dict[str, Any], project: Dict[str, Any]) -> List[Dict[
             add("warn", "asset_empty", f"기준 이미지 '{nm}': 외형 묘사(appearance)가 비어 있습니다.")
         if CJK_RE.search(a["appearance"]) or CJK_RE.search(a["label"]):
             add("error", "asset_cjk", f"기준 이미지 '{nm}': 외형/라벨은 영문만 허용(Zero-Text).")
+        hits = policy_hits(cfg, a["appearance"] + " " + a["label"])
+        for cat, code, level, msg in POLICY_MSG:
+            if hits[cat]:
+                add(level, code, f"기준 이미지 '{nm}': " + msg.format(w=", ".join(hits[cat])))
+        if a["type"] == "character" and a["appearance"].strip() and not has_adult_marker(cfg, a["appearance"]):
+            add("warn", "asset_age", f"기준 이미지 '{nm}': 연령(adult / 30-year-old 등) 명시가 없습니다 - 피규어·인형 캐릭터가 미성년자로 오인되어 정책 차단될 수 있습니다.")
         if a["id"] not in linked:
             add("warn", "asset_unlinked", f"기준 이미지 '{nm}'이(가) 어느 씬에도 연결되지 않았습니다.")
     if not project.get("assets") and any(sc["frame1"].strip() for sc in project["scenes"]):
@@ -711,12 +841,12 @@ def _load_project(path: Optional[str], cfg: Dict[str, Any]) -> Dict[str, Any]:
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="AI 쇼츠 파이프라인 프롬프트 엔진")
-    ap.add_argument("cmd", choices=["master", "package", "validate", "metadata", "parse", "sync-config", "cta", "assets-prompt", "refs"])
+    ap.add_argument("cmd", choices=["master", "package", "validate", "metadata", "parse", "sync-config", "cta", "assets-prompt", "refs", "policy-fix"])
     ap.add_argument("--project", help="프로젝트 JSON (대시보드에서 내보낸 파일 / samples/*.json)")
     ap.add_argument("--response", help="Claude 응답 텍스트 파일 (parse 용)")
     ap.add_argument("--langs", default="ko", help="metadata 대상 언어 (예: ko,en,ja,zh)")
     ap.add_argument("--topic"); ap.add_argument("--category"); ap.add_argument("--category2")
-    ap.add_argument("--style"); ap.add_argument("--lang"); ap.add_argument("--source", help="벤치마킹 대본 텍스트 파일")
+    ap.add_argument("--style"); ap.add_argument("--lang"); ap.add_argument("--scene", type=int, default=1, help="policy-fix 대상 씬 번호(1~6)"); ap.add_argument("--source", help="벤치마킹 대본 텍스트 파일")
     a = ap.parse_args(argv)
     cfg = load_config()
     if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
@@ -748,6 +878,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     elif a.cmd == "refs":
         for r in reference_prompts(cfg, proj):
             print(f"[{r['id']}] {r['name']} ({r['type']}) 등장 씬: {r['scenes']}\n  main : {r['main']}\n  sheet: {r['sheet']}\n")
+    elif a.cmd == "policy-fix":
+        print(build_policy_fix_prompt(cfg, proj, max(1, min(a.scene, len(proj["scenes"]))) - 1))
     elif a.cmd == "cta":
         print(json.dumps(inject_cta(cfg, proj), ensure_ascii=False, indent=2))
     elif a.cmd == "parse":

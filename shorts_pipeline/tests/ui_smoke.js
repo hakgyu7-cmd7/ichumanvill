@@ -2,7 +2,7 @@
 // (Playwright 필요: npm i -g playwright, NODE_PATH 지정)
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path');
-const [SERVER, FILEURL, CLIP, WAV, OUT, REFPNG] = process.argv.slice(2);
+const [SERVER, FILEURL, CLIP, WAV, OUT, REFPNG, FONTFILE] = process.argv.slice(2);
 const FIX = path.join(__dirname, 'fixtures');
 let failed = 0; const ok = (c, m) => { if (!c) { failed++; console.log('FAIL:', m); } else console.log('ok  :', m); };
 const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 ${JSON.stringify(a)})`);
@@ -129,6 +129,40 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
   ok((await txt('#toast')).includes('assets 배열'), '잘못된 분석 응답은 에러 토스트');
   await tab('script');
 
+  // ===== 카메라 구도 경고 / 정책 안전 (Flow 차단 대응)
+  await tab('visual');
+  ok((await txt('#fin-0-frame1')).includes('all characters are clearly adult'), '인물 대상이 있는 씬에는 성인 명시 문구 자동 삽입');
+  await pg.uncheck('input[data-check="options.adult_safe"]'); await pg.waitForTimeout(250);
+  ok(!(await txt('#fin-0-frame1')).includes('all characters are clearly adult'), '성인 문구 옵션 해제 시 삽입 안 됨');
+  await pg.check('input[data-check="options.adult_safe"]'); await pg.waitForTimeout(250);
+  const f3 = 'textarea[data-bind="scenes.2.frame1"]';
+  await pg.click('details[data-scene="2"] summary'); await pg.waitForTimeout(200);
+  await pg.fill(f3, 'macro close-up of a pot lid'); ok(!(await txt('#issues')).includes('익스트림 클로즈업'), "흔한 'macro close-up' 은 경고하지 않음");
+  await pg.fill(f3, 'extreme close-up of a pot lid'); ok((await txt('#issues')).includes('익스트림 클로즈업'), '익스트림 클로즈업은 경고');
+  await pg.uncheck('input[data-check="options.camera_warn"]'); await pg.waitForTimeout(250);
+  ok(!(await txt('#issues')).includes('익스트림 클로즈업'), '구도 경고 옵션을 끄면 경고 없음');
+  await pg.check('input[data-check="options.camera_warn"]'); await pg.waitForTimeout(250);
+  await pg.click('[data-act="fixCamera"]'); await pg.waitForTimeout(250);
+  eq(await pg.inputValue(f3), 'close-up with generous negative space of a pot lid', '구도 표현 자동 교정');
+  ok(!(await txt('#issues')).includes('익스트림 클로즈업'), '교정 후 경고 사라짐');
+  const f6 = 'textarea[data-bind="scenes.5.frame1"]';
+  await pg.click('details[data-scene="5"] summary'); await pg.waitForTimeout(200);
+  await pg.fill(f6, 'a little boy and a cute girl in the kitchen');
+  ok((await txt('#issues')).includes('미성년자 관련 콘텐츠로 차단될 수 있습니다') && (await txt('#issues')).includes('어려 보일 수 있는 표현'), '미성년자/어려 보이는 표현 정책 경고');
+  await pg.click('details[data-scene="5"] details.acc summary'); await pg.waitForTimeout(200);
+  await pg.click('[data-act="copyPolicyFix"][data-i="5"]'); await pg.waitForTimeout(250);
+  const fixClip = await pg.evaluate(() => navigator.clipboard.readText());
+  ok(fixClip.includes('[정책 안전 재작성]') && fixClip.includes('Scene 06') && fixClip.includes('little boy'), '정책 안전 재작성 프롬프트(위험 단어 포함) 복사');
+  await pg.fill('#fix-5', '```json\n{"frame1": "an adult man standing in the kitchen --no text", "assets": [{"id": "hero_man", "appearance": "a 35-year-old adult male PVC figure with short black hair"}]}\n```');
+  await pg.click('[data-act="applyPolicyFix"][data-i="5"]'); await pg.waitForTimeout(300);
+  eq(await pg.inputValue(f6), 'an adult man standing in the kitchen', '재작성 결과 적용(--no 접미사 제거)');
+  ok(!(await txt('#issues')).includes('little boy'), '적용 후 정책 경고 해소');
+  await tab('assets'); ok((await pg.inputValue('textarea[data-bind="assets.0.appearance"]')).includes('35-year-old adult'), '재작성 결과의 인물 외형(성인 연령)도 기준 이미지에 반영');
+  await pg.fill('textarea[data-bind="assets.0.appearance"]', 'a male figure with short black hair');
+  ok((await txt('#issues')).includes('연령(adult / 30-year-old 등) 명시가 없습니다'), '인물 외형에 성인 연령이 없으면 경고');
+  await pg.fill('textarea[data-bind="assets.0.appearance"]', 'a 30-year-old adult male PVC figure with short black hair');
+  await tab('script');
+
   // ===== 쇼핑 쇼츠는 별도 모드
   await pg.click('[data-act="setMode"][data-m="shopping"]'); await pg.waitForTimeout(300);
   eq(await txt('#mode-seg .on'), '🛒 쇼핑 쇼츠', '쇼핑 모드 전환');
@@ -173,13 +207,60 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
   await tab('audio'); await pg.setInputFiles('input[data-upload="voice_raw"]', WAV); await pg.waitForTimeout(800);
   await pg.click('[data-act="processVoice"]'); await pg.waitForTimeout(2500);
   ok((await txt('#content')).includes('voice.mp3') && (await pg.$('#content audio')) !== null, '음성 처리 후 voice.mp3 + 플레이어');
+  // 설정값이 실제로 전달되는지 (처리 버튼을 누르면 화면을 먼저 다시 그려 값이 초기화되던 버그의 회귀 방지)
+  await pg.fill('input[data-au="speed"]', '1'); await pg.uncheck('input[data-au="sil"]');
+  const [req1] = await Promise.all([pg.waitForRequest('**/api/audio/process'), pg.click('[data-act="processVoice"]')]);
+  const b1 = req1.postDataJSON();
+  ok(b1.speed === 1 && b1.remove_silence === false && !('fit_seconds' in b1), '처리 요청에 입력한 속도/무음 설정이 그대로 전달: ' + JSON.stringify(b1));
+  await pg.waitForTimeout(2500);
+  ok((await txt('#content')).includes('길이 점검') && (await txt('#content')).includes('음성 3.0초'), '원속도 + 무음 유지 = 3.0초 (설정이 결과에 반영)');
+  eq(await pg.inputValue('input[data-au="speed"]'), '1', '처리 후에도 입력한 속도 유지');
+  ok(!(await pg.isChecked('input[data-au="sil"]')), '처리 후에도 무음 제거 해제 상태 유지');
+  await pg.check('input[data-au="fit"]'); await pg.waitForTimeout(200);
+  ok(await pg.isDisabled('input[data-au="speed"]'), '자동 속도 선택 시 속도 입력 비활성');
+  const [req2] = await Promise.all([pg.waitForRequest('**/api/audio/process'), pg.click('[data-act="processVoice"]')]);
+  eq(req2.postDataJSON().fit_seconds, 45, '자동 속도: 목표 45초 전달'); await pg.waitForTimeout(2500);
+  ok((await txt('#content')).includes('마지막 처리: 속도 0.5x') && (await txt('#content')).includes('제한됨'), '3초 음성을 45초로 늘리면 0.5x 로 제한됨을 안내');
+  await pg.click('[data-act="calibrateTiming"]'); await pg.waitForTimeout(300);
+  ok(!(await txt('#m-chars')).includes('320~350') && (await txt('#issues')).includes('실측 TTS 속도'), '실측 속도 보정: 목표 글자수 범위가 바뀌고 점검 기준도 변경');
+  await pg.click('[data-act="resetTiming"]'); await pg.waitForTimeout(300);
+  ok((await txt('#m-chars')).endsWith('/ 320~350'), '보정 해제 시 기본 범위(320~350) 복귀: ' + await txt('#m-chars'));
   await tab('render');
   ok((await txt('#content')).includes('씬 클립 1/6'), '렌더 점검: 클립 1/6');
+  // 레터박스 / 타이틀 / 자막 스타일 조정 (미리보기 즉시 반영)
+  await pg.fill('input[data-bind="render.top_bar"]', '300'); await pg.fill('input[data-bind="render.bottom_bar"]', '200');
+  ok((await txt('#pv-info')).includes('상단 300px') && (await txt('#pv-info')).includes('하단 200px'), '레터박스 높이 변경이 미리보기에 반영');
+  ok((await txt('#content')).includes('1420px'), '영상 영역 높이 자동 계산(1920-300-200)');
+  await pg.fill('input[data-bind="render.bar_color"]', '#112233');
+  eq(await pg.$eval('#cv', (e) => e.style.background), 'rgb(17, 34, 51)', '바 색상 반영');
+  await pg.fill('input[data-bind="render.title_color"]', '#00ff00');
+  eq(await pg.$eval('#pv-title', (e) => e.style.color), 'rgb(0, 255, 0)', '타이틀 색 반영');
+  await pg.fill('input[data-bind="render.sub_size"]', '80');
+  ok(parseFloat(await pg.$eval('#pv-sb span', (e) => e.style.fontSize)) > 15, '자막 크기 반영');
+  await pg.fill('input[data-bind="render.sub_color"]', '#ffff00');
+  eq(await pg.$eval('#pv-sb span', (e) => e.style.color), 'rgb(255, 255, 0)', '자막 글자 색 반영');
+  await pg.uncheck('input[data-check="render.sub_box"]'); await pg.waitForTimeout(250);
+  eq(await pg.$eval('#pv-sb span', (e) => e.style.background), 'none', '자막 배경 박스 해제');
+  await pg.fill('input[data-bind="render.top_bar"]', '900'); await pg.fill('input[data-bind="render.bottom_bar"]', '900');
+  ok((await txt('#content')).includes('400px 이상이어야 합니다'), '영상 영역이 400px 미만이면 경고');
+  await pg.fill('input[data-bind="render.top_bar"]', '300'); await pg.fill('input[data-bind="render.bottom_bar"]', '200');
+  ok((await pg.$$eval('select[data-bind="render.sub_font"] option', (o) => o.length)) >= 1, '글꼴 선택 목록');
+  if (FONTFILE) {
+    await pg.setInputFiles('input[data-upload="font"]', FONTFILE); await pg.waitForTimeout(900);
+    const spec = await pg.$eval('select[data-bind="render.title_font"] optgroup[label^="assets"] option', (o) => o.value);
+    ok(spec.startsWith('assets:'), '업로드한 글꼴이 assets 그룹 목록에 표시: ' + spec);
+    await pg.selectOption('select[data-bind="render.title_font"]', spec); await pg.waitForTimeout(200);
+    await pg.waitForFunction(() => Array.from(document.fonts).some((f) => f.family.indexOf('pv_') === 0 && f.status === 'loaded'), null, { timeout: 8000 });
+    ok(true, '선택한 글꼴이 미리보기에 실제로 로드됨');
+  }
   await pg.check('#rd-partial'); await pg.click('[data-act="startRender"]');
   await pg.waitForFunction(() => /렌더링 완료|\[오류\]/.test(document.getElementById('rd-log').textContent), null, { timeout: 90000 });
   ok((await txt('#rd-log')).includes('렌더링 완료'), '부분 렌더 완료: ' + (await txt('#rd-log')).slice(-80));
   await pg.waitForTimeout(800); ok((await pg.$('#content video')) !== null, '결과 영상 플레이어');
   await pg.screenshot({ path: path.join(OUT, 'ui_render_done.png') });
+  await pg.click('[data-act="resetRender"]'); await pg.waitForTimeout(250);
+  eq(await pg.inputValue('input[data-bind="render.top_bar"]'), '240', '스타일 기본값 복원(상단 바)');
+  eq(await pg.inputValue('input[data-bind="render.sub_size"]'), '52', '스타일 기본값 복원(자막 크기)');
 
   // ---- 메타데이터
   await tab('meta'); await pg.click('[data-act="metaLang"][data-k="en"]');

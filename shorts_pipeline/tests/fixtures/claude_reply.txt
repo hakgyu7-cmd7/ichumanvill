@@ -30,7 +30,7 @@
    "type": "character",
    "name": "주인공 피규어",
    "label": "the deadpan PVC man figure",
-   "appearance": "a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
+   "appearance": "a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
    "keywords": "남자, 주인공, 사람, 나"
   },
   {
@@ -205,7 +205,7 @@
     "hero",
     "pot"
    ],
-   "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth --no text --ar 9:16",
+   "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with plain yellow noodles and zero soup broth --no text --ar 9:16",
    "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",
    "cuts": [
     {

@@ -12,7 +12,7 @@
 - 씬 분할: 정확히 6개 씬(Scene 01~06), 씬당 정확히 7.5초.
 - 대본 분량: 공백 포함 총 320~350자 엄수 (초당 약 7.5자), 씬당 50~58자.
 - 각 씬의 대사는 2.5초 호흡 단위 3개 비트(beats)로 쪼갭니다 (0.0~2.5s / 2.5~5.0s / 5.0~7.5s). 한 비트는 자막 1~2줄에 들어가는 한 호흡 분량으로 씁니다.
-- 발화 언어: 한국어 (자연스러운 숏폼 구어체, 1.2배속 기준 공백 포함 320~350자)
+- 발화 언어: 한국어 (자연스러운 숏폼 구어체, 1.2배속 발화)
 
 ## 2. [CRITICAL] Zero-Text(무문자) 원칙
 - 이미지(T2I)·영상(I2V) 프롬프트 어디에도 글자, 단어, 숫자 텍스트, 자막, 간판, 책/폰 화면 속 글, 브랜드 로고를 묘사하지 않습니다. 프롬프트는 영문으로만 쓰고 한글/일문/중문 문자를 넣지 않습니다.
@@ -25,6 +25,11 @@
 - 구글 플로우 우측 하단 워터마크를 1.06배 확대 크롭으로 밀어내므로, 극단적 익스트림 클로즈업(Extreme/Tight Close-up)을 쓰지 않습니다.
 - 주요 피사체는 화면 중앙 70% 구역 안에, 가장자리(특히 우측 하단)에는 15% 이상 여백을 둡니다. 'Medium close-up with generous negative space'처럼 한 단계 후퇴한 화각을 씁니다.
 - 손/머리/제품 일부가 화면 끝에 걸치는 구도는 피합니다.
+
+## 3-2. [CRITICAL] Google Flow(Veo) 콘텐츠 정책 안전 (생성 차단 방지)
+- 모든 인물·피규어·캐릭터는 명백한 성인으로 설정하고, 외형(appearance)에 반드시 연령을 명시하세요(예: a 30-year-old adult). 성인 신체 비율과 성인 의상을 씁니다.
+- child, kid, boy, girl, teen, student, baby 등 미성년으로 읽힐 수 있는 단어와 young, little, cute, childlike, baby-faced 같은 유아적 표현, 귀여움/순수함 강조는 쓰지 않습니다. (장난감/피규어/인형 캐릭터도 같은 규칙입니다.)
+- 노골적 노출·선정적 묘사, 유혈·잔혹 묘사, 실존 인물·유명인의 얼굴/이름은 쓰지 않습니다.
 
 ## 4. 비주얼 규격 (방법 B: 씬당 7.5초 단일 클립 내 2.5초 간격 화각 전환)
 - 씬마다 frame1(0s 시작 기준 이미지), frame2(2.5s 전환 기준 이미지), cuts 3개(각 2.5초 구간의 카메라 무빙/동작)를 출력합니다.
@@ -46,7 +51,7 @@
 - 선택된 화풍: 7. 고정밀 피규어 & 디오라마 (Detailed Figure & Diorama). 화풍 앵커는 시스템이 모든 프레임 프롬프트 앞에 자동 삽입합니다. 분위기가 반전되어도(예: B급 병맛) 만화/애니메이션 등 다른 화풍 키워드를 쓰지 말고, 같은 화풍 안에서 표정 연기와 상황 연출로만 표현합니다.
 - [기준 이미지 규칙] 이미 정의된 기준 이미지 대상입니다(그대로 유지하세요. 시스템이 외형을 해당 씬의 모든 프레임 프롬프트에 자동 삽입합니다):
   · pot (object) 실리콘 팟 / the sage-green silicone pot: a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall
-  · cook (character) 요리하는 주인공 / the PVC home cook figure: a small PVC figure of a home cook with short brown hair and a cream apron
+  · cook (character) 요리하는 주인공 / the PVC home cook figure: a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron
   · fryer (object) 에어프라이어 / the black air fryer: a compact round black basket-style air fryer with a silver handle
   새로 필요한 반복 대상이 있으면 assets 에 추가하고, 씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭하세요. 각 씬의 refs 에 등장하는 asset id 를 넣으세요.
 

@@ -22,7 +22,7 @@
   const BANNED_PROMPT_WORDS = ['text', 'texts', 'letter', 'letters', 'word', 'words', 'caption', 'subtitle', 'subtitles',
     'signage', 'sign', 'signs', 'writing', 'written', 'typography', 'font', 'logo', 'logos',
     'label', 'banner', 'headline', 'headlines', 'poster', 'newspaper', 'slogan', 'handwriting'];
-  const EXTREME_CLOSEUP_RE = /\b(extreme|tight)[- ](close[- ]?up|macro)\b|\bmacro close[- ]?up\b/i;
+  const EXTREME_CLOSEUP_RE = /\b(extreme|tight)[- ](close[- ]?up|macro)\b/i;
   const CJK_RE = /[ᄀ-ᇿ぀-ヿ㄰-㆏㐀-䶿一-鿿가-힯]/;
   const TIME_MARKER_RE = /^\s*\[[^\]]*\]\s*/;
 
@@ -49,6 +49,11 @@
   function emptyScene(i) {
     return { id: i, beats: ['', '', ''], frame1: '', frame2: '', refs: [], cuts: [0, 1, 2].map(() => ({ type: '', prompt: '' })) };
   }
+  function defaultRender(cfg) {
+    const r = { crop_scale: cfg.spec.crop_scale, fit: 'cover' };
+    Object.keys(cfg.layout).forEach((k) => { if (k !== 'width' && k !== 'height') r[k] = cfg.layout[k]; });
+    return r;
+  }
   function defaultProject(cfg) {
     const scenes = [];
     for (let i = 1; i <= cfg.spec.scenes; i++) scenes.push(emptyScene(i));
@@ -56,12 +61,13 @@
       version: 3,
       meta: { topic: '', top_title: '', category: cfg.default_category || 'general', category2: '', format: '', style: defaultStyleId(cfg),
         language: 'ko', source_url: '', source_script: '' },
-      options: { zero_text: true, safe_margin: true },
+      options: { zero_text: true, safe_margin: true, adult_safe: true, camera_warn: true },
+      timing: { chars_per_sec: 0 },
       assets: [],
       analysis: { hook_technique: '', retention_psychology: '', skeleton: '' },
       plan: { titles: [], description: '', hashtags: [] },
       scenes,
-      render: { crop_scale: cfg.spec.crop_scale, fit: 'cover', sub_size: cfg.layout.sub_size, sub_chars_per_line: cfg.layout.sub_chars_per_line },
+      render: defaultRender(cfg),
       metadata: {}
     };
   }
@@ -96,8 +102,10 @@
   function normalizeProject(p, cfg) {
     p = p || {};
     const out = defaultProject(cfg);
-    ['meta', 'options', 'analysis', 'plan', 'render'].forEach((k) => { if (p[k] && typeof p[k] === 'object' && !Array.isArray(p[k])) Object.assign(out[k], clone(p[k])); });
+    ['meta', 'options', 'timing', 'analysis', 'plan', 'render'].forEach((k) => { if (p[k] && typeof p[k] === 'object' && !Array.isArray(p[k])) Object.assign(out[k], clone(p[k])); });
     if ('metadata' in p) out.metadata = clone(p.metadata);
+    const cps = parseFloat(out.timing.chars_per_sec) || 0;
+    out.timing = { chars_per_sec: cps > 0 ? Math.floor(cps * 100 + 0.5) / 100 : 0 };
     const m = out.meta;
     m.style = LEGACY_STYLE_KEYS[m.style] || m.style;
     m.category = LEGACY_CATEGORY_KEYS[m.category] || m.category;
@@ -152,6 +160,22 @@
     if (unit === 'words') return (text.match(/\S+/g) || []).length;
     return ulen(text.replace(/\s+/g, ''));
   }
+  const round = (x) => Math.floor(x + 0.5);
+  function charRange(cfg, project) {
+    const lang = cfg.languages[project.meta.language];
+    const cps = parseFloat((project.timing || {}).chars_per_sec) || 0;
+    if (cps > 0) {
+      const total = cps * cfg.spec.total_seconds, per = total / cfg.spec.scenes, tol = cfg.timing.tolerance, stol = cfg.timing.scene_tolerance;
+      return { min: round(total * (1 - tol)), max: round(total * (1 + tol)), scene_min: round(per * (1 - stol)), scene_max: round(per * (1 + stol)), cps, custom: true };
+    }
+    return { min: lang.min, max: lang.max, scene_min: lang.scene_min, scene_max: lang.scene_max, cps: (lang.min + lang.max) / 2 / cfg.spec.total_seconds, custom: false };
+  }
+  function lengthRuleText(cfg, project) {
+    const lang = cfg.languages[project.meta.language], rg = charRange(cfg, project);
+    if (!rg.custom) return lang.length_rule;
+    const uw = lang.unit === 'words' ? '단어' : '자';
+    return lang.count_note + '총 ' + rg.min + '~' + rg.max + uw + ' 엄수 (초당 약 ' + String(rg.cps) + uw + ', 실측 TTS 속도 기준), 씬당 ' + rg.scene_min + '~' + rg.scene_max + uw + '.';
+  }
   function totalUnits(project, cfg) {
     const lang = project.meta.language;
     return project.scenes.reduce((a, s) => a + countUnits(sceneText(s), lang, cfg), 0);
@@ -166,11 +190,13 @@
   const sentence = (s) => { s = String(s || '').trim(); return !s || /[.!?]$/.test(s) ? s : s + '.'; };
 
   function sceneAssets(project, refs) { const ids = refs || []; return (project.assets || []).filter((a) => ids.indexOf(a.id) >= 0); }
+  function hasCharacter(project, refs) { return project.options.adult_safe !== false && sceneAssets(project, refs).some((a) => a.type === 'character'); }
   function composeFrame(cfg, project, desc, refs) {
     const style = cfg.styles[project.meta.style];
     const parts = [style.anchor];
     sceneAssets(project, refs).forEach((a) => { if (a.appearance.trim()) parts.push(trim(a.appearance)); });
     if ((desc || '').trim()) parts.push(trim(desc));
+    if (hasCharacter(project, refs)) parts.push(cfg.suffix.adult);
     if (project.options.safe_margin !== false) parts.push(cfg.suffix.safe_margin);
     let text = parts.join(', ');
     if (project.options.zero_text !== false) text += ' ' + cfg.suffix.zero_text;
@@ -180,6 +206,7 @@
     const ref = cfg.reference;
     const parts = [cfg.styles[project.meta.style].anchor];
     if (asset.appearance.trim()) parts.push(trim(asset.appearance));
+    if (asset.type === 'character' && project.options.adult_safe !== false) parts.push(cfg.suffix.adult);
     parts.push(ref.types[asset.type][kind]);
     let text = parts.join(', ');
     if (project.options.zero_text !== false) text += ' ' + cfg.suffix.zero_text_core + ' --ar ' + (kind === 'main' ? ref.ar_main : ref.ar_sheet);
@@ -205,6 +232,7 @@
     }
     const polish = [style.video_feel, om.polish_base];
     if (safe) polish.push(om.polish_safe);
+    if (hasCharacter(project, scene.refs)) polish.push(cfg.suffix.adult);
     if (zero) polish.push(om.polish_zero);
     lines.push('Visual Polish: ' + polish.join(', ') + '.');
     return lines.join('\n');
@@ -248,7 +276,7 @@
     if (!(project.assets || []).length) {
       return '- [기준 이미지 규칙] 2개 이상의 씬에 등장하거나 스토리의 핵심인 인물·사물·장소는 assets 배열에 정의하세요. ' +
         '각 asset: id(영문 소문자·숫자·_), type(character/object/place), name(한국어 이름), label(영문 짧은 호칭 예: the plastic cook figure), ' +
-        'appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외), ' +
+        'appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외. 인물은 반드시 성인 연령을 명시: a 30-year-old adult), ' +
         'keywords(대본에서 이 대상을 가리키는 한국어 단어들을 쉼표로). 각 씬의 refs 에 그 씬에 등장하는 asset id 를 넣으세요. ' +
         '시스템이 appearance 를 해당 씬의 모든 프레임 프롬프트에 자동 삽입하고 기준 이미지 프롬프트도 자동 생성하므로, ' +
         '씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭합니다.';
@@ -282,7 +310,7 @@
     const cameraLib = cfg.camera_library.map((x) => '  - ' + x).join('\n');
     const schema = fill(cfg.schema_template, { lang_name: lang.name });
     return fill(cfg.master_template, {
-      task_line: task, length_rule: lang.length_rule, lang_desc: lang.desc, crop_scale: String(spec.crop_scale),
+      task_line: task, length_rule: lengthRuleText(cfg, project), lang_desc: lang.desc, crop_scale: String(spec.crop_scale),
       safe_pct: String(spec.safe_zone_pct), margin_pct: String(spec.margin_pct), cut_plan: cutPlan, camera_lib: cameraLib,
       style_name: style.number + '. ' + style.name + ' (' + style.name_en + ')', asset_rule: assetRule,
       structure: structure(cfg, bp1, bp2, !!src), format_block: formatBlock, cta_block: ctaBlock, topic: m.topic || '(미지정 - 원본과 겹치지 않는 새 소재를 직접 정해 주세요)',
@@ -294,6 +322,59 @@
     const m = project.meta;
     if (m.category2 && m.category2 !== m.category) return cfg.models.crossover;
     return cfg.models.default;
+  }
+
+  // ------------------------------------------------------------------ 정책 안전 (Google Flow/Veo)
+  const POLICY_MSG = [
+    ['minor', 'policy_minor', 'error', "Google 정책 위험 단어 '{w}' - 미성년자 관련 콘텐츠로 차단될 수 있습니다. 모든 인물을 명백한 성인으로 바꾸세요."],
+    ['ambiguous', 'policy_ambiguous', 'warn', "어려 보일 수 있는 표현 '{w}' - 성인임을 분명히 하세요(adult / 30-year-old)."],
+    ['sexual', 'policy_sexual', 'warn', "선정/노출로 오인될 수 있는 단어 '{w}' - 정책에 걸릴 수 있습니다."]
+  ];
+  const escRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function policyHits(cfg, text) {
+    const low = String(text || '').toLowerCase(), out = {};
+    ['minor', 'ambiguous', 'sexual'].forEach((cat) => {
+      const re = new RegExp('\\b(?:' + cfg.policy[cat + '_terms'].map(escRe).join('|') + ')\\b', 'gi');
+      out[cat] = Array.from(new Set((low.match(re) || []).map((w) => w.toLowerCase()))).sort();
+    });
+    return out;
+  }
+  function hasAdultMarker(cfg, text) { return new RegExp(cfg.policy.adult_regex, 'i').test(text || ''); }
+  function buildPolicyFixPrompt(cfg, project, idx) {
+    const sc = project.scenes[idx];
+    const found = new Set();
+    const assets = sceneAssets(project, sc.refs);
+    [sc.frame1, sc.frame2].concat(sc.cuts.map((c) => c.prompt)).concat(assets.map((a) => a.appearance + ' ' + a.label)).forEach((t) => {
+      const h = policyHits(cfg, t); Object.keys(h).forEach((k) => h[k].forEach((w) => found.add(w)));
+    });
+    const lines = ['Scene ' + pad2(idx + 1) + ' 대사: ' + sceneText(sc), 'frame1: ' + sc.frame1, 'frame2: ' + sc.frame2];
+    sc.cuts.forEach((c, j) => lines.push('cut' + (j + 1) + ' [' + c.type + ']: ' + c.prompt));
+    return fill(cfg.policy_fix_template, {
+      scene_no: pad2(idx + 1),
+      flagged: found.size ? '- 자동 검사에서 발견된 위험 단어: ' + Array.from(found).sort().join(', ') : '',
+      assets: assets.map((a) => a.id + ': ' + a.appearance).join('; ') || '(없음)',
+      scene_text: lines.join('\n')
+    });
+  }
+  function applySceneFix(project, idx, text) {
+    const data = extractJson(text);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('응답에서 JSON 을 찾지 못했습니다.');
+    const p = clone(project), sc = p.scenes[idx];
+    ['frame1', 'frame2'].forEach((k) => { if (typeof data[k] === 'string') sc[k] = stripSuffix(data[k]); });
+    if (Array.isArray(data.cuts)) {
+      data.cuts.slice(0, 3).forEach((c, j) => {
+        if (typeof c === 'string') c = { prompt: c };
+        if (c && typeof c === 'object') {
+          if (typeof c.type === 'string' && c.type.trim()) sc.cuts[j].type = c.type.trim();
+          if (typeof c.prompt === 'string') sc.cuts[j].prompt = stripSuffix(c.prompt);
+        }
+      });
+    }
+    if (Array.isArray(data.assets)) {
+      const byId = {}; p.assets.forEach((a) => { byId[a.id] = a; });
+      data.assets.forEach((a) => { if (a && typeof a === 'object' && has(byId, String(a.id)) && typeof a.appearance === 'string') byId[String(a.id)].appearance = stripSuffix(a.appearance); });
+    }
+    return p;
   }
 
   // ------------------------------------------------------------------ 기준 이미지(등장 대상) 분석
@@ -436,19 +517,21 @@
     const m = project.meta;
     const lang = cfg.languages[m.language];
     const unit = lang.unit === 'words' ? '단어' : '자';
+    const rg = charRange(cfg, project);
+    const cam = project.options.camera_warn !== false;
     const n = project.scenes.length;
     if (n !== cfg.spec.scenes) add('error', 'scene_count', '씬이 ' + n + '개입니다. 정확히 ' + cfg.spec.scenes + '개여야 합니다.');
     const total = totalUnits(project, cfg);
     if (total === 0) add('warn', 'empty_script', '대본이 비어 있습니다.');
-    else if (total < lang.min || total > lang.max) add('error', 'total_chars', '총 ' + total + unit + ' - 목표 ' + lang.min + '~' + lang.max + unit + ' 범위를 벗어났습니다 (45초 1.2배속 기준).');
-    else add('ok', 'total_chars', '총 ' + total + unit + ' (목표 ' + lang.min + '~' + lang.max + unit + ')');
+    else if (total < rg.min || total > rg.max) add('error', 'total_chars', '총 ' + total + unit + ' - 목표 ' + rg.min + '~' + rg.max + unit + ' 범위를 벗어났습니다 (' + (rg.custom ? '실측 TTS 속도' : '45초 1.2배속') + ' 기준).');
+    else add('ok', 'total_chars', '총 ' + total + unit + ' (목표 ' + rg.min + '~' + rg.max + unit + ')');
 
     project.scenes.forEach((sc, idx) => {
       const i = idx + 1;
       const filled = sc.beats.filter((b) => b.trim());
       if (total && filled.length !== 3) add('error', 'beats', 'Scene ' + pad2(i) + ': 비트가 ' + filled.length + '개입니다 (3개 필요: 0~2.5s / 2.5~5s / 5~7.5s).', i);
       const u = countUnits(sceneText(sc), m.language, cfg);
-      if (total && (u < lang.scene_min || u > lang.scene_max)) add('warn', 'scene_chars', 'Scene ' + pad2(i) + ': ' + u + unit + ' (권장 ' + lang.scene_min + '~' + lang.scene_max + unit + ')', i);
+      if (total && (u < rg.scene_min || u > rg.scene_max)) add('warn', 'scene_chars', 'Scene ' + pad2(i) + ': ' + u + unit + ' (권장 ' + rg.scene_min + '~' + rg.scene_max + unit + ')', i);
       const prompts = [['frame1', sc.frame1], ['frame2', sc.frame2]].concat(sc.cuts.map((c, j) => ['cut' + (j + 1), c.prompt]));
       const hasAny = prompts.some((p) => p[1].trim());
       prompts.forEach(([name, ptxt]) => {
@@ -457,10 +540,12 @@
         const set = new Set((ptxt.toLowerCase().match(/[A-Za-z]+/g) || []).filter((w) => BANNED_PROMPT_WORDS.indexOf(w) >= 0));
         const words = Array.from(set).sort();
         if (words.length) add('warn', 'zero_text_word', 'Scene ' + pad2(i) + ' ' + name + ': 문자 연상 단어 ' + words.join(', ') + ' - AI가 글자를 그려 넣을 수 있습니다.', i);
-        if (EXTREME_CLOSEUP_RE.test(ptxt)) add('warn', 'extreme_closeup', 'Scene ' + pad2(i) + ' ' + name + ': 익스트림 클로즈업은 1.06배 크롭 시 피사체 잘림 위험 (Medium close-up + 여백 권장).', i);
+        if (cam && EXTREME_CLOSEUP_RE.test(ptxt)) add('warn', 'extreme_closeup', 'Scene ' + pad2(i) + ' ' + name + ': 익스트림 클로즈업은 1.06배 크롭 시 피사체 잘림 위험 (Medium close-up + 여백 권장).', i);
+        const hits = policyHits(cfg, ptxt);
+        POLICY_MSG.forEach(([cat, code, level, msg]) => { if (hits[cat].length) add(level, code, 'Scene ' + pad2(i) + ' ' + name + ': ' + msg.split('{w}').join(hits[cat].join(', ')), i); });
       });
       sc.cuts.forEach((c, j) => {
-        if (EXTREME_CLOSEUP_RE.test(c.type || '')) add('warn', 'extreme_closeup', 'Scene ' + pad2(i) + ' cut' + (j + 1) + " 화각 '" + c.type + "': 안전 마진 규칙과 충돌합니다.", i);
+        if (cam && EXTREME_CLOSEUP_RE.test(c.type || '')) add('warn', 'extreme_closeup', 'Scene ' + pad2(i) + ' cut' + (j + 1) + " 화각 '" + c.type + "': 안전 마진 규칙과 충돌합니다.", i);
       });
     });
 
@@ -470,6 +555,9 @@
       const nm = a.name || a.id;
       if (!a.appearance.trim()) add('warn', 'asset_empty', "기준 이미지 '" + nm + "': 외형 묘사(appearance)가 비어 있습니다.");
       if (CJK_RE.test(a.appearance) || CJK_RE.test(a.label)) add('error', 'asset_cjk', "기준 이미지 '" + nm + "': 외형/라벨은 영문만 허용(Zero-Text).");
+      const ah = policyHits(cfg, a.appearance + ' ' + a.label);
+      POLICY_MSG.forEach(([cat, code, level, msg]) => { if (ah[cat].length) add(level, code, "기준 이미지 '" + nm + "': " + msg.split('{w}').join(ah[cat].join(', '))); });
+      if (a.type === 'character' && a.appearance.trim() && !hasAdultMarker(cfg, a.appearance)) add('warn', 'asset_age', "기준 이미지 '" + nm + "': 연령(adult / 30-year-old 등) 명시가 없습니다 - 피규어·인형 캐릭터가 미성년자로 오인되어 정책 차단될 수 있습니다.");
       if (!linked.has(a.id)) add('warn', 'asset_unlinked', "기준 이미지 '" + nm + "'이(가) 어느 씬에도 연결되지 않았습니다.");
     });
     if (!(project.assets || []).length && project.scenes.some((sc) => sc.frame1.trim())) add('warn', 'no_assets', "등장인물/사물 기준 이미지가 없습니다. '기준 이미지' 단계에서 대본을 분석해 정의하세요(씬마다 외형이 달라지는 원인).");
@@ -485,6 +573,7 @@
 
   return {
     fill, defaultStyleId, emptyScene, defaultProject, normalizeProject, normalizeScene, stripTimeMarker, stripSuffix,
+    defaultRender, charRange, lengthRuleText, policyHits, hasAdultMarker, buildPolicyFixPrompt, applySceneFix,
     sceneText, countUnits, totalUnits, isShopping, composeFrame, composeOmni, composeReference, referencePrompts, sceneAssets, normalizeAssets,
     buildAssetPrompt, parseAssetsResponse, applyAssets, linkAssets, suggestRecurring, scenePackage, allPromptsText,
     buildMasterPrompt, recommendedModel, buildMetadataPrompt, extractJson, parseClaudeResponse, applyResponse,

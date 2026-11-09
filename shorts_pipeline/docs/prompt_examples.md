@@ -27,11 +27,11 @@
 
 대표 1컷
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, all characters are clearly adult, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 3면 턴어라운드 시트(선택)
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, all characters are clearly adult, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
 ```
 
 **냄비** (object) - 등장 씬: 1, 2, 3, 4, 5, 6
@@ -62,11 +62,11 @@ Hyper-detailed collectible PVC figure, premium resin statue texture, visible mol
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -78,7 +78,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. A single water droplet drips slowly through a clear glass chamber, sharp freeze at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 02 - 문제 심화 / 기존 대안 실패 (7.5~15.0s)
@@ -87,11 +87,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -103,7 +103,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Fast whip-pan upward to the PVC figure standing rigidly with hands on hips, head tilted in disbelief, freeze at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 03 - 원인 해부 / 솔루션 등장 (15.0~22.5s)
@@ -112,11 +112,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -128,7 +128,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Snappy whip-pan downward to the boiling water surface illuminated in green laser light, crisp freeze at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 04 - 기능 검증 / 핵심 카타르시스 (22.5~30.0s)
@@ -137,11 +137,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -153,7 +153,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Snappy whip-pan to an automated mechanical valve hissing open, releasing a burst of cooling mist, sharp freeze at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 05 - 반전 펀치라인 / 극적 대비 (30.0~37.5s)
@@ -162,11 +162,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -178,7 +178,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Fast whip-pan downward to chopsticks drooping under the intense heat, sharp snap freeze at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 06 - 결론 / 행동 유도 (CTA) (37.5~45.0s)
@@ -187,11 +187,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of the PVC figure opening the pot lid, showing completely clear plain water with plain yellow noodles and zero soup broth, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -203,7 +203,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Snappy push-in zoom toward the figure's unblinking eyes breaking the fourth wall, sudden hard blackout transition at 7.5s.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ---
@@ -243,11 +243,11 @@ Hyper-detailed collectible PVC figure, premium resin statue texture, visible mol
 
 대표 1컷
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, all characters are clearly adult, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 3면 턴어라운드 시트(선택)
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, all characters are clearly adult, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
 ```
 
 **에어프라이어** (object) - 등장 씬: 1, 2, 4
@@ -267,11 +267,11 @@ Hyper-detailed collectible PVC figure, premium resin statue texture, visible mol
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -283,7 +283,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Snappy whip-pan pull-back revealing the whole smoky messy countertop.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 02 - 문제 심화 / 기존 대안 실패 (7.5~15.0s)
@@ -292,11 +292,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, 45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, 45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -308,7 +308,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Slow zoom-out revealing the cluttered messy kitchen counter with grease stains.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 03 - 원인 해부 / 솔루션 등장 (15.0~22.5s)
@@ -367,11 +367,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a small PVC figure of a home cook with short brown hair and a cream apron, medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a small PVC figure of a home cook with short brown hair and a cream apron, medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a 30-year-old adult PVC figure of a home cook with short brown hair and a cream apron, medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off, all characters are clearly adult, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -383,7 +383,7 @@ A continuous 7.5-second vertical 9:16 clip with snappy transitions every 2.5 sec
 
 [5.0s - 7.5s]: Snappy whip-pan transition to a brand-new third angle. Snappy whip-pan to the sparkling clean pot drying on a wooden miniature rack with a gleam effect.
 
-Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, no text, letters or typography.
+Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency, no morphing artifacts between cuts, subject stays centered in the safe zone, all characters are clearly adult, no text, letters or typography.
 ```
 
 ### Scene 06 - 결론 / 행동 유도 (CTA) (37.5~45.0s)
@@ -396,7 +396,7 @@ Hyper-detailed collectible PVC figure, premium resin statue texture, visible mol
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, medium shot of a miniature wooden pointing arrow indicating downward toward the lower safe area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```

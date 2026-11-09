@@ -45,11 +45,13 @@ class UiSmoke(unittest.TestCase):
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=red:size=64x64", "-frames:v", "1", str(png)], check=True)
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=360x640:rate=24:duration=1.5", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(clip)], check=True)
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=330:duration=3", str(wav)], check=True)
+            import shorts_stitcher as st
+            ttf = next((f for f in st.SYSTEM_FONTS if f.lower().endswith(".ttf") and Path(f).exists()), "")
             srv = server.make_server(0, proj)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
                 url = f"http://127.0.0.1:{srv.server_address[1]}/"
-                r = subprocess.run(["node", str(ROOT / "tests" / "ui_smoke.js"), url, (proj / "web_dashboard.html").as_uri(), str(clip), str(wav), str(out), str(png)],
+                r = subprocess.run(["node", str(ROOT / "tests" / "ui_smoke.js"), url, (proj / "web_dashboard.html").as_uri(), str(clip), str(wav), str(out), str(png), ttf],
                                    env=ENV, capture_output=True, text=True, encoding="utf-8", timeout=240)
                 print(r.stdout)
                 self.assertEqual(r.returncode, 0, r.stdout + "\n" + r.stderr)

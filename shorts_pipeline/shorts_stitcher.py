@@ -85,6 +85,80 @@ def find_font(assets_dir: Path, weight: str = "bold") -> Tuple[Optional[Path], b
     return None, False
 
 
+FONT_EXTS = (".ttf", ".otf", ".ttc")
+
+
+def system_font_dirs() -> List[Path]:
+    dirs: List[Path] = []
+    win = os.environ.get("WINDIR") or os.environ.get("SystemRoot")
+    if win:
+        dirs.append(Path(win) / "Fonts")
+    dirs += [Path("C:/Windows/Fonts"), Path.home() / "AppData/Local/Microsoft/Windows/Fonts", Path("/System/Library/Fonts"),
+             Path("/Library/Fonts"), Path.home() / "Library/Fonts", Path("/usr/share/fonts"), Path("/usr/local/share/fonts"),
+             Path.home() / ".fonts", Path.home() / ".local/share/fonts"]
+    seen, out = set(), []
+    for d in dirs:
+        if d.exists() and str(d.resolve()) not in seen:
+            seen.add(str(d.resolve()))
+            out.append(d)
+    return out
+
+
+def _walk_fonts(base: Path, depth: int = 4):
+    base_parts = len(base.parts)
+    for root, dirnames, files in os.walk(base):
+        if len(Path(root).parts) - base_parts >= depth:
+            dirnames[:] = []
+        for f in files:
+            if f.lower().endswith(FONT_EXTS):
+                yield Path(root) / f
+
+
+def find_system_font(name: str) -> Optional[Path]:
+    low = Path(name).name.lower()
+    for d in system_font_dirs():
+        for f in _walk_fonts(d):
+            if f.name.lower() == low:
+                return f
+    return None
+
+
+def resolve_font(spec: Optional[str], assets_dir: Path, weight: str = "bold") -> Tuple[Optional[Path], bool]:
+    """폰트 지정(spec) -> (경로, Pretendard 여부). spec: '' = 자동 / 'assets:파일명' / 'system:파일명'.
+    지정한 폰트를 못 찾으면 자동 선택으로 대체한다."""
+    spec = (spec or "").strip()
+    if spec.startswith("assets:"):
+        f = Path(assets_dir) / Path(spec[7:]).name
+        if f.exists() and f.suffix.lower() in FONT_EXTS:
+            return f, f.name.lower().startswith("pretendard")
+    elif spec.startswith("system:"):
+        f = find_system_font(spec[7:])
+        if f:
+            return f, False
+    return find_font(assets_dir, weight)
+
+
+def list_fonts(assets_dir: Path, limit: int = 500) -> List[Dict[str, str]]:
+    """선택 가능한 폰트 목록 [{spec, name, group}] (assets/ 먼저, 그다음 시스템 폰트)."""
+    out: List[Dict[str, str]] = []
+    seen = set()
+    ad = Path(assets_dir)
+    if ad.exists():
+        for f in sorted(ad.iterdir(), key=lambda x: x.name.lower()):
+            if f.suffix.lower() in FONT_EXTS:
+                out.append({"spec": f"assets:{f.name}", "name": f.stem, "group": "assets"})
+                seen.add(f.name.lower())
+    sysf = []
+    for d in system_font_dirs():
+        for f in _walk_fonts(d):
+            if f.name.lower() not in seen:
+                seen.add(f.name.lower())
+                sysf.append(f)
+    for f in sorted(sysf, key=lambda x: x.name.lower())[: max(0, limit - len(out))]:
+        out.append({"spec": f"system:{f.name}", "name": f.stem, "group": "system"})
+    return out
+
+
 # --------------------------------------------------------------------------- text helpers
 def wrap_text(text: str, width: int) -> str:
     """공백 단위 그리디 줄바꿈, 공백이 없거나 단어가 길면 width 글자마다 강제 분할."""
@@ -141,21 +215,58 @@ def build_timeline(scenes: List[Dict[str, Any]], durations: List[float], wrap: i
 
 
 # --------------------------------------------------------------------------- ffmpeg command
+HEX_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
+
+
+def _hex(v: Any, default: str) -> str:
+    m = HEX_RE.match(str(v if v is not None else "").strip())
+    return (m.group(1) if m else str(default)).upper()
+
+
+def _num(v: Any, default: Any, lo: float, hi: float) -> float:
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        x = float(default)
+    return max(lo, min(hi, x))
+
+
+def render_settings(cfg: Dict[str, Any], project: Dict[str, Any]) -> Dict[str, Any]:
+    """project.render + config.layout 기본값 -> 검증/보정된 합성 설정 (레터박스, 타이틀, 자막 스타일)."""
+    lay, r = cfg["layout"], project["render"]
+    W, H = lay["width"], lay["height"]
+    top = int(_num(r.get("top_bar"), lay["top_bar"], 0, 800))
+    bottom = int(_num(r.get("bottom_bar"), lay["bottom_bar"], 0, 800))
+    video_h = H - top - bottom
+    if video_h < 400:
+        raise StitchError(f"레터박스가 너무 큽니다: 상단 {top}px + 하단 {bottom}px 이면 영상 높이가 {video_h}px 입니다 (최소 400px).")
+    box = bool(r.get("sub_box", lay["sub_box"]))
+    border = int(_num(r.get("sub_box_border"), lay["sub_box_border"], 0, 60)) if box else 0
+    sub_bottom = int(_num(r.get("sub_bottom"), 0, 0, H)) or (H - bottom - int(_num(r.get("sub_bottom_gap"), lay["sub_bottom_gap"], 0, 400)))
+    return {
+        "W": W, "H": H, "top": top, "bottom": bottom, "video_h": video_h, "bar": _hex(r.get("bar_color"), lay["bar_color"]),
+        "zoom": _num(r.get("crop_scale"), cfg["spec"]["crop_scale"], 1.0, 1.5), "fit": r.get("fit", "cover"),
+        "title_size": int(_num(r.get("title_size"), lay["title_size"], 12, 200)), "title_color": _hex(r.get("title_color"), lay["title_color"]),
+        "title_outline": int(_num(r.get("title_outline"), lay["title_outline"], 0, 20)), "title_outline_color": _hex(r.get("title_outline_color"), lay["title_outline_color"]),
+        "title_y": int(_num(r.get("title_y"), 0, -600, 600)), "title_chars": int(_num(r.get("title_chars_per_line"), lay["title_chars_per_line"], 4, 60)),
+        "sub_size": int(_num(r.get("sub_size"), lay["sub_size"], 12, 200)), "sub_color": _hex(r.get("sub_color"), lay["sub_color"]),
+        "sub_outline": int(_num(r.get("sub_outline"), lay["sub_outline"], 0, 20)), "sub_outline_color": _hex(r.get("sub_outline_color"), lay["sub_outline_color"]),
+        "sub_box": box, "sub_box_color": _hex(r.get("sub_box_color"), lay["sub_box_color"]), "sub_box_alpha": _num(r.get("sub_box_alpha"), lay["sub_box_alpha"], 0, 1),
+        "sub_border": border, "sub_gap": int(_num(r.get("sub_gap"), lay["sub_gap"], 0, 60)), "sub_bottom": sub_bottom,
+        "sub_chars": int(_num(r.get("sub_chars_per_line"), lay["sub_chars_per_line"], 4, 80)),
+    }
+
+
 def build_command(
     clips: List[Path], voice: Optional[Path], project: Dict[str, Any], cfg: Dict[str, Any], durations: List[float],
     font_title: Optional[Path], font_sub: Optional[Path], out_path: Path, tmp_rel: str = "output/_tmp",
 ) -> Tuple[List[str], Dict[str, str]]:
     """(ffmpeg 인자 리스트, {상대경로: 파일내용}) 반환. 텍스트는 textfile 로 넘겨 따옴표/콜론/% 이스케이프 문제를 원천 차단."""
-    lay = cfg["layout"]
-    W, H, TOP, VH = lay["width"], lay["height"], lay["top_bar"], lay["video_h"]
-    rnd = project["render"]
-    zoom = float(rnd.get("crop_scale", cfg["spec"]["crop_scale"]))
-    fit = rnd.get("fit", "cover")
-    lang = project["meta"]["language"]
-    mult = LANG_WIDTH_MULT.get(lang, 1.0)
-    sub_size = int(rnd.get("sub_size", lay["sub_size"]))
-    sub_w = int(int(rnd.get("sub_chars_per_line", lay["sub_chars_per_line"])) * mult)
-    title_w = int(lay["title_chars_per_line"] * mult)
+    S = render_settings(cfg, project)
+    W, H, TOP, VH = S["W"], S["H"], S["top"], S["video_h"]
+    zoom, fit = S["zoom"], S["fit"]
+    mult = LANG_WIDTH_MULT.get(project["meta"]["language"], 1.0)
+    sub_w, title_w = int(S["sub_chars"] * mult), int(S["title_chars"] * mult)
 
     files: Dict[str, str] = {}
     n = len(clips)
@@ -170,8 +281,8 @@ def build_command(
         norm.append(f"[{i}:v]{f},setsar=1,fps={FPS},format=yuv420p[v{i}]")
     chain = [";".join(norm), "".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0[cat]"]
 
-    draw: List[str] = [f"pad={W}:{H}:0:{TOP}:color=black"]
-    gap = 8  # 줄 간격(px). drawtext 는 줄별 중앙정렬이 없어 한 줄씩 따로 그린다.
+    draw: List[str] = [f"pad={W}:{H}:0:{TOP}:color=0x{S['bar']}"]
+    gap = 8  # 타이틀 줄 간격(px). drawtext 는 줄별 중앙정렬이 없어 한 줄씩 따로 그린다.
 
     def line_filters(font: Path, tag: str, text: str, size: int, color: str, y_expr: Callable[[int, int], str],
                      extra: str, enable: str = "") -> List[str]:
@@ -182,21 +293,27 @@ def build_command(
             files[rel] = ln
             out.append(
                 f"drawtext=fontfile='{ff_escape(rel_or_abs(font, BASE))}':textfile='{ff_escape(rel)}':expansion=none:"
-                f"fontsize={size}:fontcolor={color}:{extra}x=(w-text_w)/2:y={y_expr(k, len(lines))}{enable}")
+                f"fontsize={size}:fontcolor=0x{color}:{extra}x=(w-text_w)/2:y={y_expr(k, len(lines))}{enable}")
         return out
 
     title = (project["meta"].get("top_title") or "").strip()
     if title and font_title:
-        draw += line_filters(
-            font_title, "title", wrap_text(title, title_w), lay["title_size"], f"0x{lay['title_color']}",
-            lambda k, n: f"({TOP}-({n}*text_h+{n - 1}*{gap}))/2+{k}*(text_h+{gap})", "borderw=2:bordercolor=black:")
+        outline = f"borderw={S['title_outline']}:bordercolor=0x{S['title_outline_color']}:" if S["title_outline"] > 0 else ""
+        ty = S["title_y"]
+        if TOP > 0:
+            y_title = lambda k, nn: f"({TOP}-({nn}*text_h+{nn - 1}*{gap}))/2+{k}*(text_h+{gap})+{ty}"  # noqa: E731
+        else:  # 상단 바가 없으면 영상 위 상단에 겹쳐 그린다
+            y_title = lambda k, nn: f"40+{k}*(text_h+{gap})+{ty}"  # noqa: E731
+        draw += line_filters(font_title, "title", wrap_text(title, title_w), S["title_size"], S["title_color"], y_title, outline)
     if font_sub:
-        border = lay["sub_box_border"]
-        box = f"box=1:boxcolor=black@{lay['sub_box_alpha']}:boxborderw={border}:"
+        border, sb, sgap = S["sub_border"], S["sub_bottom"], S["sub_gap"]
+        extra = (f"borderw={S['sub_outline']}:bordercolor=0x{S['sub_outline_color']}:" if S["sub_outline"] > 0 else "")
+        if S["sub_box"]:
+            extra += f"box=1:boxcolor=0x{S['sub_box_color']}@{S['sub_box_alpha']:g}:boxborderw={border}:"
         for k, (a, b, text) in enumerate(build_timeline(project["scenes"], durations, sub_w)):
             draw += line_filters(
-                font_sub, f"sub{k:02d}", text, sub_size, "white",
-                lambda j, n: f"{lay['sub_bottom']}-{border}-{n - j}*text_h-{n - j - 1}*{gap}", box,
+                font_sub, f"sub{k:02d}", text, S["sub_size"], S["sub_color"],
+                lambda j, nn: f"{sb}-{border}-{nn - j}*text_h-{nn - j - 1}*{sgap}", extra,
                 f":enable='gte(t,{a})*lt(t,{b})'")
     chain.append("[cat]" + ",".join(draw) + "[outv]")
 
@@ -266,11 +383,12 @@ def render(
         d = probe_duration(c) if c.exists() else None
         durations.append(d if d and d > 0.5 else cfg["spec"]["scene_seconds"])
     voice = find_voice(input_dir)
-    font_title, pre_t = find_font(assets_dir, "black")
-    font_sub, pre_s = find_font(assets_dir, "bold")
+    rnd = project["render"]
+    font_title, pre_t = resolve_font(rnd.get("title_font"), assets_dir, "black")
+    font_sub, pre_s = resolve_font(rnd.get("sub_font"), assets_dir, "bold")
     if not font_title or not font_sub:
-        raise StitchError("한글 폰트를 찾지 못했습니다. assets/ 폴더에 Pretendard-Black.ttf, Pretendard-Bold.ttf 를 넣어 주세요.")
-    if not (pre_t and pre_s):
+        raise StitchError("한글 폰트를 찾지 못했습니다. assets/ 폴더에 Pretendard-Black.ttf, Pretendard-Bold.ttf 를 넣거나 대시보드에서 글꼴을 선택해 주세요.")
+    if not (pre_t and pre_s) and not (rnd.get("title_font") or rnd.get("sub_font")):
         log(f"[알림] Pretendard 폰트가 없어 대체 폰트({font_title.name})를 사용합니다. assets/ 에 Pretendard 를 넣으면 디자인이 정확해집니다.")
     if not voice:
         log("[경고] input/voice.mp3 가 없어 무음 영상으로 렌더합니다.")
@@ -321,6 +439,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--fit", choices=["cover", "contain"], help="cover=꽉 채움(기본), contain=원본 비율 유지(좌우 검은 기둥)")
     ap.add_argument("--crop", type=float, help="워터마크 크롭 배율 (기본 1.06)")
     ap.add_argument("--title", help="상단 타이틀 덮어쓰기")
+    ap.add_argument("--top-bar", type=int, help="상단 검정 바 높이(px)"); ap.add_argument("--bottom-bar", type=int, help="하단 검정 바 높이(px)")
     ap.add_argument("--partial", action="store_true", help="있는 클립만으로 미리보기 렌더")
     ap.add_argument("--dry-run", action="store_true", help="실행하지 않고 FFmpeg 명령만 출력")
     a = ap.parse_args(argv)
@@ -337,6 +456,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         proj["render"]["crop_scale"] = a.crop
     if a.title:
         proj["meta"]["top_title"] = a.title
+    if a.top_bar is not None:
+        proj["render"]["top_bar"] = a.top_bar
+    if a.bottom_bar is not None:
+        proj["render"]["bottom_bar"] = a.bottom_bar
     try:
         res = render(proj, Path(a.input), Path(a.output), Path(a.assets), a.out_name, a.partial, a.dry_run,
                      on_progress=lambda p: print(f"\r  진행 {p * 100:5.1f}%", end="", flush=True))

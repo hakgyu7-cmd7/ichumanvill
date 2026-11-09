@@ -187,7 +187,7 @@
         "스프 넣는 걸 깜빡했더라고요.",
         "그러니까 그냥 눈대중으로 드세요."
       ],
-      "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth",
+      "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with plain yellow noodles and zero soup broth",
       "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",
       "cuts": [
         {
@@ -222,7 +222,7 @@
       "type": "character",
       "name": "주인공 피규어",
       "label": "the deadpan PVC man figure",
-      "appearance": "a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
+      "appearance": "a 30-year-old adult male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
       "keywords": "남자, 주인공, 사람, 나",
       "done": false
     },

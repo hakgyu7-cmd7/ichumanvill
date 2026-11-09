@@ -93,7 +93,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:12px}table.tb th{color:va
 .phone{width:270px;margin:6px auto 0;border:4px solid #334155;border-radius:26px;overflow:hidden;background:#000;box-shadow:0 20px 40px rgba(0,0,0,.5)}
 .cv{position:relative;width:100%;aspect-ratio:9/16;background:#000;overflow:hidden;font-size:11px}
 .cv .tb{position:absolute;left:0;right:0;top:0;height:12.5%;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px}
-.cv .tb span{color:#ffe500;font-weight:900;font-size:15px;line-height:1.2;text-shadow:0 0 2px #000,0 0 2px #000;white-space:pre-line}
+.cv .tb span{color:#ffe500;font-weight:900;font-size:15px;line-height:1.2;white-space:pre-line}
 .cv .vd{position:absolute;left:0;right:0;top:12.5%;height:66.667%;background:radial-gradient(circle at 50% 40%,#1f2d4d,#0b1224);overflow:hidden}
 .cv .vd .ic{position:absolute;inset:0;display:grid;place-items:center;font-size:54px;opacity:.9}
 .cv .vd .ct{position:absolute;left:5px;top:5px;font-size:9px;background:#08222bcc;color:#a5f3fc;border:1px solid #155e75;border-radius:5px;padding:1px 5px;max-width:92%}
@@ -102,7 +102,7 @@ table.tb{width:100%;border-collapse:collapse;font-size:12px}table.tb th{color:va
 .cv .vd .pil{position:absolute;top:0;bottom:0;background:#000}
 .cv .bt{position:absolute;left:0;right:0;bottom:0;height:20.833%;display:grid;place-items:center;color:#475569;font-size:9px;text-align:center;border-top:1px dashed #334155}
 .cv .sb{position:absolute;left:0;right:0;bottom:21.875%;display:flex;flex-direction:column;align-items:center;transform:translateY(0)}
-.cv .sb span{background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:12.5px;padding:1px 6px;line-height:1.35;margin-top:-1px}
+.cv .sb span{display:block;background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:12.5px;padding:1px 6px;line-height:1.17;white-space:nowrap}
 .cv .g-off .sf,.cv.noguide .sf,.cv.noguide .bt{display:none}
 .scrub{width:270px;margin:8px auto 0}
 .scrub input[type=range]{width:100%;accent-color:var(--g)}
@@ -112,6 +112,9 @@ table.tb{width:100%;border-collapse:collapse;font-size:12px}table.tb th{color:va
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
 details.acc>summary{cursor:pointer;color:var(--cy);font-size:12px;font-weight:600;margin:6px 0}
 .hide{display:none!important}
+input[type=color]{width:100%;height:34px;padding:2px 4px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--g)}
+.sect{margin:14px 0 4px;padding-top:10px;border-top:1px solid var(--line);font-weight:700;font-size:13px;color:var(--g2)}
 .seg{display:flex;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:3px;gap:3px}
 .seg button{border:0;background:none;border-radius:9px;padding:6px 14px;font-weight:700;font-size:13px;color:var(--mut)}
 .seg button.on.ref{background:linear-gradient(90deg,#14532d,#0e7490);color:#fff}
@@ -206,6 +209,7 @@ let P;                       // 현재 프로젝트
 const S = {                  // UI/세션 상태 (프로젝트 파일에는 저장하지 않음)
   tab: 'source', server: null, files: null, status: null, trends: null, outliers: null, trendSrc: { coupang: true, tiktok: true, reddit: true },
   redditCat: 'general', manual: [], busy: {}, metaLang: 'ko', metaPlat: 'youtube', metaLangs: { ko: true, en: false, ja: false, zh: false },
+  au: { speed: 1.2, sil: true, thr: -45, minsil: 0.15, fit: false }, lastProc: null, fonts: [],
   pvScene: 0, pvT: 0, pvTimer: null, guides: true, job: null, ytKey: '', claudeReply: '', metaReply: '', ttsMode: 'beats', openScenes: { 0: true }
 };
 
@@ -272,9 +276,10 @@ function renderStepper() {
 }
 function renderMetrics() {
   const c = counts(), L = lang(), is = issues();
-  const el = $('#m-chars'); el.textContent = c.total + unitTxt() + ' / ' + L.min + '~' + L.max;
-  el.style.color = !c.total ? 'var(--mut)' : (c.total >= L.min && c.total <= L.max ? 'var(--g2)' : 'var(--rd)');
-  const run = lang().unit === 'words' ? c.total / (L.max / 45) : c.total / 7.5;
+  const rg = Core.charRange(CFG, P);
+  const el = $('#m-chars'); el.textContent = c.total + unitTxt() + ' / ' + rg.min + '~' + rg.max;
+  el.style.color = !c.total ? 'var(--mut)' : (c.total >= rg.min && c.total <= rg.max ? 'var(--g2)' : 'var(--rd)');
+  const run = c.total / rg.cps;
   $('#m-run').textContent = (c.total ? run.toFixed(1) : '0.0') + '초 (목표 45)';
   $('#m-zero').textContent = P.options.zero_text ? '적용' : '해제'; $('#m-zero').style.color = P.options.zero_text ? 'var(--g2)' : 'var(--mut)';
   const shop = Core.isShopping(P, CFG), cta = $('#m-cta');
@@ -292,31 +297,68 @@ function renderIssues() {
 function refreshDerived() { renderMetrics(); renderStepper(); renderIssues(); renderPreview(); const f = LIVE[S.tab]; if (f) f(); save(); }
 
 /* ------------------------------------------------------------------ preview (최종 1080x1920 구성 그대로) */
+function rs() {   // shorts_stitcher.render_settings 의 JS 판 (미리보기/안내용)
+  const L = CFG.layout, r = P.render, W = L.width, H = L.height;
+  const n = (v, d, lo, hi) => { v = parseFloat(v); if (!isFinite(v)) v = d; return Math.max(lo, Math.min(hi, v)); };
+  const hex = (v, d) => (/^#?[0-9a-fA-F]{6}$/.test(String(v == null ? '' : v).trim()) ? String(v).trim().replace('#', '').toUpperCase() : d);
+  const top = Math.round(n(r.top_bar, L.top_bar, 0, 800)), bottom = Math.round(n(r.bottom_bar, L.bottom_bar, 0, 800));
+  const box = r.sub_box !== false && r.sub_box !== 0;
+  const border = box ? Math.round(n(r.sub_box_border, L.sub_box_border, 0, 60)) : 0;
+  const subBottom = Math.round(n(r.sub_bottom, 0, 0, H)) || (H - bottom - Math.round(n(r.sub_bottom_gap, L.sub_bottom_gap, 0, 400)));
+  return { W, H, top, bottom, video_h: H - top - bottom, bar: hex(r.bar_color, L.bar_color), zoom: n(r.crop_scale, CFG.spec.crop_scale, 1, 1.5),
+    title_size: Math.round(n(r.title_size, L.title_size, 12, 200)), title_color: hex(r.title_color, L.title_color), title_outline: Math.round(n(r.title_outline, L.title_outline, 0, 20)),
+    title_outline_color: hex(r.title_outline_color, L.title_outline_color), title_y: Math.round(n(r.title_y, 0, -600, 600)), title_chars: Math.round(n(r.title_chars_per_line, L.title_chars_per_line, 4, 60)),
+    sub_size: Math.round(n(r.sub_size, L.sub_size, 12, 200)), sub_color: hex(r.sub_color, L.sub_color), sub_outline: Math.round(n(r.sub_outline, L.sub_outline, 0, 20)),
+    sub_outline_color: hex(r.sub_outline_color, L.sub_outline_color), sub_box: box, sub_box_color: hex(r.sub_box_color, L.sub_box_color), sub_box_alpha: n(r.sub_box_alpha, L.sub_box_alpha, 0, 1),
+    sub_border: border, sub_gap: Math.round(n(r.sub_gap, L.sub_gap, 0, 60)), sub_bottom: subBottom, sub_chars: Math.round(n(r.sub_chars_per_line, L.sub_chars_per_line, 4, 80)) };
+}
+const hx = (v) => '#' + String(v || '000000').replace('#', '').toUpperCase();
 function geometry() {
-  const z = Number(P.render.crop_scale) || 1, VH = CFG.layout.video_h / CFG.layout.width;           // 1280/1080
-  const srcAspect = 9 / 16;                                                                       // 원본 클립 가정: 9:16
+  const R = rs(), z = R.zoom, VH = R.video_h / R.W, srcAspect = 9 / 16;                            // 원본 클립 가정: 9:16
   if (P.render.fit === 'contain') return { fit: 'contain', visW: 1 / z, visH: 1 / z };
-  const visH = (VH * srcAspect) / z, visW = 1 / z;                                                 // 원본 대비 노출 비율
-  return { fit: 'cover', visW, visH };
+  return { fit: 'cover', visW: 1 / z, visH: (VH * srcAspect) / z };                                 // 원본 대비 노출 비율
+}
+const pvFontCache = {};
+function pvFont(spec, el) {   // 서버의 글꼴 파일을 불러와 미리보기에도 같은 글꼴을 적용 (실패하면 기본 글꼴)
+  if (!spec || !S.server) { el.style.fontFamily = ''; return; }
+  const fam = 'pv_' + Array.from(spec).map((c) => c.charCodeAt(0).toString(16)).join('').slice(0, 40);
+  if (pvFontCache[fam] === 'ok') { el.style.fontFamily = `"${fam}", sans-serif`; return; }
+  if (pvFontCache[fam] === 'wait' || pvFontCache[fam] === 'fail') { el.style.fontFamily = pvFontCache[fam] === 'fail' ? '' : el.style.fontFamily; return; }
+  pvFontCache[fam] = 'wait';
+  new FontFace(fam, `url(/api/font-file?spec=${encodeURIComponent(spec)})`).load()
+    .then((f) => { document.fonts.add(f); pvFontCache[fam] = 'ok'; renderPreview(); })
+    .catch(() => { pvFontCache[fam] = 'fail'; });
 }
 function renderPreview() {
   const T = S.pvT, sc = Math.min(5, Math.floor(T / 7.5)), within = T - sc * 7.5, beat = Math.min(2, Math.floor(within / 2.5));
   S.pvScene = sc;
-  const scene = P.scenes[sc], st = style(), g = geometry();
+  const scene = P.scenes[sc], g = geometry(), R = rs();
+  const cvEl = $('#cv'), k = (cvEl.clientWidth || 262) / R.W;
+  cvEl.style.background = '#' + R.bar;
   const title = (P.meta.top_title || '').trim();
-  $('#pv-title').textContent = title ? wrapPv(title, CFG.layout.title_chars_per_line) : '(상단 타이틀)';
+  const tb = $('.tb', cvEl), tt = $('#pv-title');
+  tt.textContent = title ? wrapPv(title, R.title_chars) : '(상단 타이틀)';
+  tt.style.cssText = `color:#${R.title_color};font-size:${(R.title_size * k).toFixed(2)}px;${R.title_outline ? `-webkit-text-stroke:${(R.title_outline * k * 2).toFixed(2)}px #${R.title_outline_color};paint-order:stroke fill;` : ''}transform:translateY(${(R.title_y * k).toFixed(2)}px)`;
+  pvFont(P.render.title_font, tt);
+  if (R.top > 0) tb.style.cssText = `top:0;height:${R.top / R.H * 100}%;align-items:center`; else tb.style.cssText = `top:${(40 * k).toFixed(1)}px;height:auto;align-items:flex-start;z-index:5`;
+  const vd = $('#pv-vd'); vd.style.top = R.top / R.H * 100 + '%'; vd.style.height = R.video_h / R.H * 100 + '%';
+  const bt = $('.bt', cvEl); bt.style.height = R.bottom / R.H * 100 + '%'; bt.style.display = R.bottom > 40 ? '' : 'none';
   $('#pv-ic').textContent = ICONS[sc]; $('#pv-ic').style.filter = 'none';
   const cut = scene.cuts[beat];
   $('#pv-ct').textContent = `Scene ${p2(sc + 1)} · Cut ${beat + 1} (${(beat * 2.5).toFixed(1)}~${((beat + 1) * 2.5).toFixed(1)}s)` + (cut && cut.type ? ' · ' + cut.type : '');
   const txt = (scene.beats[beat] || '').trim();
-  $('#pv-sb').innerHTML = txt ? wrapPv(txt, Math.round(P.render.sub_chars_per_line * (P.meta.language === 'en' ? 1.9 : 1))).split('\n').map((l) => `<span>${esc(l)}</span>`).join('') : '';
+  const sb = $('#pv-sb'); sb.style.bottom = (R.H - R.sub_bottom) / R.H * 100 + '%';
+  const rgba = (h, a) => `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${a})`;
+  sb.innerHTML = txt ? wrapPv(txt, Math.round(R.sub_chars * (P.meta.language === 'en' ? 1.9 : 1))).split('\n').map((l, i) =>
+    `<span style="font-size:${(R.sub_size * k).toFixed(2)}px;color:#${R.sub_color};padding:${(R.sub_border * k).toFixed(2)}px;margin-top:${i ? ((R.sub_gap - 2 * R.sub_border) * k).toFixed(2) : 0}px;${R.sub_box ? `background:${rgba(R.sub_box_color, R.sub_box_alpha)};` : 'background:none;'}${R.sub_outline ? `-webkit-text-stroke:${(R.sub_outline * k * 2).toFixed(2)}px #${R.sub_outline_color};paint-order:stroke fill;` : ''}">${esc(l)}</span>`).join('') : '';
+  pvFont(P.render.sub_font, sb);
   $('#pv-time').textContent = T.toFixed(1) + 's / 45.0s'; $('#pv-range').value = T;
-  const vd = $('#pv-vd'); $$('.pil', vd).forEach((n) => n.remove());
-  const sf = $('#pv-sf'), cvEl = $('#cv');
+  $$('.pil', vd).forEach((n) => n.remove());
+  const sf = $('#pv-sf');
   cvEl.classList.toggle('noguide', !S.guides);
   if (g.fit === 'contain') {
-    const side = (1 - 720 / 1080) / 2 * 100;
-    [0, 1].forEach((k) => { const d = document.createElement('div'); d.className = 'pil'; d.style.cssText = `${k ? 'right' : 'left'}:0;width:${side}%`; vd.appendChild(d); });
+    const side = (1 - (R.video_h * 9 / 16) / R.W) / 2 * 100;
+    [0, 1].forEach((kk) => { const d = document.createElement('div'); d.className = 'pil'; d.style.cssText = `${kk ? 'right' : 'left'}:0;width:${Math.max(0, side)}%`; vd.appendChild(d); });
     sf.style.display = 'none';
   } else {
     sf.style.display = '';
@@ -327,7 +369,7 @@ function renderPreview() {
     S.safeBad = bad;
   }
   $('#pv-info').innerHTML = g.fit === 'cover'
-    ? `1080×1920 합성 결과 그대로. 크롭 후 원본에서 보이는 영역: 가로 <b>${(g.visW * 100).toFixed(1)}%</b> · 세로 <b>${(g.visH * 100).toFixed(1)}%</b> (9:16 원본 기준). 박스 = 피사체 안전구역(원본 중앙 70%)${S.safeBad ? ' - <span style="color:var(--or)">주황: 세로 일부가 크롭되니 피사체를 더 중앙에</span>' : ''}`
+    ? `${R.W}×${R.H} 합성 결과 그대로 (상단 ${R.top}px · 영상 ${R.video_h}px · 하단 ${R.bottom}px). 크롭 후 원본에서 보이는 영역: 가로 <b>${(g.visW * 100).toFixed(1)}%</b> · 세로 <b>${(g.visH * 100).toFixed(1)}%</b> (9:16 원본 기준). 박스 = 피사체 안전구역(원본 중앙 70%)${S.safeBad ? ' - <span style="color:var(--or)">주황: 세로 일부가 크롭되니 피사체를 더 중앙에</span>' : ''}`
     : '원본 비율 유지(contain) 모드: 좌우에 검은 기둥이 생깁니다.';
   $$('#pv-scenes button').forEach((b, i) => b.classList.toggle('pri', i === sc));
 }
@@ -445,11 +487,13 @@ function tabScript() {
     <div class="note">${esc(CFG.categories[P.meta.category].flow)}<br><span style="opacity:.8">심리 트리거: ${esc(CFG.categories[P.meta.category].psychology)} · 소재 공급처: ${esc(CFG.categories[P.meta.category].sourcing)}</span></div>
     <div class="grid3">
       <div><label class="f">영상 화풍 (전 씬 100% 고정)</label><select data-bind="meta.style" data-re>${styleOpt}</select><div class="hint" style="margin-top:4px">${style().icon} ${esc(style().desc)} · 추천: ${esc(style().recommended)}</div></div>
-      <div><label class="f">발화 언어</label><select data-bind="meta.language" data-re>${langOpt}</select><div class="hint" style="margin-top:4px">${esc(lang().length_rule)}</div></div>
+      <div><label class="f">발화 언어</label><select data-bind="meta.language" data-re>${langOpt}</select><div class="hint" style="margin-top:4px">${esc(Core.lengthRuleText(CFG, P))}</div></div>
       <div><label class="f">등장인물·사물 기준 이미지</label><div class="note" style="margin:0">대본을 만든 뒤 <b>다음 단계 "기준 이미지"</b>에서 자주 나오는 인물·사물을 분석해 외형을 고정합니다. Claude 응답에 assets 가 있으면 자동으로 채워집니다. (현재 ${P.assets.length}개) <button class="btn sm" data-act="tab" data-id="assets">이동</button></div></div>
     </div>
     <div class="row sub"><label class="row"><input type="checkbox" data-check="options.zero_text" data-re ${P.options.zero_text ? 'checked' : ''}> Zero-Text 네거티브 접미사 자동 삽입</label>
       <label class="row"><input type="checkbox" data-check="options.safe_margin" data-re ${P.options.safe_margin ? 'checked' : ''}> 워터마크 크롭 안전 마진(중앙 70% · 여백 15%) 문구 삽입</label>
+      <label class="row"><input type="checkbox" data-check="options.adult_safe" data-re ${P.options.adult_safe !== false ? 'checked' : ''}> 성인 명시 문구 자동 삽입 (Flow 미성년자 정책 차단 예방)</label>
+      <label class="row"><input type="checkbox" data-check="options.camera_warn" data-re ${P.options.camera_warn !== false ? 'checked' : ''}> 익스트림 클로즈업 경고 표시</label>
       ${shopMode ? '<span class="badge a">🛒 Scene 06 제휴 CTA 강제</span>' : ''}</div>
   </section>
 
@@ -468,7 +512,8 @@ function tabScript() {
   </section>
 
   <section class="card"><h3>④ 대본 편집 (6씬 × 3비트) <span class="sp"></span><span class="badge" id="tot-badge"></span></h3>
-    <div class="hint">비트 = 2.5초 호흡 단위(자막 한 번에 표시). 글자수는 <b>${esc(lang().length_rule)}</b></div>
+    <div class="hint">비트 = 2.5초 호흡 단위(자막 한 번에 표시). 글자수는 <b>${esc(Core.lengthRuleText(CFG, P))}</b></div>
+    ${P.timing.chars_per_sec > 0 ? `<div class="note g">🎙️ <b>실측 TTS 속도로 보정 중</b>: 초당 ${P.timing.chars_per_sec}${unitTxt()} → 목표 ${Core.charRange(CFG, P).min}~${Core.charRange(CFG, P).max}${unitTxt()} (45초를 채우는 분량). 마스터 프롬프트도 이 분량으로 나옵니다. <button class="btn sm" data-act="resetTiming">보정 해제(기본값)</button></div>` : '<div class="hint">음성 단계에서 실제 TTS 길이를 재면 목표 글자수를 실측 속도에 맞게 보정할 수 있습니다(음성이 45초보다 짧거나 길 때).</div>'}
     <div class="bar" id="tot-bar" style="margin:6px 0 12px"></div>
     <div class="col" style="gap:10px">${P.scenes.map((sc, i) => `
       <div class="scene ${i === S.pvScene ? 'cur' : ''}"><div class="row sp"><div class="row"><span class="sn">${p2(i + 1)}</span><b>${esc(CFG.scene_roles[i].role)}</b><span class="badge c mono">${CFG.scene_roles[i].time}</span></div>
@@ -498,6 +543,12 @@ function tabVisual() {
       : '<div class="note g">🧬 기준 이미지 준비 완료 — 씬 이미지를 만들 때 각 씬 카드에 표시된 기준 이미지를 참조로 함께 첨부하세요.</div>');
   return `
   ${assetBanner}
+  <section class="card"><h3>🛡️ 생성 차단 · 경고 대응</h3>
+    <div class="hint">Flow 가 <b>"미성년자 관련 정책 위반 가능성"</b> 등으로 프롬프트를 거부하면: ① 오른쪽 <b>프로젝트 점검</b>의 정책 단어를 먼저 확인하고, ② <b>기준 이미지 탭</b>에서 인물 외형에 성인 연령(예: a 30-year-old adult)을 명시한 뒤, ③ 아래 각 씬 카드의 <b>[정책 안전 재작성]</b>으로 해당 씬만 Claude 에게 다시 쓰게 하세요. 피규어·인형·미니어처 캐릭터도 어려 보이면 같은 정책이 적용됩니다.</div>
+    <div class="row"><button class="btn" data-act="fixCamera">📷 익스트림/타이트 클로즈업 표현 자동 교정</button>
+      <label class="row"><input type="checkbox" data-check="options.adult_safe" data-re ${P.options.adult_safe !== false ? 'checked' : ''}> 성인 명시 문구 자동 삽입</label>
+      <label class="row"><input type="checkbox" data-check="options.camera_warn" data-re ${P.options.camera_warn !== false ? 'checked' : ''}> 익스트림 클로즈업 경고 표시</label></div>
+  </section>
   <section class="card"><h3>🎬 Google Flow (Omni 1.2) 제작 가이드 <span class="sp"></span><button class="btn pri" data-act="copyAllPrompts">📋 전체 프롬프트 복사</button></h3>
     <div class="grid3" style="margin-top:6px">
       <div class="note"><b>1) 이미지 2장/씬</b><br>Frame 1(0s), Frame 2(2.5s) 프롬프트로 9:16 이미지를 각각 생성</div>
@@ -529,6 +580,10 @@ function sceneVisual(sc, i) {
         <textarea data-bind="scenes.${i}.cuts.${j}.prompt" data-live data-scene-live="${i}" rows="3" class="mono" style="margin-top:6px">${esc(sc.cuts[j].prompt)}</textarea></div>`).join('')}</div>
     <div class="row sp" style="margin:8px 0 2px"><small class="hint" style="margin:0">Omni 1.2 영상 프롬프트 (연결 문구·화풍 질감 자동 합성)</small><span class="row"><button class="btn sm" data-act="copyFin" data-i="${i}" data-k="omni">복사</button><button class="btn sm pri" data-act="copyScene" data-i="${i}">씬 전체 복사</button></span></div>
     <div class="final" id="fin-${i}-omni"></div>
+    <details class="acc"><summary>🛡️ 이 씬이 Flow 정책(미성년자 등)에 차단됐나요? — 안전하게 다시 쓰기</summary>
+      <div class="row"><button class="btn" data-act="copyPolicyFix" data-i="${i}">① 정책 안전 재작성 프롬프트 복사 (Claude)</button></div>
+      <label class="f">② Claude 응답(JSON) 붙여넣기</label><textarea id="fix-${i}" class="mono" rows="3" placeholder="Claude 가 출력한 json 코드블록 응답 전체"></textarea>
+      <div class="row" style="margin-top:6px"><button class="btn pri" data-act="applyPolicyFix" data-i="${i}">③ 이 씬에 적용 (프레임/컷 프롬프트 + 인물 외형)</button></div></details>
     <div class="row sub"><div id="clip-${i}" style="flex:1;min-width:240px">${clipBox(i)}</div></div>
     <div id="sc-iss-${i}"></div></details>`;
 }
@@ -560,7 +615,7 @@ LIVE.visual = function () {
   });
 };
 LIVE.script = function () {
-  const L = lang(), total = Core.totalUnits(P, CFG), u = unitTxt();
+  const L = Core.charRange(CFG, P), total = Core.totalUnits(P, CFG), u = unitTxt();
   const b = $('#tot-badge'); if (b) { b.className = 'badge mono ' + (!total ? '' : total >= L.min && total <= L.max ? 'g' : 'r'); b.textContent = `총 ${total}${u} / 목표 ${L.min}~${L.max}${u}`; }
   const bar = $('#tot-bar');
   if (bar) { const max = L.max * 1.25; bar.innerHTML = `<div class="zone" style="left:${L.min / max * 100}%;width:${(L.max - L.min) / max * 100}%"></div><i style="width:${Math.min(100, total / max * 100)}%;background:${total >= L.min && total <= L.max ? 'var(--g)' : total > L.max ? 'var(--rd)' : 'var(--am)'}"></i>`; }
@@ -571,6 +626,11 @@ LIVE.script = function () {
   });
   const mb = $('#master-box');
   if (mb) { const txt = Core.buildMasterPrompt(CFG, P); mb.value = txt; $('#master-len').textContent = txt.length.toLocaleString() + '자'; }
+};
+LIVE.render = function () {   // 레터박스 숫자를 바꾸는 즉시 영상 영역 높이/경고/자막 자동 위치를 갱신
+  const R = rs(), vh = $('#rd-vh'), sa = $('#rd-subauto');
+  if (vh) { vh.className = 'note' + (R.video_h < 400 ? ' e' : ''); vh.innerHTML = `<b class="mono">${R.video_h}px</b> ` + (R.video_h < 400 ? '— 400px 이상이어야 합니다' : '(1920 − 상단 − 하단)'); }
+  if (sa) sa.textContent = `자동 = 하단 바 바로 위(현재 y=${R.sub_bottom})`;
 };
 LIVE.source = function () { const c = $('#src-cnt'); if (c) c.textContent = P.meta.source_script.length + '자'; };
 LIVE.audio = function () { const t = $('#tts-text'); if (t) t.value = ttsText(); const s = $('#tts-stat'); if (s) s.innerHTML = ttsStat(); };
@@ -646,35 +706,66 @@ function ttsText() {
   return P.scenes.map((s) => s.beats.filter((b) => b.trim()).join('\n')).join('\n\n');
 }
 function ttsStat() {
-  const total = Core.totalUnits(P, CFG), L = lang(), est = L.unit === 'words' ? total / (L.max / 45) : total / 7.5;
-  return `총 <b class="mono">${total}${unitTxt()}</b> → 1.2배속·무음 제거 기준 약 <b class="mono">${est.toFixed(1)}초</b> (목표 45초 · 허용 43~46초)`;
+  const total = Core.totalUnits(P, CFG), rg = Core.charRange(CFG, P), est = total / rg.cps;
+  return `총 <b class="mono">${total}${unitTxt()}</b> → ${rg.custom ? '실측 속도' : '기본 가정'}(초당 ${rg.cps.toFixed(1)}${unitTxt()}) 기준 약 <b class="mono">${est.toFixed(1)}초</b> (목표 45초 · 허용 43~46초)`;
+}
+function audioPanel() {   // 실제 음성 길이 측정 -> 속도 보정 / 목표 글자수 보정
+  const v = S.files && S.files.voice, dur = v && v.duration, total = Core.totalUnits(P, CFG), u = unitTxt();
+  if (!v || !dur || !total) return '';
+  const rate = total / dur, need = Math.round(rate * 45), diff = dur - 45, ok = Math.abs(diff) <= 3, raw = S.files && S.files.voice_raw;
+  const speedNow = S.lastProc ? S.lastProc.speed : S.au.speed;
+  return `<div class="note ${ok ? 'g' : 'w'}" style="margin-top:12px"><b>📏 길이 점검</b> — 음성 <b class="mono">${dur.toFixed(1)}초</b> / 영상 <b class="mono">45.0초</b>
+      ${ok ? '(규격 OK)' : `→ <b>${Math.abs(diff).toFixed(1)}초 ${diff < 0 ? '짧습니다' : '깁니다'}</b>`}<br>
+      대본 ${total}${u}을 현재 설정(속도 ${Number(speedNow).toFixed(2)}x)으로 읽은 실제 속도는 <b class="mono">초당 ${rate.toFixed(1)}${u}</b> 입니다. 이 속도로 45초를 채우려면 대본이 약 <b class="mono">${need}${u}</b> 필요합니다.</div>
+    ${ok ? '' : `<div class="row" style="margin-top:8px">
+      <button class="btn pri" data-act="fitAudio" ${raw ? '' : 'disabled'} title="원본 음성(voice_raw)이 필요합니다">⏱ 속도를 조절해 정확히 45초로 맞추기</button>
+      <button class="btn cy" data-act="calibrateTiming">📝 이 속도 기준으로 목표 글자수 보정 (${need}${u} 안팎)</button>
+      ${P.timing.chars_per_sec > 0 ? '<button class="btn" data-act="resetTiming">보정 해제</button>' : ''}</div>
+    <div class="hint" style="margin-top:6px">${diff < 0 ? '음성이 짧을 때: ① 속도를 낮춰 늘리거나(자연스러운 범위는 0.8~1.0x), ② 위 버튼으로 목표 글자수를 보정한 뒤 2단계에서 마스터 프롬프트를 다시 복사해 대본을 더 길게 만드세요.' : '음성이 길 때: 속도를 올리거나 대본을 줄이세요.'}</div>`}
+    ${S.lastProc ? `<div class="hint" style="margin-top:6px">마지막 처리: 속도 <b>${S.lastProc.speed}x</b>${S.lastProc.fit_clamped ? ' (자동 계산이 0.5~2.0배 범위로 제한됨)' : ''} · 원본 ${S.lastProc.before ? S.lastProc.before.toFixed(1) : '?'}초 → 결과 ${S.lastProc.after ? S.lastProc.after.toFixed(1) : '?'}초</div>` : ''}`;
 }
 function tabAudio() {
-  const v = S.files && S.files.voice, raw = S.files && S.files.voice_raw;
-  const dur = v && v.duration, okDur = dur && Math.abs(dur - 45) <= 3;
+  const v = S.files && S.files.voice, raw = S.files && S.files.voice_raw, A = S.au;
   return `
   <section class="card"><h3>🎙️ ① TTS 입력 대본 <span class="sp"></span><button class="btn pri" data-act="copyTts">📋 대본 복사</button></h3>
-    <div class="hint">Pinokio Qwen3-TTS(0.6B/1.7B) 같은 로컬 TTS에 붙여넣어 음성을 만드세요. <b>속도 1.2배 · 숨소리/무음 제거</b>가 규격입니다(TTS가 속도 옵션이 없으면 아래 ②에서 처리).</div>
+    <div class="hint">Pinokio Qwen3-TTS(0.6B/1.7B) 같은 로컬 TTS에 붙여넣어 음성을 만드세요. 이미 TTS 자체에서 1.2배속으로 만들었다면 아래 ②에서 속도를 <b>1.0</b>으로 두세요(두 번 빨라지는 것을 막기 위해).</div>
     <div class="row">${[['beats', '비트마다 줄바꿈'], ['scene', '씬마다 줄바꿈'], ['one', '한 덩어리']].map(([k, n]) => `<label class="chip ${S.ttsMode === k ? 'on' : ''}"><input type="radio" name="ttsm" value="${k}" ${S.ttsMode === k ? 'checked' : ''} class="hide">${n}</label>`).join('')}</div>
     <textarea id="tts-text" rows="10" readonly style="margin-top:8px"></textarea><div class="hint" id="tts-stat" style="margin-top:6px"></div>
     <div class="note ${P.meta.language === 'ko' ? '' : 'w'}">발화 언어: <b>${esc(lang().name)}</b>. 대본 언어와 TTS 음성 언어가 일치해야 합니다. edge-tts(무료·인터넷 필요)는 ${S.status && S.status.edge_tts ? '설치됨' : '미설치(pip install edge-tts)'}.</div>
     <div class="row"><button class="btn cy ${S.status && S.status.edge_tts ? '' : 'hide'}" data-act="edgeTts" ${S.busy.tts ? 'disabled' : ''}>${S.busy.tts ? '생성 중…' : 'edge-tts 로 음성 생성(실험)'}</button></div>
   </section>
-  <section class="card"><h3>🎧 ② 음성 파일 → 무음 제거 + 1.2배속 → voice.mp3</h3>
+  <section class="card"><h3>🎧 ② 음성 파일 → 무음 제거 · 속도 변경 → voice.mp3</h3>
     ${S.server ? `
     <div class="grid2">
       <div><label class="f">TTS 원본 음성 (voice_raw)</label><div class="drop" data-drop-voice="voice_raw">${raw ? '✅ <b>' + esc(raw) + '</b>' : '원본 음성 파일을 끌어놓거나'}<label class="btn sm" style="margin-left:8px">선택<input type="file" accept="audio/*" class="hide" data-upload="voice_raw"></label></div>
-        <div class="row" style="margin-top:8px"><label>속도 <input type="number" id="au-speed" value="1.2" step="0.05" min="1" max="2" style="width:80px"></label><label class="row"><input type="checkbox" id="au-sil" checked> 무음 제거</label>
-          <button class="btn pri" data-act="processVoice" ${raw && !S.busy.au ? '' : 'disabled'}>${S.busy.au ? '처리 중…' : '처리 → voice.mp3'}</button></div></div>
+        <div class="grid2" style="margin-top:8px">
+          <div><label class="f">속도 (배속)</label><input type="number" data-au="speed" value="${A.speed}" step="0.05" min="0.5" max="2" ${A.fit ? 'disabled' : ''}></div>
+          <div><label class="f">무음 기준 (dB)</label><input type="number" data-au="thr" value="${A.thr}" step="1" min="-80" max="-10"></div>
+          <div><label class="f">무음 인정 최소 길이 (초)</label><input type="number" data-au="minsil" value="${A.minsil}" step="0.05" min="0.02" max="2"></div>
+          <div class="col" style="justify-content:flex-end;gap:6px"><label class="row"><input type="checkbox" data-au="sil" ${A.sil ? 'checked' : ''}> 무음 제거</label>
+            <label class="row"><input type="checkbox" data-au="fit" ${A.fit ? 'checked' : ''}> 45초에 맞춰 속도 자동 계산</label></div></div>
+        <div class="hint" style="margin:6px 0">무음이 '최소 길이' 이상이면 제거하되, 문장 사이 호흡으로 그 길이만큼은 남깁니다(값을 줄이면 더 촘촘해집니다).</div>
+        <button class="btn pri" data-act="processVoice" ${raw && !S.busy.au ? '' : 'disabled'}>${S.busy.au ? '처리 중…' : '처리 → voice.mp3'}</button></div>
       <div><label class="f">최종 음성 (voice) — 이미 처리된 파일이면 직접 업로드</label><div class="drop" data-drop-voice="voice">${v ? '✅ <b>' + esc(v.name) + '</b>' : '완성된 voice.mp3 를 끌어놓거나'}<label class="btn sm" style="margin-left:8px">선택<input type="file" accept="audio/*" class="hide" data-upload="voice"></label></div>
-        ${v ? `<div class="note ${okDur ? 'g' : 'w'}" style="margin-top:8px">길이 <b class="mono">${dur ? dur.toFixed(1) : '?'}초</b> ${okDur ? '— 45초 규격 OK' : '— 45±3초를 벗어났습니다. 대본 분량/속도를 점검하세요.'}</div><audio controls src="/media/input/${esc(v.name)}?t=${dur}" style="width:100%"></audio>` : ''}</div>
-    </div>` : `<div class="note w">서버 없이는 자동 처리를 못 합니다. 터미널에서 직접 실행하세요:</div>
-      <div class="pre">ffmpeg -i voice_raw.mp3 -af "silenceremove=start_periods=1:start_threshold=-45dB:stop_periods=-1:stop_duration=0.15:stop_threshold=-45dB,atempo=1.2" input/voice.mp3</div>
+        ${v ? `<audio controls src="/media/input/${esc(v.name)}?t=${v.duration}" style="width:100%;margin-top:8px"></audio>` : ''}</div>
+    </div>
+    ${audioPanel()}` : `<div class="note w">서버 없이는 자동 처리를 못 합니다. 터미널에서 직접 실행하세요(속도는 --speed, 목표 길이에 맞추려면 --fit 45):</div>
+      <div class="pre">python audio_tools.py voice_raw.mp3 input/voice.mp3 --speed 1.0 --fit 45</div>
       <label class="row" style="margin-top:8px"><input type="checkbox" data-check="progress_voice" ${S.localVoice ? 'checked' : ''}> input/voice.mp3 준비 완료</label>`}
   </section>`;
 }
 
 /* ------------------------------------------------------------------ tab: 5 합성 */
+function fontSelect(path, cur) {
+  const groups = { assets: [], system: [] };
+  S.fonts.forEach((f) => groups[f.group].push(f));
+  const opt = (f) => `<option value="${esc(f.spec)}" ${cur === f.spec ? 'selected' : ''}>${esc(f.name)}</option>`;
+  const known = S.fonts.some((f) => f.spec === cur);
+  return `<select data-bind="${path}" data-re><option value="" ${!cur ? 'selected' : ''}>자동 (Pretendard → 시스템 한글)</option>
+    ${cur && !known ? `<option value="${esc(cur)}" selected>${esc(cur)} (현재 값)</option>` : ''}
+    ${groups.assets.length ? `<optgroup label="assets/ 폴더">${groups.assets.map(opt).join('')}</optgroup>` : ''}
+    ${groups.system.length ? `<optgroup label="시스템 글꼴">${groups.system.map(opt).join('')}</optgroup>` : ''}</select>`;
+}
 function tabRender() {
   const f = S.files, is = issues(), errs = is.filter((i) => i.level === 'error').length;
   const row = (ok, txt, hint) => `<div class="chk"><span class="m">${ok === null ? '⏳' : ok ? '✅' : '❌'}</span><span>${txt}${ok === false && hint ? ` <small style="color:var(--dim)">→ ${hint}</small>` : ''}</span></div>`;
@@ -687,14 +778,55 @@ function tabRender() {
     ${row(!!(f && f.font), '한글 폰트' + (f ? `: ${f.font || '없음'}${f.pretendard ? '' : ' (대체 폰트 - assets/ 에 Pretendard 권장)'}` : ''), 'assets/ 에 Pretendard-Black.ttf / Bold.ttf')}
     ${row(errs === 0, '대본/프롬프트 규칙 오류 ' + errs + '건', '오른쪽 프로젝트 점검 확인')}` : `<div class="note w">서버가 꺼져 있어 파일 점검을 못 합니다. 아래 [CLI 명령]을 사용하세요.</div>`}
   </section>
-  <section class="card"><h3>⚙️ 합성 설정</h3>
-    <div class="grid4">
-      <div><label class="f">상단 타이틀 (노란 바)</label><input type="text" data-bind="meta.top_title" data-live value="${esc(P.meta.top_title)}" style="color:var(--am);font-weight:700"></div>
-      <div><label class="f">영상 채움 방식</label><select data-bind="render.fit" data-re><option value="cover" ${P.render.fit === 'cover' ? 'selected' : ''}>cover — 1080 가로 꽉 채움 (권장)</option><option value="contain" ${P.render.fit === 'contain' ? 'selected' : ''}>contain — 원본 비율(좌우 검은 기둥)</option></select></div>
-      <div><label class="f">워터마크 크롭 배율</label><input type="number" data-bind="render.crop_scale" data-num data-live step="0.01" min="1" max="1.3" value="${P.render.crop_scale}"></div>
-      <div><label class="f">자막 크기 / 줄당 글자</label><div class="row" style="flex-wrap:nowrap"><input type="number" data-bind="render.sub_size" data-num data-live min="30" max="90" value="${P.render.sub_size}"><input type="number" data-bind="render.sub_chars_per_line" data-num data-live min="8" max="40" value="${P.render.sub_chars_per_line}"></div></div>
+  <section class="card"><h3>⚙️ 합성 설정 <span class="sp"></span><button class="btn sm" data-act="resetRender">스타일 기본값으로</button></h3>
+    <div class="hint">모든 값은 오른쪽 미리보기에 바로 반영되고, 렌더링에 그대로 적용됩니다. 색은 색상 선택기로 고르세요.</div>
+    <div class="grid3">
+      <div><label class="f">상단 타이틀 문구</label><input type="text" data-bind="meta.top_title" data-live value="${esc(P.meta.top_title)}"></div>
+      <div><label class="f">영상 채움 방식</label><select data-bind="render.fit" data-re><option value="cover" ${P.render.fit === 'cover' ? 'selected' : ''}>cover — 가로 꽉 채움 (권장)</option><option value="contain" ${P.render.fit === 'contain' ? 'selected' : ''}>contain — 원본 비율(좌우 검은 기둥)</option></select></div>
+      <div><label class="f">워터마크 크롭 배율 (1.00~1.50)</label><input type="number" data-bind="render.crop_scale" data-num data-live step="0.01" min="1" max="1.5" value="${P.render.crop_scale}"></div>
     </div>
-    <div class="hint" style="margin-top:8px">레이아웃(1080×1920): 상단 검정 바 <b>0~240px</b>(노란 타이틀) · 영상 <b>240~1520px</b>(1280px, 1.06x 크롭) · 자막은 하단 바 바로 위 <b>y=1500</b> 기준 아래 정렬(최대 ~1360 까지) · 하단 검정 바 <b>1520~1920px</b>(쇼츠/릴스/틱톡 UI 보호존). 자막은 씬 클립 실제 길이를 3등분한 2.5초 비트 단위로 표시됩니다.</div>
+
+    <div class="sect">① 레터박스 (검정 바)</div>
+    <div class="grid4">
+      <div><label class="f">상단 바 높이 (px)</label><input type="number" data-bind="render.top_bar" data-num data-live min="0" max="800" step="10" value="${P.render.top_bar}"></div>
+      <div><label class="f">하단 바 높이 (px)</label><input type="number" data-bind="render.bottom_bar" data-num data-live min="0" max="800" step="10" value="${P.render.bottom_bar}"></div>
+      <div><label class="f">바 색상</label><input type="color" data-bind="render.bar_color" data-hex data-live value="${hx(P.render.bar_color)}"></div>
+      <div><label class="f">영상 영역 높이</label><div id="rd-vh" class="note ${rs().video_h < 400 ? 'e' : ''}" style="margin:0"><b class="mono">${rs().video_h}px</b> ${rs().video_h < 400 ? '— 400px 이상이어야 합니다' : '(1920 − 상단 − 하단)'}</div></div>
+    </div>
+
+    <div class="sect">② 상단 타이틀</div>
+    <div class="grid4">
+      <div><label class="f">글꼴</label>${fontSelect('render.title_font', P.render.title_font)}</div>
+      <div><label class="f">크기 (px)</label><input type="number" data-bind="render.title_size" data-num data-live min="12" max="200" value="${P.render.title_size}"></div>
+      <div><label class="f">글자 색</label><input type="color" data-bind="render.title_color" data-hex data-live value="${hx(P.render.title_color)}"></div>
+      <div><label class="f">줄당 글자 수</label><input type="number" data-bind="render.title_chars_per_line" data-num data-live min="4" max="60" value="${P.render.title_chars_per_line}"></div>
+      <div><label class="f">외곽선 두께 (0=없음)</label><input type="number" data-bind="render.title_outline" data-num data-live min="0" max="20" value="${P.render.title_outline}"></div>
+      <div><label class="f">외곽선 색</label><input type="color" data-bind="render.title_outline_color" data-hex data-live value="${hx(P.render.title_outline_color)}"></div>
+      <div><label class="f">위치 보정 (px, − = 위)</label><input type="number" data-bind="render.title_y" data-num data-live min="-600" max="600" step="5" value="${P.render.title_y}"></div>
+    </div>
+
+    <div class="sect">③ 하단 자막</div>
+    <div class="grid4">
+      <div><label class="f">글꼴</label>${fontSelect('render.sub_font', P.render.sub_font)}</div>
+      <div><label class="f">크기 (px)</label><input type="number" data-bind="render.sub_size" data-num data-live min="12" max="200" value="${P.render.sub_size}"></div>
+      <div><label class="f">글자 색</label><input type="color" data-bind="render.sub_color" data-hex data-live value="${hx(P.render.sub_color)}"></div>
+      <div><label class="f">줄당 글자 수</label><input type="number" data-bind="render.sub_chars_per_line" data-num data-live min="4" max="80" value="${P.render.sub_chars_per_line}"></div>
+      <div><label class="f">외곽선 두께 (0=없음)</label><input type="number" data-bind="render.sub_outline" data-num data-live min="0" max="20" value="${P.render.sub_outline}"></div>
+      <div><label class="f">외곽선 색</label><input type="color" data-bind="render.sub_outline_color" data-hex data-live value="${hx(P.render.sub_outline_color)}"></div>
+      <div><label class="f">줄 간격 (px)</label><input type="number" data-bind="render.sub_gap" data-num data-live min="0" max="60" value="${P.render.sub_gap}"></div>
+      <div><label class="f">자막 하단 위치 (y px, 0=자동)</label><input type="number" data-bind="render.sub_bottom" data-num data-live min="0" max="1920" step="10" value="${P.render.sub_bottom}"><div class="hint" id="rd-subauto" style="margin:2px 0 0">자동 = 하단 바 바로 위(현재 y=${rs().sub_bottom})</div></div>
+    </div>
+    <div class="row" style="margin-top:8px"><label class="row"><input type="checkbox" data-check="render.sub_box" data-re ${P.render.sub_box !== false ? 'checked' : ''}> 자막 배경 박스 사용</label></div>
+    ${P.render.sub_box !== false ? `<div class="grid3">
+      <div><label class="f">박스 색</label><input type="color" data-bind="render.sub_box_color" data-hex data-live value="${hx(P.render.sub_box_color)}"></div>
+      <div><label class="f">박스 투명도 (0 투명 ~ 1 불투명): <b class="mono">${Number(P.render.sub_box_alpha).toFixed(2)}</b></label><input type="range" data-bind="render.sub_box_alpha" data-num data-live min="0" max="1" step="0.05" value="${P.render.sub_box_alpha}"></div>
+      <div><label class="f">박스 여백 (px)</label><input type="number" data-bind="render.sub_box_border" data-num data-live min="0" max="60" value="${P.render.sub_box_border}"></div></div>` : ''}
+
+    <div class="sect">④ 글꼴 추가</div>
+    ${S.server ? `<div class="row"><label class="btn">글꼴 파일 올리기 (.ttf / .otf / .ttc)<input type="file" accept=".ttf,.otf,.ttc" class="hide" data-upload="font"></label>
+      <span class="hint" style="margin:0">올린 글꼴은 assets/ 폴더에 저장되고 위 글꼴 목록에 나타납니다. 시스템에 설치된 글꼴(${S.fonts.filter((f) => f.group === 'system').length}개)도 선택할 수 있습니다.</span></div>`
+      : '<div class="hint">서버를 켜면(python server.py) 시스템/업로드 글꼴을 선택할 수 있습니다. 서버 없이 렌더하려면 assets/ 폴더에 글꼴을 넣고 JSON 의 render.title_font / sub_font 에 "assets:파일명" 을 쓰세요.</div>'}
+    <div class="hint" style="margin-top:8px">자막은 씬 클립 실제 길이를 3등분한 2.5초 비트 단위로 표시됩니다. 글꼴을 "자동"으로 두면 Pretendard → assets 폴더의 글꼴 → 시스템 한글 글꼴 순으로 고릅니다.</div>
   </section>
   <section class="card"><h3>🎞️ 렌더링 <span class="sp"></span><label class="row" style="font-size:12px"><input type="checkbox" id="rd-partial"> 있는 클립만 미리보기 렌더</label></h3>
     <div class="row"><button class="btn pri" data-act="startRender" ${S.server && !(job && job.state === 'running') ? '' : 'disabled'}>${job && job.state === 'running' ? '렌더링 중…' : '▶ 최종 렌더링 시작'}</button>
@@ -747,7 +879,7 @@ function gotoTab(id) { S.tab = id; renderAll(); window.scrollTo({ top: 0, behavi
 async function detectServer() {
   if (location.protocol === 'file:') { S.server = false; paintServer(); return; }
   try { S.status = await api('/api/status'); S.server = true; } catch (e) { S.server = false; }
-  paintServer(); if (S.server) refreshFiles(true);
+  paintServer(); if (S.server) { refreshFiles(true); loadFonts().then(() => { if (S.tab === 'render') renderTab(); }); }
 }
 function paintServer() {
   $('#srv-dot').className = 'dot' + (S.server ? ' on' : ''); $('#srv-txt').textContent = S.server ? '서버 연결됨' : (location.protocol === 'file:' ? '오프라인 (python server.py 로 실행하면 전체 기능)' : '서버 없음');
@@ -759,6 +891,10 @@ async function refreshFiles(silent) {
   renderMetrics(); renderStepper();
   if (['assets', 'visual', 'audio', 'render'].includes(S.tab)) { const y = window.scrollY; renderTab(); window.scrollTo(0, y); }
 }
+async function loadFonts() {
+  if (!S.server) return;
+  try { S.fonts = (await api('/api/fonts')).fonts; } catch (e) { S.fonts = []; }
+}
 async function uploadFile(kind, file, scene, id) {
   if (!file) return;
   toast(`${file.name} 업로드 중… (${(file.size / 1048576).toFixed(1)}MB)`);
@@ -766,6 +902,7 @@ async function uploadFile(kind, file, scene, id) {
     const q = `kind=${kind}&name=${encodeURIComponent(file.name)}` + (scene !== undefined ? `&scene=${scene + 1}` : '') + (id ? `&id=${encodeURIComponent(id)}` : '');
     const r = await fetch('/api/upload?' + q, { method: 'POST', body: file, headers: { 'Content-Type': 'application/octet-stream' } });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    if (kind === 'font') { await loadFonts(); renderTab(); toast(`글꼴 추가됨: ${j.saved} (위 글꼴 목록에서 선택하세요)`); return; }
     toast(`저장됨: ${j.saved}`); await refreshFiles();
   } catch (e) { toast('업로드 실패: ' + e.message, 'e'); }
 }
@@ -779,6 +916,11 @@ async function pollRender() {
 /* ------------------------------------------------------------------ actions */
 const ACT = {
   tab: (d) => gotoTab(d.id),
+  resetRender: () => {
+    const def = Core.defaultRender(CFG);
+    Object.keys(def).forEach((k) => { if (k !== 'crop_scale' && k !== 'fit') P.render[k] = def[k]; });
+    save(); renderAll(); toast('레터박스/타이틀/자막 스타일을 기본값으로 되돌렸습니다.');
+  },
   setMode: (d) => {
     const m = P.meta, def = CFG.default_category;
     if (d.m === 'shopping' && mode() !== 'shopping') { const old = m.category; m.category = 'shopping'; m.category2 = old && old !== def && old !== 'shopping' ? old : ''; }
@@ -874,10 +1016,34 @@ const ACT = {
   delRef: async (d) => { try { await post('/api/delete-file', { kind: 'ref', id: d.id }); await refreshFiles(); } catch (e) { toast(e.message, 'e'); } },
   // --- audio
   copyTts: () => copyText(ttsText(), 'TTS 입력 대본을 복사했습니다.'),
-  processVoice: async () => {
-    S.busy.au = true; renderTab();
-    try { const r = await post('/api/audio/process', { speed: +$('#au-speed').value, remove_silence: $('#au-sil').checked }); toast(`처리 완료: ${r.before ? r.before.toFixed(1) : '?'}초 → ${r.after ? r.after.toFixed(1) : '?'}초`); }
+  resetTiming: () => { P.timing.chars_per_sec = 0; save(); renderAll(); toast('목표 글자수를 기본값(언어별 기준)으로 되돌렸습니다.'); },
+  calibrateTiming: () => {
+    const v = S.files && S.files.voice, total = Core.totalUnits(P, CFG);
+    if (!v || !v.duration || !total) return toast('음성과 대본이 모두 있어야 합니다.', 'w');
+    const cps = Math.floor(total / v.duration * 100 + 0.5) / 100;
+    P.timing.chars_per_sec = cps; save(); renderAll();
+    toast(`실측 속도 ${cps}${unitTxt()}/초로 보정: 목표 ${Core.charRange(CFG, P).min}~${Core.charRange(CFG, P).max}${unitTxt()}. 2단계에서 마스터 프롬프트를 다시 복사해 대본을 새로 만드세요.`);
+  },
+  fitAudio: async () => { S.au.fit = true; await ACT.processVoice(); },
+  fixCamera: () => {
+    let n = 0; const re = /\b(extreme|tight)[- ](close[- ]?up|macro)\b/gi, fx = (t) => String(t || '').replace(re, () => { n++; return 'close-up with generous negative space'; });
+    P.scenes.forEach((sc) => { sc.frame1 = fx(sc.frame1); sc.frame2 = fx(sc.frame2); sc.cuts.forEach((c) => { c.prompt = fx(c.prompt); c.type = fx(c.type); }); });
+    save(); renderAll(); toast(n ? `${n}곳의 구도 표현을 교정했습니다 (close-up with generous negative space).` : '교정할 익스트림/타이트 클로즈업 표현이 없습니다.');
+  },
+  copyPolicyFix: (d) => copyText(Core.buildPolicyFixPrompt(CFG, P, Number(d.i)), `Scene ${p2(Number(d.i) + 1)} 정책 안전 재작성 프롬프트를 복사했습니다. Claude 에 붙여넣으세요.`),
+  applyPolicyFix: (d) => {
+    const i = Number(d.i), box = $('#fix-' + i);
+    try { P = Core.normalizeProject(Core.applySceneFix(P, i, box.value), CFG); save(); S.openScenes[i] = true; renderAll(); toast(`Scene ${p2(i + 1)} 를 정책 안전 버전으로 바꿨습니다. 점검 패널을 확인하세요.`); }
     catch (e) { toast(e.message, 'e'); }
+  },
+  processVoice: async () => {
+    const A = S.au, body = { speed: A.speed, remove_silence: A.sil, threshold_db: A.thr, min_silence: A.minsil };   // 화면을 다시 그리기 전에 값부터 읽는다
+    if (A.fit) body.fit_seconds = 45;
+    S.busy.au = true; renderTab();
+    try {
+      const r = await post('/api/audio/process', body); S.lastProc = r;
+      toast(`처리 완료: 속도 ${r.speed}x · ${r.before ? r.before.toFixed(1) : '?'}초 → ${r.after ? r.after.toFixed(1) : '?'}초`);
+    } catch (e) { toast(e.message, 'e'); }
     S.busy.au = false; await refreshFiles();
   },
   edgeTts: async () => { S.busy.tts = true; renderTab(); try { await post('/api/tts', { text: ttsText().replace(/\n+/g, ' '), language: P.meta.language }); toast('voice_raw.mp3 생성됨 - ②에서 처리하세요'); } catch (e) { toast(e.message, 'e'); } S.busy.tts = false; await refreshFiles(); },
@@ -910,10 +1076,12 @@ document.addEventListener('click', (e) => {
 document.addEventListener('input', (e) => {
   const t = e.target;
   if (t.dataset.bind) {
-    let v = t.value; if (t.dataset.num !== undefined) v = parseFloat(v) || 0;
+    let v = t.value; if (t.dataset.num !== undefined) v = parseFloat(v) || 0; if (t.dataset.hex !== undefined) v = String(t.value).replace('#', '').toUpperCase();
     setPath(P, t.dataset.bind, v);
     if (t.dataset.bind === 'meta.top_title') $$('[data-bind="meta.top_title"]').forEach((x) => { if (x !== t) x.value = v; });
     refreshDerived();
+  } else if (t.dataset.au) {
+    S.au[t.dataset.au] = t.type === 'checkbox' ? t.checked : (parseFloat(t.value) || 0);
   } else if (t.dataset.meta) {
     const m = ((P.metadata[S.metaLang] = P.metadata[S.metaLang] || {})[S.metaPlat] = Object.assign({ title: '', caption: '', pinned: '' }, (P.metadata[S.metaLang] || {})[S.metaPlat]));
     m[t.dataset.meta] = t.value; if (t.dataset.meta === 'title') { const c = $('#mt-c1'); if (c) c.textContent = t.value.length + '자'; } save(); renderStepper();
@@ -933,6 +1101,9 @@ document.addEventListener('change', (e) => {
     const path = t.dataset.check; const ks = path.split('.');
     if (ks[0] === 'scenes' && ks[2] === 'done') { const sc = P.scenes[+ks[1]]; sc.done = sc.done || {}; sc.done[ks[3]] = t.checked; save(); renderStepper(); const sum = t.closest('details'); if (sum) { const i = +ks[1]; S.openScenes[i] = true; } return; }
     setPath(P, path, t.checked); save(); renderAll();
+  } else if (t.dataset.au) {
+    S.au[t.dataset.au] = t.type === 'checkbox' ? t.checked : (parseFloat(t.value) || 0);
+    if (t.dataset.au === 'fit') renderTab();
   } else if (t.dataset.ref) {
     const [ai, si] = t.dataset.ref.split(':').map(Number), id = P.assets[ai].id, sc = P.scenes[si];
     sc.refs = t.checked ? (sc.refs.includes(id) ? sc.refs : sc.refs.concat([id])) : sc.refs.filter((r) => r !== id);
