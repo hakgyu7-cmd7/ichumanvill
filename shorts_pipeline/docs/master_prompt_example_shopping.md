@@ -42,9 +42,13 @@
   - 중반 컷: Low-angle Tilt / Top-down POV + Sudden hard cut, Snappy whip-pan, Dynamic shake
   - 후반 컷: Tracking Medium Shot / Dutch Tilt + Fast tracking pull-back, Sharp snap-zoom to freeze
 
-## 5. 화풍 일관성 (전 씬 단일 화풍)
+## 5. 화풍 일관성 & 기준 이미지(등장인물·사물)
 - 선택된 화풍: 7. 고정밀 피규어 & 디오라마 (Detailed Figure & Diorama). 화풍 앵커는 시스템이 모든 프레임 프롬프트 앞에 자동 삽입합니다. 분위기가 반전되어도(예: B급 병맛) 만화/애니메이션 등 다른 화풍 키워드를 쓰지 말고, 같은 화풍 안에서 표정 연기와 상황 연출로만 표현합니다.
-- 주인공/제품 외형 앵커(전 씬 고정, 시스템이 모든 프레임 프롬프트에 자동 삽입): a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron. 씬 묘사에서 외형을 다시 설명하지 말고 같은 대상이 일관되게 등장한다는 전제로 행동과 구도만 쓰세요.
+- [기준 이미지 규칙] 이미 정의된 기준 이미지 대상입니다(그대로 유지하세요. 시스템이 외형을 해당 씬의 모든 프레임 프롬프트에 자동 삽입합니다):
+  · pot (object) 실리콘 팟 / the sage-green silicone pot: a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall
+  · cook (character) 요리하는 주인공 / the PVC home cook figure: a small PVC figure of a home cook with short brown hair and a cream apron
+  · fryer (object) 에어프라이어 / the black air fryer: a compact round black basket-style air fryer with a silver handle
+  새로 필요한 반복 대상이 있으면 assets 에 추가하고, 씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭하세요. 각 씬의 refs 에 등장하는 asset id 를 넣으세요.
 
 ## 6. 스토리 아키텍처 (총 45초 / 6씬)
 - [Scene 01 / 0.0~7.5s] 훅: 기존 사용법의 충격적 낭비/불편/분노 지적
@@ -66,11 +70,15 @@
   "analysis": {"hook_technique": "원본(또는 카테고리 뼈대)의 후킹 기법", "retention_psychology": "시청자 유지 심리 기법", "skeleton": "차용할 핵심 리듬(구조)"},
   "plan": {"titles": ["후킹 제목 후보 1", "후보 2", "후보 3"], "description": "유튜브 설명란", "hashtags": ["#해시태그"]},
   "top_title": "상단 노란 타이틀 배너 문구 (15자 내외, 후킹)",
-  "subject_anchor": "전 씬에서 외형을 고정할 주인공/제품 영문 키워드 (예: a 30-year-old Korean man in a dusty grey hoodie)",
+  "assets": [
+    {"id": "hero", "type": "character", "name": "주인공(한국어 이름)", "label": "the deadpan PVC man figure", "appearance": "영문 외형 고정 키워드 (성별·연령·체형·의상·색·재질·특징. 배경/동작/화각 제외)", "keywords": "남자, 주인공, 그"},
+    {"id": "pot", "type": "object", "name": "냄비", "label": "the silver pot", "appearance": "...", "keywords": "냄비, 솥"}
+  ],
   "scenes": [
     {
       "id": 1,
       "beats": ["[0.0~2.5s] 대사", "[2.5~5.0s] 대사", "[5.0~7.5s] 대사"],
+      "refs": ["hero", "pot"],
       "frame1": "영문: 0s 시작 기준 이미지 묘사 (피사체·구도·조명만)",
       "frame2": "영문: 2.5s 전환 기준 이미지 묘사 (frame1과 다른 화각)",
       "cuts": [
@@ -83,5 +91,6 @@
 }
 ```
 - scenes는 정확히 6개(id 1~6), 각 씬의 beats는 정확히 3개입니다. beats 문자열 앞의 [시간] 표기는 생략해도 됩니다.
-- 대사(beats)는 한국어로, 나머지 모든 prompt/type/subject_anchor는 영문으로만 작성합니다.
+- assets 는 2개 이상의 씬에 등장하거나 스토리 핵심인 인물·사물·장소만 정의하고, 각 씬의 refs 에는 그 씬에 등장하는 asset id 를 넣습니다(없으면 빈 배열). frame1/frame2/cuts 에서는 asset 의 외형을 다시 설명하지 말고 label 로만 지칭합니다.
+- 대사(beats)는 한국어로, 나머지 모든 prompt/type/label/appearance는 영문으로만 작성합니다.
 ```

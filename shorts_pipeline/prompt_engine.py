@@ -13,6 +13,8 @@ CLI
   python prompt_engine.py validate --project samples/ramen_bgrade.json
   python prompt_engine.py metadata --project samples/ramen_bgrade.json --langs ko,en
   python prompt_engine.py parse    --response claude_reply.txt --project my.json   # Claude 응답(JSON) 가져오기
+  python prompt_engine.py refs     --project samples/ramen_bgrade.json      # 등장 대상별 기준 이미지 프롬프트
+  python prompt_engine.py assets-prompt --project my.json                    # 대본 분석(등장 대상 추출) 프롬프트
   python prompt_engine.py sync-config                                             # config.json -> config.js
 """
 from __future__ import annotations
@@ -93,7 +95,7 @@ def default_style_id(cfg: Dict[str, Any]) -> str:
 
 
 def empty_scene(i: int) -> Dict[str, Any]:
-    return {"id": i, "beats": ["", "", ""], "frame1": "", "frame2": "",
+    return {"id": i, "beats": ["", "", ""], "frame1": "", "frame2": "", "refs": [],
             "cuts": [{"type": "", "prompt": ""} for _ in range(3)]}
 
 
@@ -106,7 +108,7 @@ def default_project(cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             "style": default_style_id(cfg), "language": "ko", "source_url": "", "source_script": "",
         },
         "options": {"zero_text": True, "safe_margin": True},
-        "subject_anchor": "",
+        "assets": [],
         "analysis": {"hook_technique": "", "retention_psychology": "", "skeleton": ""},
         "plan": {"titles": [], "description": "", "hashtags": []},
         "scenes": [empty_scene(i) for i in range(1, cfg["spec"]["scenes"] + 1)],
@@ -124,9 +126,8 @@ def normalize_project(p: Dict[str, Any], cfg: Optional[Dict[str, Any]] = None) -
     for k in ("meta", "options", "analysis", "plan", "render"):
         if isinstance(p.get(k), dict):
             out[k].update(p[k])
-    for k in ("subject_anchor", "metadata"):
-        if k in p:
-            out[k] = p[k]
+    if "metadata" in p:
+        out["metadata"] = p["metadata"]
     m = out["meta"]
     m["style"] = LEGACY_STYLE_KEYS.get(m["style"], m["style"])
     m["category"] = LEGACY_CATEGORY_KEYS.get(m["category"], m["category"])
@@ -145,6 +146,53 @@ def normalize_project(p: Dict[str, Any], cfg: Optional[Dict[str, Any]] = None) -
     for i in range(n):
         src = scenes[i] if i < len(scenes) and isinstance(scenes[i], dict) else {}
         out["scenes"].append(_normalize_scene(src, i + 1))
+    out["assets"] = normalize_assets(p.get("assets"))
+    legacy = str(p.get("subject_anchor") or "").strip()
+    if legacy and not out["assets"]:  # 옛 '주인공 외형 앵커' -> 모든 씬에 연결된 asset 1개
+        out["assets"] = [{"id": "main", "type": "character", "name": "주인공/핵심 대상", "label": "", "appearance": strip_suffix(legacy).rstrip(" .,;"),
+                          "keywords": "", "done": False}]
+        for sc in out["scenes"]:
+            sc["refs"] = ["main"]
+    ids = [a["id"] for a in out["assets"]]
+    for sc in out["scenes"]:
+        sc["refs"] = [r for r in _uniq(sc["refs"]) if r in ids]
+    return out
+
+
+def _uniq(items: List[str]) -> List[str]:
+    seen: List[str] = []
+    for x in items:
+        if x not in seen:
+            seen.append(x)
+    return seen
+
+
+ASSET_TYPES = ("character", "object", "place")
+
+
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9_]+", "_", (s or "").strip().lower()).strip("_")[:30]
+
+
+def normalize_assets(items: Any) -> List[Dict[str, Any]]:
+    """등장 대상(인물/사물/장소) 목록 정규화: id 중복 제거, 타입/외형/키워드 기본값."""
+    out: List[Dict[str, Any]] = []
+    used: set = set()
+    for n, a in enumerate(items if isinstance(items, list) else [], start=1):
+        if not isinstance(a, dict):
+            continue
+        base = _slug(str(a.get("id") or a.get("label") or "")) or f"asset{n}"
+        aid, k = base, 2
+        while aid in used:
+            aid, k = f"{base}_{k}", k + 1
+        used.add(aid)
+        t = str(a.get("type") or "object").strip().lower()
+        kw = a.get("keywords", "")
+        if isinstance(kw, list):
+            kw = ", ".join(str(x) for x in kw)
+        out.append({"id": aid, "type": t if t in ASSET_TYPES else "object", "name": str(a.get("name") or "").strip(),
+                    "label": str(a.get("label") or "").strip(), "appearance": strip_suffix(str(a.get("appearance") or "")),
+                    "keywords": str(kw or "").strip(), "done": bool(a.get("done", False))})
     return out
 
 
@@ -183,6 +231,8 @@ def _normalize_scene(src: Dict[str, Any], i: int) -> Dict[str, Any]:
         if isinstance(c, str):
             c = {"type": "", "prompt": c}
         sc["cuts"][j] = {"type": str(c.get("type", "") or ""), "prompt": strip_suffix(str(c.get("prompt", "") or ""))}
+    refs = src.get("refs")
+    sc["refs"] = [str(x) for x in refs] if isinstance(refs, list) else []
     if "done" in src:
         sc["done"] = src["done"]
     return sc
@@ -222,11 +272,18 @@ def _sentence(s: str) -> str:
     return s if not s or re.search(r"[.!?]$", s) else s + "."
 
 
-def compose_frame(cfg: Dict[str, Any], project: Dict[str, Any], desc: str) -> str:
+def scene_assets(project: Dict[str, Any], refs: Optional[List[str]]) -> List[Dict[str, Any]]:
+    ids = list(refs or [])
+    return [a for a in project.get("assets", []) if a["id"] in ids]
+
+
+def compose_frame(cfg: Dict[str, Any], project: Dict[str, Any], desc: str, refs: Optional[List[str]] = None) -> str:
+    """화풍 앵커 -> 이 씬에 등장하는 기준 이미지 대상들의 외형 -> 장면 묘사 -> 안전 마진 -> --no 접미사."""
     style = cfg["styles"][project["meta"]["style"]]
     parts = [style["anchor"]]
-    if project.get("subject_anchor", "").strip():
-        parts.append(_trim(project["subject_anchor"]))
+    for a in scene_assets(project, refs):
+        if a["appearance"].strip():
+            parts.append(_trim(a["appearance"]))
     if (desc or "").strip():
         parts.append(_trim(desc))
     if project["options"].get("safe_margin", True):
@@ -235,6 +292,28 @@ def compose_frame(cfg: Dict[str, Any], project: Dict[str, Any], desc: str) -> st
     if project["options"].get("zero_text", True):
         text += " " + cfg["suffix"]["zero_text"]
     return text
+
+
+def compose_reference(cfg: Dict[str, Any], project: Dict[str, Any], asset: Dict[str, Any], kind: str = "main") -> str:
+    """기준 이미지 프롬프트: kind='main'(대표 1컷, 9:16) | 'sheet'(3면 턴어라운드, 16:9)."""
+    ref = cfg["reference"]
+    parts = [cfg["styles"][project["meta"]["style"]]["anchor"]]
+    if asset["appearance"].strip():
+        parts.append(_trim(asset["appearance"]))
+    parts.append(ref["types"][asset["type"]][kind])
+    text = ", ".join(parts)
+    if project["options"].get("zero_text", True):
+        text += " " + cfg["suffix"]["zero_text_core"] + " --ar " + ref["ar_main" if kind == "main" else "ar_sheet"]
+    return text
+
+
+def reference_prompts(cfg: Dict[str, Any], project: Dict[str, Any]) -> List[Dict[str, Any]]:
+    out = []
+    for a in project.get("assets", []):
+        scenes = [i + 1 for i, sc in enumerate(project["scenes"]) if a["id"] in sc.get("refs", [])]
+        out.append({"id": a["id"], "type": a["type"], "name": a["name"], "label": a["label"], "scenes": scenes,
+                    "main": compose_reference(cfg, project, a, "main"), "sheet": compose_reference(cfg, project, a, "sheet")})
+    return out
 
 
 def compose_omni(cfg: Dict[str, Any], project: Dict[str, Any], scene: Dict[str, Any]) -> str:
@@ -260,8 +339,8 @@ def scene_package(cfg: Dict[str, Any], project: Dict[str, Any], idx: int) -> Dic
     sc = project["scenes"][idx]
     return {
         "narration": scene_text(sc),
-        "frame1": compose_frame(cfg, project, sc["frame1"]),
-        "frame2": compose_frame(cfg, project, sc["frame2"]),
+        "frame1": compose_frame(cfg, project, sc["frame1"], sc.get("refs")),
+        "frame2": compose_frame(cfg, project, sc["frame2"], sc.get("refs")),
         "omni": compose_omni(cfg, project, sc),
     }
 
@@ -273,6 +352,9 @@ def all_prompts_text(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
            f'Zero-Text: {"ENFORCED" if project["options"].get("zero_text", True) else "OFF"}',
            f'Safe margin (1.06x crop): {"APPLIED" if project["options"].get("safe_margin", True) else "OFF"}',
            "=" * 57, ""]
+    for r in reference_prompts(cfg, project):
+        out += [f"[기준 이미지] {r['name'] or r['id']} ({r['type']}) - 등장 씬: {', '.join(str(x) for x in r['scenes']) or '-'}", "",
+                "[Reference - main]", r["main"], "", "[Reference - sheet]", r["sheet"], "", "-" * 57, ""]
     for i in range(len(project["scenes"])):
         pk = scene_package(cfg, project, i)
         out += [f"[Scene {i + 1:02d}]  narration: {pk['narration']}", "", "[Frame 1 (0s)]", pk["frame1"], "",
@@ -302,6 +384,21 @@ def _structure(cfg: Dict[str, Any], bp1: Dict[str, Any], bp2: Optional[Dict[str,
     return "\n".join(lines)
 
 
+def _asset_rule(project: Dict[str, Any]) -> str:
+    if not project.get("assets"):
+        return ("- [기준 이미지 규칙] 2개 이상의 씬에 등장하거나 스토리의 핵심인 인물·사물·장소는 assets 배열에 정의하세요. "
+                "각 asset: id(영문 소문자·숫자·_), type(character/object/place), name(한국어 이름), label(영문 짧은 호칭 예: the plastic cook figure), "
+                "appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외), "
+                "keywords(대본에서 이 대상을 가리키는 한국어 단어들을 쉼표로). 각 씬의 refs 에 그 씬에 등장하는 asset id 를 넣으세요. "
+                "시스템이 appearance 를 해당 씬의 모든 프레임 프롬프트에 자동 삽입하고 기준 이미지 프롬프트도 자동 생성하므로, "
+                "씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭합니다.")
+    lines = ["- [기준 이미지 규칙] 이미 정의된 기준 이미지 대상입니다(그대로 유지하세요. 시스템이 외형을 해당 씬의 모든 프레임 프롬프트에 자동 삽입합니다):"]
+    for a in project["assets"]:
+        lines.append(f"  · {a['id']} ({a['type']}) {a['name']} / {a['label']}: {a['appearance']}")
+    lines.append("  새로 필요한 반복 대상이 있으면 assets 에 추가하고, 씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭하세요. 각 씬의 refs 에 등장하는 asset id 를 넣으세요.")
+    return "\n".join(lines)
+
+
 def build_master_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
     m = project["meta"]
     lang = cfg["languages"][m["language"]]
@@ -319,12 +416,7 @@ def build_master_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
     else:
         task = "원본 소스 대본이 없으므로, 선택한 카테고리의 스토리 뼈대를 바탕으로 [타깃 소재]에 맞춰 처음부터 대본을 설계하세요."
 
-    if project.get("subject_anchor", "").strip():
-        subject_rule = (f"- 주인공/제품 외형 앵커(전 씬 고정, 시스템이 모든 프레임 프롬프트에 자동 삽입): {project['subject_anchor'].strip()}. "
-                        "씬 묘사에서 외형을 다시 설명하지 말고 같은 대상이 일관되게 등장한다는 전제로 행동과 구도만 쓰세요.")
-    else:
-        subject_rule = ("- 주인공/제품이 반복 등장하면 subject_anchor에 영문 외형 키워드(성별·연령·의상·색·재질)를 한 번만 정의하세요. "
-                        "시스템이 모든 프레임 프롬프트에 자동 삽입해 씬마다 외형이 달라지지 않게 합니다.")
+    asset_rule = _asset_rule(project)
 
     fmt = cfg["formats"].get(m.get("format", ""))
     format_block = f"- 트렌드 포맷 적용: {fmt['name']} ({fmt['keywords']}) - {fmt['guide']}" if fmt else ""
@@ -353,7 +445,7 @@ def build_master_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
         "cut_plan": cut_plan,
         "camera_lib": camera_lib,
         "style_name": f"{style['number']}. {style['name']} ({style['name_en']})",
-        "subject_rule": subject_rule,
+        "asset_rule": asset_rule,
         "structure": _structure(cfg, bp1, bp2, bool(src)),
         "format_block": format_block,
         "cta_block": cta_block,
@@ -372,6 +464,84 @@ def recommended_model(cfg: Dict[str, Any], project: Dict[str, Any], task: str = 
     if m.get("category2") and m["category2"] != m["category"]:
         return cfg["models"]["crossover"]
     return cfg["models"]["default"]
+
+
+# --------------------------------------------------------------------------- 기준 이미지(등장 대상) 분석
+def build_asset_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
+    st = cfg["styles"][project["meta"]["style"]]
+    existing = ""
+    if project.get("assets"):
+        existing = "- 이미 정의된 asset(유지하고 필요한 것만 추가): " + ", ".join(f"{a['id']}={a['label'] or a['name']}" for a in project["assets"])
+    lines = []
+    for i, sc in enumerate(project["scenes"], start=1):
+        lines.append(f"Scene {i:02d}: {scene_text(sc)}")
+        lines.append(f"  frame1: {sc['frame1']}")
+        lines.append(f"  frame2: {sc['frame2']}")
+        lines.append("  cuts: " + " / ".join(c["prompt"] for c in sc["cuts"] if c["prompt"].strip()))
+    return fill(cfg["asset_template"], {"style_name": f"{st['number']}. {st['name']} ({st['name_en']})",
+                                        "existing_assets": existing, "scenes_text": "\n".join(lines)})
+
+
+def parse_assets_response(text: str, cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    cfg = cfg or load_config()
+    data = extract_json(text)
+    if not isinstance(data, dict) or not isinstance(data.get("assets"), list):
+        raise ValueError("응답에서 assets 배열이 있는 JSON 을 찾지 못했습니다.")
+    refs: Dict[str, List[str]] = {}
+    sr = data.get("scene_refs")
+    if isinstance(sr, dict):
+        for k, v in sr.items():
+            try:
+                i = int(k)
+            except (TypeError, ValueError):
+                continue
+            if 1 <= i <= cfg["spec"]["scenes"] and isinstance(v, list):
+                refs[str(i)] = [str(x) for x in v]
+    return {"assets": normalize_assets(data["assets"]), "scene_refs": refs}
+
+
+def apply_assets(project: Dict[str, Any], parsed: Dict[str, Any]) -> Dict[str, Any]:
+    p = copy.deepcopy(project)
+    done = {a["id"]: a.get("done", False) for a in p.get("assets", [])}
+    p["assets"] = [dict(a, done=bool(done.get(a["id"], a.get("done", False)))) for a in parsed["assets"]]
+    ids = [a["id"] for a in p["assets"]]
+    for i, sc in enumerate(p["scenes"], start=1):
+        src = parsed.get("scene_refs", {}).get(str(i), sc.get("refs", []))
+        sc["refs"] = [r for r in _uniq(src) if r in ids]
+    return p
+
+
+def asset_tokens(a: Dict[str, Any]) -> List[str]:
+    toks = [a["name"], a["label"]] + re.split(r"[,\n]+", a["keywords"])
+    return [t.strip().lower() for t in toks if len(t.strip()) >= 2]
+
+
+def link_assets(project: Dict[str, Any]) -> Dict[str, Any]:
+    """대본/프롬프트에 asset 의 이름·라벨·키워드가 나오는 씬에 자동 연결 (기존 연결은 유지)."""
+    p = copy.deepcopy(project)
+    for sc in p["scenes"]:
+        hay = " ".join([scene_text(sc), sc["frame1"], sc["frame2"]] + [c["prompt"] for c in sc["cuts"]]).lower()
+        sc["refs"] = [a["id"] for a in p["assets"] if a["id"] in sc.get("refs", []) or any(t in hay for t in asset_tokens(a))]
+    return p
+
+
+def suggest_recurring(cfg: Dict[str, Any], project: Dict[str, Any], min_scenes: int = 3, limit: int = 12) -> List[Dict[str, Any]]:
+    """여러 씬 프롬프트에 반복되는 영문 단어 힌트 (이미 asset 으로 정의된 단어 제외). 휴리스틱이므로 참고용."""
+    stop = set(cfg.get("recurring_stop_words", []))
+    covered: set = set()
+    for a in project.get("assets", []):
+        for t in asset_tokens(a):
+            covered.update(re.findall(r"[a-z]{4,}", t))
+    counts: Dict[str, int] = {}
+    for sc in project["scenes"]:
+        words: set = set()
+        for txt in [sc["frame1"], sc["frame2"]] + [c["prompt"] for c in sc["cuts"]]:
+            words.update(w for w in re.findall(r"[a-z]{4,}", (txt or "").lower()) if w not in stop and w not in covered)
+        for w in words:
+            counts[w] = counts.get(w, 0) + 1
+    items = [{"word": w, "scenes": n} for w, n in counts.items() if n >= min_scenes]
+    items.sort(key=lambda x: (-x["scenes"], x["word"]))
+    return items[:limit]
 
 
 # --------------------------------------------------------------------------- metadata prompt
@@ -422,9 +592,14 @@ def parse_claude_response(text: str, cfg: Optional[Dict[str, Any]] = None) -> Di
     for k in ("analysis", "plan"):
         if isinstance(data.get(k), dict):
             out[k] = data[k]
-    for k in ("top_title", "subject_anchor"):
-        if isinstance(data.get(k), str):
-            out[k] = data[k].strip()
+    if isinstance(data.get("top_title"), str):
+        out["top_title"] = data["top_title"].strip()
+    if isinstance(data.get("assets"), list):
+        out["assets"] = normalize_assets(data["assets"])
+    elif isinstance(data.get("subject_anchor"), str) and data["subject_anchor"].strip():  # 옛 형식
+        out["assets"] = normalize_assets([{"id": "main", "type": "character", "name": "주인공/핵심 대상", "appearance": data["subject_anchor"]}])
+        for sc in out["scenes"]:
+            sc["refs"] = ["main"]
     return out
 
 
@@ -436,8 +611,12 @@ def apply_response(project: Dict[str, Any], parsed: Dict[str, Any]) -> Dict[str,
             p[k].update(parsed[k])
     if parsed.get("top_title"):
         p["meta"]["top_title"] = parsed["top_title"]
-    if parsed.get("subject_anchor"):
-        p["subject_anchor"] = parsed["subject_anchor"]
+    if "assets" in parsed:
+        done = {a["id"]: a.get("done", False) for a in p.get("assets", [])}
+        p["assets"] = [dict(a, done=bool(done.get(a["id"], a.get("done", False)))) for a in parsed["assets"]]
+    ids = [a["id"] for a in p.get("assets", [])]
+    for sc in p["scenes"]:
+        sc["refs"] = [r for r in _uniq(sc.get("refs", [])) if r in ids]
     return p
 
 
@@ -486,6 +665,18 @@ def validate_project(cfg: Dict[str, Any], project: Dict[str, Any]) -> List[Dict[
             if EXTREME_CLOSEUP_RE.search(c.get("type", "")):
                 add("warn", "extreme_closeup", f"Scene {i:02d} cut{j + 1} 화각 '{c['type']}': 안전 마진 규칙과 충돌합니다.", i)
 
+    linked = {r for sc in project["scenes"] for r in sc.get("refs", [])}
+    for a in project.get("assets", []):
+        nm = a["name"] or a["id"]
+        if not a["appearance"].strip():
+            add("warn", "asset_empty", f"기준 이미지 '{nm}': 외형 묘사(appearance)가 비어 있습니다.")
+        if CJK_RE.search(a["appearance"]) or CJK_RE.search(a["label"]):
+            add("error", "asset_cjk", f"기준 이미지 '{nm}': 외형/라벨은 영문만 허용(Zero-Text).")
+        if a["id"] not in linked:
+            add("warn", "asset_unlinked", f"기준 이미지 '{nm}'이(가) 어느 씬에도 연결되지 않았습니다.")
+    if not project.get("assets") and any(sc["frame1"].strip() for sc in project["scenes"]):
+        add("warn", "no_assets", "등장인물/사물 기준 이미지가 없습니다. '기준 이미지' 단계에서 대본을 분석해 정의하세요(씬마다 외형이 달라지는 원인).")
+
     if is_shopping(project, cfg) and n:
         last = scene_text(project["scenes"][-1]).lower()
         if not all(mk.lower() in last for mk in lang["cta_markers"]):
@@ -520,7 +711,7 @@ def _load_project(path: Optional[str], cfg: Dict[str, Any]) -> Dict[str, Any]:
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="AI 쇼츠 파이프라인 프롬프트 엔진")
-    ap.add_argument("cmd", choices=["master", "package", "validate", "metadata", "parse", "sync-config", "cta"])
+    ap.add_argument("cmd", choices=["master", "package", "validate", "metadata", "parse", "sync-config", "cta", "assets-prompt", "refs"])
     ap.add_argument("--project", help="프로젝트 JSON (대시보드에서 내보낸 파일 / samples/*.json)")
     ap.add_argument("--response", help="Claude 응답 텍스트 파일 (parse 용)")
     ap.add_argument("--langs", default="ko", help="metadata 대상 언어 (예: ko,en,ja,zh)")
@@ -552,6 +743,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(all_prompts_text(cfg, proj))
     elif a.cmd == "metadata":
         print(build_metadata_prompt(cfg, proj, [x.strip() for x in a.langs.split(",") if x.strip()]))
+    elif a.cmd == "assets-prompt":
+        print(build_asset_prompt(cfg, proj))
+    elif a.cmd == "refs":
+        for r in reference_prompts(cfg, proj):
+            print(f"[{r['id']}] {r['name']} ({r['type']}) 등장 씬: {r['scenes']}\n  main : {r['main']}\n  sheet: {r['sheet']}\n")
     elif a.cmd == "cta":
         print(json.dumps(inject_cta(cfg, proj), ensure_ascii=False, indent=2))
     elif a.cmd == "parse":

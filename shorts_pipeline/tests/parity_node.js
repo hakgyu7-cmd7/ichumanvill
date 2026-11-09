@@ -17,8 +17,13 @@ const out = cases.map((c) => {
     total: core.totalUnits(p, cfg),
     shopping: core.isShopping(p, cfg),
     model: core.recommendedModel(cfg, p, 'script'),
-    cta: core.injectCta(cfg, p)
+    cta: core.injectCta(cfg, p),
+    refs: core.referencePrompts(cfg, p),
+    asset_prompt: core.buildAssetPrompt(cfg, p),
+    linked: core.linkAssets(p),
+    suggest: core.suggestRecurring(cfg, p)
   };
+  if (c.assets_response) { const pa = core.parseAssetsResponse(c.assets_response, cfg); r.parsed_assets = pa; r.applied_assets = core.applyAssets(p, pa); }
   if (c.response) { const parsed = core.parseClaudeResponse(c.response, cfg); r.parsed = parsed; r.applied = core.applyResponse(p, parsed); }
   return r;
 });

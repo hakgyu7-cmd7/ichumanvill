@@ -15,7 +15,6 @@
     "zero_text": true,
     "safe_margin": true
   },
-  "subject_anchor": "a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron",
   "analysis": {
     "hook_technique": "",
     "retention_psychology": "",
@@ -59,6 +58,10 @@
           "type": "Whip-pan Pull-back",
           "prompt": "Snappy whip-pan pull-back revealing the whole smoky messy countertop"
         }
+      ],
+      "refs": [
+        "cook",
+        "fryer"
       ]
     },
     {
@@ -83,6 +86,10 @@
           "type": "Slow Pull-back",
           "prompt": "Slow zoom-out revealing the cluttered messy kitchen counter with grease stains"
         }
+      ],
+      "refs": [
+        "cook",
+        "fryer"
       ]
     },
     {
@@ -107,6 +114,9 @@
           "type": "Macro Texture Pull-back",
           "prompt": "Snap focus on the flexible soft silicone bending smoothly without deformation, then fast pull-back"
         }
+      ],
+      "refs": [
+        "pot"
       ]
     },
     {
@@ -131,6 +141,10 @@
           "type": "Eye-level Sizzle",
           "prompt": "Snappy whip-pan to an eye-level shot of delicate steam rising from the golden cooked meal"
         }
+      ],
+      "refs": [
+        "pot",
+        "fryer"
       ]
     },
     {
@@ -155,6 +169,10 @@
           "type": "Sparkle Clean Hero",
           "prompt": "Snappy whip-pan to the sparkling clean pot drying on a wooden miniature rack with a gleam effect"
         }
+      ],
+      "refs": [
+        "pot",
+        "cook"
       ]
     },
     {
@@ -179,6 +197,9 @@
           "type": "Final Lockup",
           "prompt": "Snappy whip-pan pull-back to a centered wide beauty shot of the whole product set, then hard blackout"
         }
+      ],
+      "refs": [
+        "pot"
       ]
     }
   ],
@@ -223,5 +244,34 @@
         "pinned": "Grab yours now via the yellow basket at bottom left! ⬇️"
       }
     }
-  }
+  },
+  "assets": [
+    {
+      "id": "pot",
+      "type": "object",
+      "name": "실리콘 팟",
+      "label": "the sage-green silicone pot",
+      "appearance": "a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall",
+      "keywords": "팟, 실리콘, 디바이더, 이거",
+      "done": false
+    },
+    {
+      "id": "cook",
+      "type": "character",
+      "name": "요리하는 주인공",
+      "label": "the PVC home cook figure",
+      "appearance": "a small PVC figure of a home cook with short brown hair and a cream apron",
+      "keywords": "손목, 설거지, 나, 사람",
+      "done": false
+    },
+    {
+      "id": "fryer",
+      "type": "object",
+      "name": "에어프라이어",
+      "label": "the black air fryer",
+      "appearance": "a compact round black basket-style air fryer with a silver handle",
+      "keywords": "에어프라이어, 기계, 바스켓",
+      "done": false
+    }
+  ]
 }

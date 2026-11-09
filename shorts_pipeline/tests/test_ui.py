@@ -41,14 +41,15 @@ class UiSmoke(unittest.TestCase):
             _copy_project(proj)
             out = Path(os.environ.get("SHORTS_UI_OUT") or td / "out")
             out.mkdir(parents=True, exist_ok=True)
-            clip, wav = td / "clip.mp4", td / "tts.wav"
+            clip, wav, png = td / "clip.mp4", td / "tts.wav", td / "ref.png"
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=red:size=64x64", "-frames:v", "1", str(png)], check=True)
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=360x640:rate=24:duration=1.5", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(clip)], check=True)
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=330:duration=3", str(wav)], check=True)
             srv = server.make_server(0, proj)
             threading.Thread(target=srv.serve_forever, daemon=True).start()
             try:
                 url = f"http://127.0.0.1:{srv.server_address[1]}/"
-                r = subprocess.run(["node", str(ROOT / "tests" / "ui_smoke.js"), url, (proj / "web_dashboard.html").as_uri(), str(clip), str(wav), str(out)],
+                r = subprocess.run(["node", str(ROOT / "tests" / "ui_smoke.js"), url, (proj / "web_dashboard.html").as_uri(), str(clip), str(wav), str(out), str(png)],
                                    env=ENV, capture_output=True, text=True, encoding="utf-8", timeout=240)
                 print(r.stdout)
                 self.assertEqual(r.returncode, 0, r.stdout + "\n" + r.stderr)

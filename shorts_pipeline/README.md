@@ -15,9 +15,9 @@ AI 유튜브 쇼츠 자동 제작 파이프라인. **45초(1.2배속·무음 삭
 > 제미나이에서 작업하던 v2.6 코드가 대화 후반으로 갈수록 누락·충돌이 생겨 처음 대화부터 다시 분석해 새로 만든 버전입니다.
 
 ```
-① 소재 발굴 → ② 기획·대본 → ③ 이미지·영상(Flow) → ④ 음성 → ⑤ 합성(렌더) → ⑥ 메타데이터
- 트렌드/떡상/    마스터 프롬프트   Frame1·Frame2·Omni    TTS·1.2배속   레터박스·자막     YouTube·Reels·TikTok
- 벤치마킹 대본    → Claude → 6씬   프롬프트 + 클립 업로드   · 무음 제거    · FFmpeg         × ko/en/ja/zh
+① 레퍼런스 → ② 새 대본 → ③ 기준 이미지 → ④ 이미지·영상(Flow) → ⑤ 음성 → ⑥ 합성(렌더) → ⑦ 메타데이터
+ 떡상 링크·     마스터 프롬프트   인물·사물·장소    Frame1·Frame2·Omni   TTS·1.2배속   레터박스·자막    YouTube·Reels·TikTok
+ 대본 추출      → Claude → 6씬   분석 → 기준 이미지  프롬프트 + 클립 업로드  · 무음 제거    · FFmpeg        × ko/en/ja/zh
 ```
 
 ---
@@ -66,19 +66,25 @@ AI 유튜브 쇼츠 자동 제작 파이프라인. **45초(1.2배속·무음 삭
 3. Claude의 JSON 응답을 붙여넣고 **[씬 가져오기]** → 6씬 × 3비트 대본, Frame1/Frame2, 3컷, 분석, 제목 후보가 채워짐
 4. 6씬 대본을 편집(실시간 글자수 · 목표 범위 표시). 쇼핑 모드에서만 Scene 06 CTA 자동 검사/삽입
 
-### ③ 이미지 · 영상 (Google Flow / Omni 1.2)
+### ③ 기준 이미지 (등장 인물·사물·장소의 일관성)
+AI는 씬마다 이미지를 따로 그려서 같은 인물·사물도 매번 다르게 나옵니다. 그래서 **씬 이미지보다 먼저 등장 대상별 기준 이미지를 만듭니다.**
+1. **등장 대상 정의**: 2단계 Claude 응답에 `assets`(인물/사물/장소 + 영문 외형 고정 키워드)와 씬별 `refs`가 들어옵니다. 대본을 고쳤거나 빠진 대상이 있으면 **[대본 분석 프롬프트 복사]** → Claude → 결과 붙여넣기로 현재 대본을 다시 분석합니다. 여러 씬에 반복되는 영문 단어 힌트도 보여주고(휴리스틱), 직접 추가/**[씬 자동 연결]**(이름·키워드가 대본에 나오는 씬에 연결)도 됩니다.
+2. **기준 이미지 생성**: 대상마다 대표 1컷(9:16)과 3면 턴어라운드 시트(16:9, 선택) 프롬프트가 나옵니다. Flow에서 만들고 마음에 드는 1장을 확정한 뒤 [생성함]을 체크(서버를 켜면 이미지를 업로드해 보관/미리보기도 가능).
+3. **모든 씬에 적용**: 각 씬 프레임 프롬프트에 **그 씬에 연결된 대상의 외형이 자동 삽입**됩니다(`화풍 앵커 → 대상 외형 → 장면 묘사 → 안전 마진 → --no`). 4단계 씬 카드에는 "이 씬에 참조로 첨부할 기준 이미지" 목록이 표시되니, 씬 이미지를 만들 때 함께 첨부하세요.
+
+### ④ 이미지 · 영상 (Google Flow / Omni 1.2)
 - 씬마다 **Frame 1(0s) · Frame 2(2.5s) 이미지 프롬프트**와 **Omni 1.2 영상 프롬프트**가 완성형으로 나옵니다(복사 버튼).
-  화풍 앵커·안전 마진·`--no text…` 접미사·컷 연결 문구는 자동 합성되므로, 화풍을 바꾸면 6씬 전체가 즉시 바뀝니다.
+  화풍 앵커·등장 대상 외형·안전 마진·`--no text…` 접미사·컷 연결 문구는 자동 합성되므로, 화풍을 바꾸면 6씬 전체가 즉시 바뀝니다.
 - Flow에서 생성한 7.5초 클립을 씬 카드에 끌어놓으면 `input/sceneN.mp4` 로 저장됩니다.
 
-### ④ 음성
+### ⑤ 음성
 - TTS 입력 대본(비트/씬/한 덩어리) 복사 → 로컬 TTS(Pinokio Qwen3-TTS 등)로 생성 → `voice_raw` 업로드 → **[처리]** 로 무음 제거 + 1.2배속 → `voice.mp3` (길이 45±3초 점검)
 
-### ⑤ 합성
+### ⑥ 합성
 - 점검 목록(FFmpeg·클립 6/6·음성·폰트·규칙 오류) 확인 → **[최종 렌더링 시작]** → `output/final_shorts.mp4`
 - 서버 없이: 프로젝트 JSON 내보내기 후 `python shorts_stitcher.py --project projects/내프로젝트.json`
 
-### ⑥ 메타데이터
+### ⑦ 메타데이터
 - 확정 대본으로 **YouTube Shorts / Instagram Reels / TikTok** × 한/영/일/중 프롬프트(권장 Haiku 5.5) 복사 → 응답 붙여넣기 → 제목·캡션·고정댓글 편집/복사. 쇼핑이면 고정댓글 기본 문구 자동 채움.
 - 자동 업로드는 **의도적으로 제외**했습니다(수동 업로드 체크리스트 제공).
 
@@ -127,6 +133,8 @@ python prompt_engine.py package  --project samples/ramen_bgrade.json         # 6
 python prompt_engine.py validate --project samples/ramen_bgrade.json         # 규칙 검증 (종료코드 1 = 오류)
 python prompt_engine.py metadata --project samples/airfryer_shopping.json --langs ko,en
 python prompt_engine.py parse    --response claude_reply.txt --project my.json   # Claude 응답 가져오기
+python prompt_engine.py refs     --project samples/ramen_bgrade.json         # 등장 대상별 기준 이미지 프롬프트
+python prompt_engine.py assets-prompt --project my.json                      # 대본 분석(등장 대상 추출) 프롬프트
 python shorts_stitcher.py --project samples/ramen_bgrade.json --dry-run      # FFmpeg 명령만 확인
 python shorts_stitcher.py --project projects/my.json --fit contain --crop 1.08
 python audio_tools.py tts_raw.wav input/voice.mp3                            # 무음 제거 + 1.2배속
@@ -154,6 +162,7 @@ python source_tools.py outliers "kitchen gadget" --min-ratio 10              # Y
 - **쿠팡 수집**: 봇 차단(403)이 흔해 실시간 수집이 되지 않을 수 있습니다(구현은 하되 실패 시 샘플+사유 표시). **틱톡 크리에이티브 센터는 공식 API가 없어 자동 수집을 하지 않습니다**(수동 링크 제공).
 - **YouTube API / 자막 추출 / 레딧**: 실제 네트워크 호출은 하지 않고 목(mock) 응답으로만 테스트했습니다. 실제 키로 첫 호출 시 오류가 나면 알려주세요.
 - **Claude CLI 실행 버튼, edge-tts 버튼**: 실험 기능이며 실제 실행 검증은 하지 못했습니다(없을 때의 에러 경로만 테스트).
+- **기준 이미지 적용**: 외형 키워드 자동 삽입과 프롬프트 생성은 테스트로 검증했지만, Google Flow 가 참조 이미지를 얼마나 충실히 따르는지(기능 이름·위치·지원 비율 포함)는 확인하지 못했습니다. 3면 시트를 16:9 로 잡은 것도 가정입니다(`config.json` 의 `reference.ar_sheet` 로 변경). 영문 단어 힌트는 단순 빈도 휴리스틱이라 참고용입니다.
 - Google Flow(Omni 1.2)의 워터마크 위치·컷 전환 품질은 서비스 변화에 따라 달라질 수 있습니다(확실하지 않음). 이 도구는 프롬프트와 후처리만 담당합니다.
 
 ## 9. 새 세션에서 이어서 작업할 때

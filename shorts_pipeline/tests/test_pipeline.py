@@ -55,6 +55,14 @@ def variants():
     cases.append({"name": "empty", "project": {}})
     cases.append({"name": "legacy", "project": {"meta": {"style": "피규어_디오라마", "category": "쇼핑_꿀템", "category2": "B급_병맛", "language": "xx"}}})
     cases.append({"name": "response", "project": copy.deepcopy(RAMEN), "response": MESSY_RESPONSE})
+    reply = (ROOT / "tests" / "fixtures" / "claude_reply.txt").read_text(encoding="utf-8")
+    areply = (ROOT / "tests" / "fixtures" / "assets_reply.txt").read_text(encoding="utf-8")
+    cases.append({"name": "assets", "project": copy.deepcopy(AIR), "response": reply, "assets_response": areply})
+    pa = copy.deepcopy(AIR)
+    pa["meta"]["language"] = "en"
+    pa["assets"][1]["appearance"] = "한글 appearance"
+    pa["scenes"][2]["refs"] = ["pot", "nope", "pot"]
+    cases.append({"name": "assets-en-bad", "project": pa, "assets_response": areply})
     return cases
 
 
@@ -108,13 +116,19 @@ class EngineTests(unittest.TestCase):
 
     def test_frame_composition(self):
         proj = pe.normalize_project(AIR, CFG)
-        f = pe.compose_frame(CFG, proj, "a wide shot.")
+        refs = proj["scenes"][0]["refs"]            # Scene 01: cook, fryer
+        f = pe.compose_frame(CFG, proj, "a wide shot.", refs)
         self.assertTrue(f.startswith(CFG["styles"]["diorama"]["anchor"]))
         self.assertTrue(f.endswith(CFG["suffix"]["zero_text"]))
-        self.assertIn(proj["subject_anchor"].rstrip("."), f)
+        by_id = {a["id"]: a for a in proj["assets"]}
+        self.assertIn(by_id["cook"]["appearance"], f)
+        self.assertIn(by_id["fryer"]["appearance"], f)
+        self.assertNotIn(by_id["pot"]["appearance"], f)          # 이 씬에 연결되지 않은 대상은 삽입 안 됨
+        self.assertLess(f.index(by_id["cook"]["appearance"]), f.index("a wide shot"))  # 앵커 -> 대상 외형 -> 장면 묘사 순서
         self.assertEqual(f.count("--no text"), 1)
+        self.assertNotIn(by_id["cook"]["appearance"], pe.compose_frame(CFG, proj, "a wide shot", []))
         proj["options"] = {"zero_text": False, "safe_margin": False}
-        f2 = pe.compose_frame(CFG, proj, "a wide shot")
+        f2 = pe.compose_frame(CFG, proj, "a wide shot", refs)
         self.assertNotIn("--no", f2)
         self.assertNotIn("safe area", f2)
 
@@ -183,8 +197,111 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(s2["beats"], ["하나", "둘", "셋"])
         self.assertEqual(s2["frame1"], "f1")
         self.assertEqual(parsed["top_title"], "테스트 타이틀")
+        self.assertEqual(parsed["assets"][0]["appearance"], "a tiny PVC figure")   # 옛 subject_anchor -> asset
+        self.assertEqual(parsed["scenes"][0]["refs"], ["main"])
+        full = pe.parse_claude_response((ROOT / "tests" / "fixtures" / "claude_reply.txt").read_text(encoding="utf-8"), CFG)
+        self.assertEqual([a["id"] for a in full["assets"]], ["hero", "pot", "kitchen"])
+        self.assertEqual(full["scenes"][1]["refs"], ["hero", "pot", "kitchen"])
+        applied = pe.apply_response(pe.normalize_project({}, CFG), full)
+        self.assertEqual(len(applied["assets"]), 3)
         with self.assertRaises(ValueError):
             pe.parse_claude_response("JSON 없음", CFG)
+
+    def test_assets_normalization_and_legacy_anchor(self):
+        a = pe.normalize_assets([{"id": "Hero Man", "label": "x"}, {"id": "hero man"}, {"label": "The Pot", "type": "THING"}, "bad", {"type": "place"}])
+        self.assertEqual([x["id"] for x in a], ["hero_man", "hero_man_2", "the_pot", "asset5"])
+        self.assertEqual([x["type"] for x in a], ["object", "object", "object", "place"])
+        p = pe.normalize_project({"subject_anchor": "a tiny PVC figure --no text.", "scenes": [{"beats": ["a", "b", "c"]}]}, CFG)
+        self.assertEqual(len(p["assets"]), 1)
+        self.assertEqual(p["assets"][0]["appearance"], "a tiny PVC figure")
+        self.assertTrue(all(sc["refs"] == ["main"] for sc in p["scenes"]))
+        self.assertNotIn("subject_anchor", p)
+        q = pe.normalize_project({"assets": [{"id": "a"}], "scenes": [{"refs": ["a", "a", "zzz"]}]}, CFG)
+        self.assertEqual(q["scenes"][0]["refs"], ["a"])   # 중복/없는 id 제거
+
+    def test_reference_prompts(self):
+        proj = pe.normalize_project(RAMEN, CFG)
+        refs = pe.reference_prompts(CFG, proj)
+        self.assertEqual([r["id"] for r in refs], ["hero", "pot", "kitchen"])
+        self.assertEqual(refs[2]["scenes"], [1, 2, 5])
+        hero = refs[0]
+        self.assertTrue(hero["main"].startswith(CFG["styles"]["diorama"]["anchor"]))
+        self.assertIn("full-body character reference image", hero["main"])
+        self.assertTrue(hero["main"].endswith(CFG["suffix"]["zero_text_core"] + " --ar 9:16"))
+        self.assertIn("turnaround reference sheet", hero["sheet"])
+        self.assertTrue(hero["sheet"].endswith("--ar 16:9"))
+        self.assertIn("single hero object reference image", refs[1]["main"])
+        self.assertIn("establishing reference image", refs[2]["main"])
+        proj["options"]["zero_text"] = False
+        self.assertNotIn("--no", pe.compose_reference(CFG, proj, proj["assets"][0], "main"))
+        self.assertIn("[기준 이미지] 주인공 피규어", pe.all_prompts_text(CFG, pe.normalize_project(RAMEN, CFG)))
+
+    def test_master_prompt_asset_rules(self):
+        empty = pe.normalize_project({"meta": {"topic": "t"}}, CFG)
+        m = pe.build_master_prompt(CFG, empty)
+        self.assertIn("assets 배열에 정의하세요", m)
+        self.assertIn('"assets": [', m)
+        self.assertIn('"refs"', m)
+        self.assertNotIn("subject_anchor", m)
+        m2 = pe.build_master_prompt(CFG, pe.normalize_project(RAMEN, CFG))
+        self.assertIn("이미 정의된 기준 이미지 대상", m2)
+        self.assertIn("hero (character) 주인공 피규어 / the deadpan PVC man figure", m2)
+
+    def test_asset_analysis_prompt_parse_apply_link(self):
+        proj = pe.normalize_project(RAMEN, CFG)
+        ap = pe.build_asset_prompt(CFG, proj)
+        self.assertIn("Scene 01: 라면 끓일 때마다", ap)
+        self.assertIn("scene_refs", ap)
+        self.assertIn("이미 정의된 asset", ap)
+        self.assertNotIn("{{", ap)
+        text = (ROOT / "tests" / "fixtures" / "assets_reply.txt").read_text(encoding="utf-8")
+        parsed = pe.parse_assets_response(text, CFG)
+        self.assertEqual([a["id"] for a in parsed["assets"]], ["hero_man", "pot", "pot_2"])
+        self.assertEqual(parsed["assets"][0]["keywords"], "남자, 주인공")           # 리스트 -> 문자열
+        self.assertEqual(parsed["assets"][0]["appearance"], "a male figure with short black hair")  # --no 제거
+        self.assertEqual(parsed["assets"][1]["type"], "object")                     # 알 수 없는 타입 -> object
+        self.assertEqual(sorted(parsed["scene_refs"]), ["1", "2"])                  # 범위 밖/비정수/잘못된 값 무시
+        base = json.loads(json.dumps(proj))
+        base["assets"][1]["done"] = True                                            # 기존 pot(done) 은 id 가 같으면 유지
+        applied = pe.apply_assets(pe.normalize_project(base, CFG), parsed)
+        self.assertEqual(applied["scenes"][0]["refs"], ["hero_man", "pot"])        # 없는 id(ghost) 제거
+        self.assertEqual(applied["scenes"][1]["refs"], ["pot"])                      # 중복 제거
+        self.assertEqual(applied["scenes"][2]["refs"], ["pot"])                       # scene_refs 에 없는 씬은 기존 연결 중 유효한 id 만 유지
+        self.assertTrue(next(a for a in applied["assets"] if a["id"] == "pot")["done"])
+        with self.assertRaises(ValueError):
+            pe.parse_assets_response("자산 없음", CFG)
+
+    def test_link_assets_by_keywords(self):
+        proj = pe.normalize_project(RAMEN, CFG)
+        for sc in proj["scenes"]:
+            sc["refs"] = []
+        linked = pe.link_assets(proj)
+        # '냄비'는 대본에 나오는 씬에, 'hero' 키워드(남자/주인공/사람/나)는 프롬프트의 'male PVC figure'가 아니라 한글 키워드 기준
+        self.assertIn("pot", linked["scenes"][0]["refs"])        # Scene 01 대본: "냄비 위에"
+        self.assertIn("kitchen", linked["scenes"][1]["refs"])    # Scene 02 프롬프트: "kitchen counter" (label 'the tiny apartment kitchen' 아님 -> 키워드 '주방/싱크대': 대본 '싱크대')
+        self.assertEqual(pe.link_assets(linked), linked)         # 멱등
+
+    def test_suggest_recurring_words(self):
+        proj = pe.normalize_project({"scenes": [{"frame1": "a rusty lantern on a table", "frame2": "x"}, {"frame1": "the rusty lantern glows"},
+                                                {"cuts": [{"prompt": "camera push toward the rusty lantern"}]}, {"frame1": "lantern"}]}, CFG)
+        words = {x["word"]: x["scenes"] for x in pe.suggest_recurring(CFG, proj)}
+        self.assertEqual(words.get("lantern"), 4)
+        self.assertEqual(words.get("rusty"), 3)
+        self.assertNotIn("camera", words)
+        proj["assets"] = pe.normalize_assets([{"id": "l", "label": "the rusty lantern", "appearance": "x"}])
+        self.assertNotIn("lantern", {x["word"] for x in pe.suggest_recurring(CFG, proj)})   # 이미 asset 인 단어는 제외
+
+    def test_validator_asset_checks(self):
+        proj = pe.normalize_project(RAMEN, CFG)
+        proj["assets"].append({"id": "x", "type": "object", "name": "유령", "label": "한글 라벨", "appearance": "", "keywords": "", "done": False})
+        codes = [(i["code"], i["level"]) for i in pe.validate_project(CFG, proj)]
+        self.assertIn(("asset_empty", "warn"), codes)
+        self.assertIn(("asset_cjk", "error"), codes)
+        self.assertIn(("asset_unlinked", "warn"), codes)
+        none = pe.normalize_project(RAMEN, CFG)
+        none["assets"], none["scenes"] = [], [dict(s, refs=[]) for s in none["scenes"]]
+        self.assertIn("no_assets", [i["code"] for i in pe.validate_project(CFG, none)])
+        self.assertNotIn("no_assets", [i["code"] for i in pe.validate_project(CFG, pe.normalize_project(RAMEN, CFG))])
 
     def test_legacy_keys(self):
         p = pe.normalize_project({"meta": {"style": "피규어_디오라마", "category": "쇼핑_꿀템", "category2": "B급_병맛", "language": "xx"}}, CFG)
@@ -218,6 +335,14 @@ class ParityTests(unittest.TestCase):
             self.assertEqual(j["shopping"], pe.is_shopping(p, CFG), n)
             self.assertEqual(j["model"], pe.recommended_model(CFG, p), n)
             self.assertEqual(j["cta"], pe.inject_cta(CFG, p), f"cta 불일치: {n}")
+            self.assertEqual(j["refs"], pe.reference_prompts(CFG, p), f"reference prompts 불일치: {n}")
+            self.assertEqual(j["asset_prompt"], pe.build_asset_prompt(CFG, p), f"asset prompt 불일치: {n}")
+            self.assertEqual(j["linked"], pe.link_assets(p), f"link 불일치: {n}")
+            self.assertEqual(j["suggest"], pe.suggest_recurring(CFG, p), f"suggest 불일치: {n}")
+            if "assets_response" in case:
+                pa_ = pe.parse_assets_response(case["assets_response"], CFG)
+                self.assertEqual(j["parsed_assets"], pa_, "parse_assets 불일치")
+                self.assertEqual(j["applied_assets"], pe.apply_assets(p, pa_), "apply_assets 불일치")
             if "response" in case:
                 parsed = pe.parse_claude_response(case["response"], CFG)
                 self.assertEqual(j["parsed"], parsed, "parse 불일치")

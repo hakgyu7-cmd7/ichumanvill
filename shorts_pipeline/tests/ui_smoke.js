@@ -2,7 +2,7 @@
 // (Playwright 필요: npm i -g playwright, NODE_PATH 지정)
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path');
-const [SERVER, FILEURL, CLIP, WAV, OUT] = process.argv.slice(2);
+const [SERVER, FILEURL, CLIP, WAV, OUT, REFPNG] = process.argv.slice(2);
 const FIX = path.join(__dirname, 'fixtures');
 let failed = 0; const ok = (c, m) => { if (!c) { failed++; console.log('FAIL:', m); } else console.log('ok  :', m); };
 const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 ${JSON.stringify(a)})`);
@@ -10,6 +10,7 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
 (async () => {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1500, height: 1000 }, acceptDownloads: true });
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new URL(SERVER).origin });
   const pg = await ctx.newPage(); const errs = [];
   pg.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); pg.on('pageerror', e => errs.push('pageerror: ' + e.message));
   pg.on('dialog', d => d.accept());
@@ -26,7 +27,8 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
   await pg.route('**/api/outliers', r => r.fulfill({ json: { items: [{ platform: 'YouTube', video_id: 'abcdefghijk', url: 'https://www.youtube.com/shorts/abcdefghijk', title: '떡상 영상', channel: 'ch', views: 5000000, subscribers: 100000, ratio: 50, grade: 'viral', duration: 30 }] } }));
   await pg.route('**/api/transcript', r => r.fulfill({ json: { text: '추출된 원본 대본 텍스트', method: 'mock', video_id: 'abcdefghijk' } }));
   await pg.goto(SERVER); await pg.waitForSelector('#stepper .step'); await pg.waitForTimeout(600);
-  eq((await pg.$$('#stepper .step')).length, 6, '스테퍼 6단계');
+  eq((await pg.$$('#stepper .step')).length, 7, '스테퍼 7단계(기준 이미지 포함)');
+  ok((await txt('#stepper .step:nth-child(3)')).includes('기준 이미지'), '3단계 = 기준 이미지');
   ok((await txt('#srv-txt')).includes('연결됨'), '서버 연결 표시');
 
   // ===== 기본은 레퍼런스 쇼츠 (쇼핑 아님)
@@ -76,6 +78,56 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
   ok(!(await txt('#issues')).includes('쇼핑 카테고리인데'), '레퍼런스 모드는 CTA 없어도 오류 아님');
   await pg.fill('#claude-reply', 'JSON 없는 응답'); await pg.click('[data-act="importReply"]'); await pg.waitForTimeout(200);
   ok((await txt('#toast')).includes('찾지 못했습니다'), 'JSON 없는 응답은 에러 토스트');
+
+
+  // ===== 기준 이미지 (등장 인물·사물 일관성)
+  await pg.fill('#claude-reply', fs.readFileSync(path.join(FIX, 'claude_reply.txt'), 'utf8')); await pg.click('[data-act="importReply"]'); await pg.waitForTimeout(300);
+  ok((await txt('#toast')).includes('기준 이미지 대상 3개'), 'Claude 응답에 포함된 assets 3개 가져오기');
+  await tab('assets');
+  eq((await pg.$$('[data-asset]')).length, 3, '기준 이미지 카드 3개(인물/사물/장소)');
+  ok((await txt('#ref-0-main')).startsWith('Hyper-detailed collectible PVC figure') && (await txt('#ref-0-main')).includes('full-body character reference image'), '인물 기준 이미지 프롬프트(화풍 앵커 + 전신 기준)');
+  ok((await txt('#ref-0-main')).endsWith('--no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16'), '기준 이미지 Zero-Text 접미사 + 9:16');
+  ok((await txt('#ref-0-sheet')).includes('turnaround reference sheet') && (await txt('#ref-0-sheet')).endsWith('--ar 16:9'), '3면 턴어라운드 시트 프롬프트 + 16:9');
+  ok((await txt('#ref-1-main')).includes('single hero object reference image'), '사물 기준 이미지 프롬프트');
+  ok((await txt('#ref-2-main')).includes('establishing reference image'), '장소 기준 이미지 프롬프트');
+  await pg.fill('textarea[data-bind="assets.0.appearance"]', 'a male figure with a bright red scarf');
+  ok((await txt('#ref-0-main')).includes('a male figure with a bright red scarf'), '외형 수정이 기준 이미지 프롬프트에 즉시 반영');
+  await tab('visual');
+  ok((await txt('#fin-0-frame1')).includes('a male figure with a bright red scarf'), '외형 수정이 연결된 씬 프레임 프롬프트에 자동 삽입');
+  ok((await txt('#fin-0-frame1')).includes('tiny miniature studio-apartment kitchen'), 'Scene 01 에는 장소(주방) 외형도 삽입');
+  ok(!(await txt('#fin-3-frame1')).includes('tiny miniature studio-apartment kitchen'), '연결되지 않은 Scene 04 에는 주방 외형 없음');
+  ok((await txt('#content')).includes('기준 이미지') && (await txt('#content')).includes('아직 생성되지 않았습니다'), '기준 이미지 미생성 경고 배너');
+  ok((await txt('details[data-scene="0"]')).includes('이 씬 이미지에 참조로 첨부할 기준 이미지'), '씬 카드에 첨부할 기준 이미지 안내');
+  await tab('assets');
+  await pg.click('label.chip:has([data-ref="2:3"])'); await pg.waitForTimeout(250);
+  await tab('visual'); ok((await txt('#fin-3-frame1')).includes('tiny miniature studio-apartment kitchen'), '씬 연결 체크 시 해당 씬에 외형 삽입');
+  await tab('assets'); await pg.click('label.chip:has([data-ref="2:3"])'); await pg.waitForTimeout(250);
+  await tab('visual'); ok(!(await txt('#fin-3-frame1')).includes('tiny miniature studio-apartment kitchen'), '연결 해제 시 외형 제거');
+
+  // 추가/삭제/검증
+  await tab('assets'); await pg.click('[data-act="addAsset"][data-t="object"]'); await pg.waitForTimeout(250);
+  eq((await pg.$$('[data-asset]')).length, 4, '사물 추가');
+  ok((await txt('#issues')).includes('외형 묘사(appearance)가 비어 있습니다') && (await txt('#issues')).includes('어느 씬에도 연결되지 않았습니다'), '빈 외형/미연결 경고');
+  await pg.click('[data-asset="obj"] [data-act="delAsset"]'); await pg.waitForTimeout(250);
+  eq((await pg.$$('[data-asset]')).length, 3, '삭제');
+  await pg.fill('input[data-bind="assets.1.label"]', '한글 라벨'); ok((await txt('#issues')).includes('영문만 허용'), '한글 라벨은 오류'); await pg.fill('input[data-bind="assets.1.label"]', 'the small silver pot');
+
+  // 업로드/미리보기/삭제
+  await pg.setInputFiles('input[data-upload="ref"][data-id="hero"]', REFPNG); await pg.waitForTimeout(900);
+  ok((await pg.$('[data-asset="hero"] img[src*="/media/refs/hero.png"]')) !== null, '기준 이미지 업로드 후 썸네일 표시');
+  await pg.click('[data-act="delRef"][data-id="hero"]'); await pg.waitForTimeout(700);
+  eq(await pg.$('[data-asset="hero"] img'), null, '기준 이미지 삭제');
+  await pg.click('[data-act="copyAssetAnalysis"]'); await pg.waitForTimeout(300);
+  const clip = await pg.evaluate(() => navigator.clipboard.readText());
+  ok(clip.includes('[기준 이미지 분석 지침]') && clip.includes('Scene 01: 라면 끓일 때마다') && clip.includes('scene_refs'), '대본 분석 프롬프트 복사(실제 클립보드 내용 확인)');
+
+  // 분석 결과 가져오기
+  await pg.fill('#asset-reply', fs.readFileSync(path.join(FIX, 'assets_reply.txt'), 'utf8')); await pg.click('[data-act="importAssets"]'); await pg.waitForTimeout(300);
+  eq((await pg.$$('[data-asset]')).length, 3, '분석 결과 가져오기 -> 등장 대상 3개');
+  ok(await pg.isVisible('[data-asset="hero_man"]') && await pg.isVisible('[data-asset="pot_2"]'), 'id 정규화(공백/중복 처리)');
+  await pg.fill('#asset-reply', '자산 없음'); await pg.click('[data-act="importAssets"]'); await pg.waitForTimeout(200);
+  ok((await txt('#toast')).includes('assets 배열'), '잘못된 분석 응답은 에러 토스트');
+  await tab('script');
 
   // ===== 쇼핑 쇼츠는 별도 모드
   await pg.click('[data-act="setMode"][data-m="shopping"]'); await pg.waitForTimeout(300);
@@ -139,7 +191,7 @@ const eq = (a, b, m) => ok(a === b, `${m} (기대 ${JSON.stringify(b)}, 실제 $
   // ---- 내보내기 / 불러오기 (v2 호환)
   const [dl] = await Promise.all([pg.waitForEvent('download'), pg.click('[data-act="exportJson"]')]);
   const exported = JSON.parse(fs.readFileSync(await dl.path(), 'utf8'));
-  eq(exported.scenes.length, 6, '내보낸 JSON 씬 6개'); eq(exported.meta.style, 'claymation', '내보낸 JSON 화풍'); eq(exported.meta.category, 'history', '내보낸 JSON 카테고리');
+  eq(exported.scenes.length, 6, '내보낸 JSON 씬 6개'); ok(exported.assets.length === 3 && !('subject_anchor' in exported), '내보낸 JSON 에 assets 포함, 옛 subject_anchor 없음'); eq(exported.meta.style, 'claymation', '내보낸 JSON 화풍'); eq(exported.meta.category, 'history', '내보낸 JSON 카테고리');
   await pg.setInputFiles('#file-in', path.join(FIX, 'legacy_v2_export.json')); await pg.waitForTimeout(500);
   await tab('script');
   eq(await pg.inputValue('input[data-bind="meta.top_title"]'), '아직도 종이호일 태우세요?', 'v2(제미나이) 내보내기 JSON 변환');

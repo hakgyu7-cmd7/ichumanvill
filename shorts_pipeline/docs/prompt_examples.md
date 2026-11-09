@@ -1,7 +1,7 @@
 # 프롬프트 예시 모음 (엔진 자동 생성)
 
 > 이 문서는 `python tools_gen_docs.py` 가 `samples/*.json` 과 `config.json` 에서 **자동 생성**합니다. 직접 고치지 말고 샘플/설정을 고친 뒤 다시 생성하세요.
-> 모든 Frame 프롬프트는 `화풍 앵커 → 주인공 앵커 → 장면 묘사 → 안전 마진 → --no 접미사` 순서로 합성되고, Omni 프롬프트는 연결 문구와 화풍 질감이 자동 합성됩니다.
+> 모든 Frame 프롬프트는 `화풍 앵커 → 그 씬에 등장하는 기준 이미지 대상의 외형 → 장면 묘사 → 안전 마진 → --no 접미사` 순서로 합성되고, Omni 프롬프트는 연결 문구와 화풍 질감이 자동 합성됩니다.
 
 ## 케이스: 라면 물 550ml 완벽 조절을 위한 궁극의 시스템
 
@@ -9,7 +9,6 @@
 - 화풍: 7. 고정밀 피규어 & 디오라마
 - 상단 타이틀: 라면 물 조절 실패하는 사람 필독
 - 대본 분량: 330자 (목표 320~350)
-- 주인공/제품 앵커: `a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama`
 
 ### 6씬 대본 (2.5초 비트)
 
@@ -22,17 +21,52 @@
 | 05 | 문제는 기계에서 나오는 열기 때문에 방 안 온도가 | 순식간에 사우나 수준인 60도까지 | 올라간다는 겁니다. | 57 |
 | 06 | 결국 땀 뻘뻘 흘리며 뚜껑을 열었더니 | 스프 넣는 걸 깜빡했더라고요. | 그러니까 그냥 눈대중으로 드세요. | 56 |
 
+### 기준 이미지 (등장 대상별 - 씬 이미지보다 먼저 생성)
+
+**주인공 피규어** (character) - 등장 씬: 1, 2, 3, 4, 5, 6
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
+**냄비** (object) - 등장 씬: 1, 2, 3, 4, 5, 6
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, single hero object reference image, centered, shown from a clear three-quarter front angle, plain seamless neutral studio background, even soft lighting, every material, shape and color detail clearly visible, generous empty margin around the object --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, object turnaround reference sheet showing the same object in three views (front view, three-quarter view, side view) side by side, plain seamless neutral background, identical shape, material and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
+**주방** (place) - 등장 씬: 1, 2, 5
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, wide establishing reference image of the location, empty of people, eye-level view, even soft lighting, all architectural and prop details clearly visible, centered composition with generous margins --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, location reference sheet showing the same place from three angles (wide front view, left corner view, right corner view), empty of people, even soft lighting, identical layout, materials and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
 ### Scene 01 - 충격적 훅 (Hook) (0.0~7.5s)
 
 **대사**: 라면 끓일 때마다 물 맞추기 실패한다면 눈대중 대신 냄비 위에 정밀 유량 조절기를 달면 됩니다.
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -53,11 +87,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -78,11 +112,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -103,11 +137,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -128,11 +162,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove, close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -153,11 +187,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama, close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts, a small round stainless-steel cooking pot with two black side handles and a clear glass lid, close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -180,7 +214,6 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 - 화풍: 7. 고정밀 피규어 & 디오라마
 - 상단 타이틀: 아직도 종이호일 태우세요?
 - 대본 분량: 325자 (목표 320~350)
-- 주인공/제품 앵커: `a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron`
 
 ### 6씬 대본 (2.5초 비트)
 
@@ -193,17 +226,52 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 | 05 | 다 먹고 뒤집어서 물로 깨끗이 헹구면 | 기름이 미끄러지듯 떨어져서 | 설거지 3초 컷으로 끝납니다. | 52 |
 | 06 | 오늘만 반값 특가 진행 중이니 | 놓치면 재고 소진이에요. | 제품 정보는 하단 쇼핑 태그와 고정 댓글 확인! | 57 |
 
+### 기준 이미지 (등장 대상별 - 씬 이미지보다 먼저 생성)
+
+**실리콘 팟** (object) - 등장 씬: 3, 4, 5, 6
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, single hero object reference image, centered, shown from a clear three-quarter front angle, plain seamless neutral studio background, even soft lighting, every material, shape and color detail clearly visible, generous empty margin around the object --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, object turnaround reference sheet showing the same object in three views (front view, three-quarter view, side view) side by side, plain seamless neutral background, identical shape, material and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
+**요리하는 주인공** (character) - 등장 씬: 1, 2, 5
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
+**에어프라이어** (object) - 등장 씬: 1, 2, 4
+
+대표 1컷
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a compact round black basket-style air fryer with a silver handle, single hero object reference image, centered, shown from a clear three-quarter front angle, plain seamless neutral studio background, even soft lighting, every material, shape and color detail clearly visible, generous empty margin around the object --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+```
+3면 턴어라운드 시트(선택)
+```
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a compact round black basket-style air fryer with a silver handle, object turnaround reference sheet showing the same object in three views (front view, three-quarter view, side view) side by side, plain seamless neutral background, identical shape, material and colors in every view --no text, letters, words, typography, subtitles, font, signage, watermark --ar 16:9
+```
+
 ### Scene 01 - 충격적 훅 (Hook) (0.0~7.5s)
 
 **대사**: 아직도 에어프라이어에 종이호일 깔고 타서 눌어붙은 기름때 닦느라 손목 다 나가고 계신가요?
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -224,11 +292,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, 45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a small PVC figure of a home cook with short brown hair and a cream apron, a compact round black basket-style air fryer with a silver handle, 45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -249,11 +317,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, front hero shot of the pastel sage-green silicone pot dropping gracefully into the center of the clean air fryer basket, studio spotlight, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, front hero shot of the pastel sage-green silicone pot dropping gracefully into the center of the clean air fryer basket, studio spotlight, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium close-up of the grooved wave bottom ridges of the silicone pot with wide negative space around it, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, medium close-up of the grooved wave bottom ridges of the silicone pot with wide negative space around it, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -274,11 +342,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, high-angle shot showing the center divider separating sizzling crispy pork belly on one side and golden french fries on the other, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a compact round black basket-style air fryer with a silver handle, high-angle shot showing the center divider separating sizzling crispy pork belly on one side and golden french fries on the other, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium close-up of hot golden oil draining cleanly down the radial wave grooves away from the food, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a compact round black basket-style air fryer with a silver handle, medium close-up of hot golden oil draining cleanly down the radial wave grooves away from the food, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -299,11 +367,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a small PVC figure of a home cook with short brown hair and a cream apron, medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, a small PVC figure of a home cook with short brown hair and a cream apron, medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```
@@ -324,11 +392,11 @@ Visual Polish: Miniature stop-motion feel, precise macro depth of field, subtle 
 
 **Frame 1 (0s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Frame 2 (2.5s)**
 ```
-Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron, medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
+Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography, a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall, medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area, subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up --no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16
 ```
 **Omni 1.2 (I2V, 7.5초)**
 ```

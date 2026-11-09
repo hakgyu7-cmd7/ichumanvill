@@ -387,6 +387,26 @@ class ServerTests(unittest.TestCase):
         s, r, _ = self.req("POST", "/api/delete-file", {"kind": "clip", "scene": 3})
         self.assertEqual(r["removed"], ["scene3.mp4"])
 
+    def test_reference_image_upload_media_delete(self):
+        png = b"\x89PNG\r\n\x1a\n0123456789"
+        s, r, _ = self.req("POST", "/api/upload?kind=ref&id=hero&name=a.PNG", raw=png)
+        self.assertEqual((s, r["saved"]), (200, "hero.png"))
+        s, r, _ = self.req("POST", "/api/upload?kind=ref&id=hero&name=b.jpg", raw=b"jpgdata")
+        self.assertEqual(r["saved"], "hero.jpg")
+        self.assertFalse((Path(self.tmp.name) / "input" / "refs" / "hero.png").exists(), "같은 id 의 이전 파일은 교체됨")
+        s, files, _ = self.req("GET", "/api/files")
+        self.assertEqual(files["refs"], {"hero": "hero.jpg"})
+        s, data, resp = self.req("GET", "/media/refs/hero.jpg")
+        self.assertEqual((s, data), (200, b"jpgdata"))
+        self.assertEqual(self.req("GET", "/media/refs/..%2fconfig.json")[0], 404)
+        self.assertEqual(self.req("GET", "/media/refs/HERO.jpg")[0], 404)           # 허용 패턴(소문자 id)만
+        for bad in ("kind=ref&id=Hero&name=a.png", "kind=ref&id=h&name=a.exe", "kind=ref&id=..%2fx&name=a.png", "kind=ref&name=a.png"):
+            self.assertEqual(self.req("POST", "/api/upload?" + bad, raw=b"x")[0], 400, bad)
+        s, r, _ = self.req("POST", "/api/delete-file", {"kind": "ref", "id": "hero"})
+        self.assertEqual(r["removed"], ["hero.jpg"])
+        self.assertEqual(self.req("POST", "/api/delete-file", {"kind": "ref", "id": "../x"})[0], 400)
+        self.assertEqual(self.req("GET", "/api/files")[1]["refs"], {})
+
     def test_project_save_load(self):
         self.assertEqual(self.req("POST", "/api/project", {"name": "../evil", "project": {}})[0], 400)
         self.assertEqual(self.req("POST", "/api/project", {"name": ".hidden", "project": {}})[0], 400)

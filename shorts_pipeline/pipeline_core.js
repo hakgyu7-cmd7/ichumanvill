@@ -47,7 +47,7 @@
     return Object.keys(cfg.styles)[0];
   }
   function emptyScene(i) {
-    return { id: i, beats: ['', '', ''], frame1: '', frame2: '', cuts: [0, 1, 2].map(() => ({ type: '', prompt: '' })) };
+    return { id: i, beats: ['', '', ''], frame1: '', frame2: '', refs: [], cuts: [0, 1, 2].map(() => ({ type: '', prompt: '' })) };
   }
   function defaultProject(cfg) {
     const scenes = [];
@@ -57,7 +57,7 @@
       meta: { topic: '', top_title: '', category: cfg.default_category || 'general', category2: '', format: '', style: defaultStyleId(cfg),
         language: 'ko', source_url: '', source_script: '' },
       options: { zero_text: true, safe_margin: true },
-      subject_anchor: '',
+      assets: [],
       analysis: { hook_technique: '', retention_psychology: '', skeleton: '' },
       plan: { titles: [], description: '', hashtags: [] },
       scenes,
@@ -89,6 +89,7 @@
       if (typeof c === 'string') c = { type: '', prompt: c };
       sc.cuts[j] = { type: String(c.type || ''), prompt: stripSuffix(String(c.prompt || '')) };
     }
+    sc.refs = Array.isArray(src.refs) ? src.refs.map((x) => String(x)) : [];
     if ('done' in src) sc.done = src.done;
     return sc;
   }
@@ -96,7 +97,7 @@
     p = p || {};
     const out = defaultProject(cfg);
     ['meta', 'options', 'analysis', 'plan', 'render'].forEach((k) => { if (p[k] && typeof p[k] === 'object' && !Array.isArray(p[k])) Object.assign(out[k], clone(p[k])); });
-    ['subject_anchor', 'metadata'].forEach((k) => { if (k in p) out[k] = clone(p[k]); });
+    if ('metadata' in p) out.metadata = clone(p.metadata);
     const m = out.meta;
     m.style = LEGACY_STYLE_KEYS[m.style] || m.style;
     m.category = LEGACY_CATEGORY_KEYS[m.category] || m.category;
@@ -111,6 +112,33 @@
       const src = i < scenes.length && scenes[i] && typeof scenes[i] === 'object' ? scenes[i] : {};
       out.scenes.push(normalizeScene(src, i + 1));
     }
+    out.assets = normalizeAssets(p.assets);
+    const legacy = String(p.subject_anchor || '').trim();
+    if (legacy && !out.assets.length) {   // 옛 '주인공 외형 앵커' -> 모든 씬에 연결된 asset 1개
+      out.assets = [{ id: 'main', type: 'character', name: '주인공/핵심 대상', label: '', appearance: stripSuffix(legacy).replace(/[ .,;]+$/, ''), keywords: '', done: false }];
+      out.scenes.forEach((sc) => { sc.refs = ['main']; });
+    }
+    const ids = out.assets.map((a) => a.id);
+    out.scenes.forEach((sc) => { sc.refs = uniq(sc.refs).filter((r) => ids.indexOf(r) >= 0); });
+    return out;
+  }
+  const uniq = (items) => Array.from(new Set(items));
+  const ASSET_TYPES = ['character', 'object', 'place'];
+  const slug = (s) => String(s || '').trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30);
+  function normalizeAssets(items) {
+    const out = [], used = new Set();
+    (Array.isArray(items) ? items : []).forEach((a, idx) => {
+      if (!a || typeof a !== 'object' || Array.isArray(a)) return;
+      const base = slug(String(a.id || a.label || '')) || ('asset' + (idx + 1));
+      let aid = base, k = 2;
+      while (used.has(aid)) { aid = base + '_' + k; k++; }
+      used.add(aid);
+      const t = String(a.type || 'object').trim().toLowerCase();
+      let kw = a.keywords === undefined ? '' : a.keywords;
+      if (Array.isArray(kw)) kw = kw.map((x) => String(x)).join(', ');
+      out.push({ id: aid, type: ASSET_TYPES.indexOf(t) >= 0 ? t : 'object', name: String(a.name || '').trim(), label: String(a.label || '').trim(),
+        appearance: stripSuffix(String(a.appearance || '')), keywords: String(kw || '').trim(), done: !!a.done });
+    });
     return out;
   }
 
@@ -137,15 +165,32 @@
   const trim = (s) => String(s || '').trim().replace(/[\s.,;]+$/, '');
   const sentence = (s) => { s = String(s || '').trim(); return !s || /[.!?]$/.test(s) ? s : s + '.'; };
 
-  function composeFrame(cfg, project, desc) {
+  function sceneAssets(project, refs) { const ids = refs || []; return (project.assets || []).filter((a) => ids.indexOf(a.id) >= 0); }
+  function composeFrame(cfg, project, desc, refs) {
     const style = cfg.styles[project.meta.style];
     const parts = [style.anchor];
-    if ((project.subject_anchor || '').trim()) parts.push(trim(project.subject_anchor));
+    sceneAssets(project, refs).forEach((a) => { if (a.appearance.trim()) parts.push(trim(a.appearance)); });
     if ((desc || '').trim()) parts.push(trim(desc));
     if (project.options.safe_margin !== false) parts.push(cfg.suffix.safe_margin);
     let text = parts.join(', ');
     if (project.options.zero_text !== false) text += ' ' + cfg.suffix.zero_text;
     return text;
+  }
+  function composeReference(cfg, project, asset, kind) {
+    const ref = cfg.reference;
+    const parts = [cfg.styles[project.meta.style].anchor];
+    if (asset.appearance.trim()) parts.push(trim(asset.appearance));
+    parts.push(ref.types[asset.type][kind]);
+    let text = parts.join(', ');
+    if (project.options.zero_text !== false) text += ' ' + cfg.suffix.zero_text_core + ' --ar ' + (kind === 'main' ? ref.ar_main : ref.ar_sheet);
+    return text;
+  }
+  function referencePrompts(cfg, project) {
+    return (project.assets || []).map((a) => ({
+      id: a.id, type: a.type, name: a.name, label: a.label,
+      scenes: project.scenes.map((sc, i) => ((sc.refs || []).indexOf(a.id) >= 0 ? i + 1 : 0)).filter(Boolean),
+      main: composeReference(cfg, project, a, 'main'), sheet: composeReference(cfg, project, a, 'sheet')
+    }));
   }
   function composeOmni(cfg, project, scene) {
     const style = cfg.styles[project.meta.style];
@@ -166,7 +211,7 @@
   }
   function scenePackage(cfg, project, idx) {
     const sc = project.scenes[idx];
-    return { narration: sceneText(sc), frame1: composeFrame(cfg, project, sc.frame1), frame2: composeFrame(cfg, project, sc.frame2), omni: composeOmni(cfg, project, sc) };
+    return { narration: sceneText(sc), frame1: composeFrame(cfg, project, sc.frame1, sc.refs), frame2: composeFrame(cfg, project, sc.frame2, sc.refs), omni: composeOmni(cfg, project, sc) };
   }
   function pad2(n) { return String(n).padStart(2, '0'); }
   function allPromptsText(cfg, project) {
@@ -175,6 +220,9 @@
       'Style: ' + st.number + '. ' + st.name, 'Rule: 45s (6 scenes x 7.5s) | Method B (3 cuts x 2.5s)',
       'Zero-Text: ' + (project.options.zero_text !== false ? 'ENFORCED' : 'OFF'),
       'Safe margin (1.06x crop): ' + (project.options.safe_margin !== false ? 'APPLIED' : 'OFF'), '='.repeat(57), ''];
+    referencePrompts(cfg, project).forEach((r) => {
+      out.push('[기준 이미지] ' + (r.name || r.id) + ' (' + r.type + ') - 등장 씬: ' + (r.scenes.join(', ') || '-'), '', '[Reference - main]', r.main, '', '[Reference - sheet]', r.sheet, '', '-'.repeat(57), '');
+    });
     project.scenes.forEach((_, i) => {
       const pk = scenePackage(cfg, project, i);
       out.push('[Scene ' + pad2(i + 1) + ']  narration: ' + pk.narration, '', '[Frame 1 (0s)]', pk.frame1, '', '[Frame 2 (2.5s)]', pk.frame2, '',
@@ -196,6 +244,20 @@
     if (hasSrc) lines.push('* 원본 대본의 구조적 리듬(훅 → 전개 → 반전)이 위 뼈대와 다르면 원본의 리듬을 우선하고, 위 뼈대는 보조 기준으로만 쓰세요.');
     return lines.join('\n');
   }
+  function assetRuleText(project) {
+    if (!(project.assets || []).length) {
+      return '- [기준 이미지 규칙] 2개 이상의 씬에 등장하거나 스토리의 핵심인 인물·사물·장소는 assets 배열에 정의하세요. ' +
+        '각 asset: id(영문 소문자·숫자·_), type(character/object/place), name(한국어 이름), label(영문 짧은 호칭 예: the plastic cook figure), ' +
+        'appearance(영문 외형 고정 키워드 - 성별·연령·체형·의상·색·재질·특징을 구체적으로, 배경·동작·화각은 제외), ' +
+        'keywords(대본에서 이 대상을 가리키는 한국어 단어들을 쉼표로). 각 씬의 refs 에 그 씬에 등장하는 asset id 를 넣으세요. ' +
+        '시스템이 appearance 를 해당 씬의 모든 프레임 프롬프트에 자동 삽입하고 기준 이미지 프롬프트도 자동 생성하므로, ' +
+        '씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭합니다.';
+    }
+    const lines = ['- [기준 이미지 규칙] 이미 정의된 기준 이미지 대상입니다(그대로 유지하세요. 시스템이 외형을 해당 씬의 모든 프레임 프롬프트에 자동 삽입합니다):'];
+    project.assets.forEach((a) => lines.push('  · ' + a.id + ' (' + a.type + ') ' + a.name + ' / ' + a.label + ': ' + a.appearance));
+    lines.push('  새로 필요한 반복 대상이 있으면 assets 에 추가하고, 씬 묘사(frame/cuts)에서는 외형을 다시 설명하지 말고 label 로만 지칭하세요. 각 씬의 refs 에 등장하는 asset id 를 넣으세요.');
+    return lines.join('\n');
+  }
   function buildMasterPrompt(cfg, project) {
     const m = project.meta;
     const lang = cfg.languages[m.language];
@@ -209,9 +271,7 @@
     const task = src
       ? "제공된 [원본 벤치마킹 대본]의 구조적 성공 공식(훅·시청 유지 심리·반전 구조)을 역설계(Reverse-Engineering)한 뒤, 내용은 그대로 베끼지 말고 '왜 떡상했는지'의 뼈대만 복제해 아래 [타깃 소재]로 완전히 새로 재구성하세요."
       : '원본 소스 대본이 없으므로, 선택한 카테고리의 스토리 뼈대를 바탕으로 [타깃 소재]에 맞춰 처음부터 대본을 설계하세요.';
-    const subjectRule = (project.subject_anchor || '').trim()
-      ? '- 주인공/제품 외형 앵커(전 씬 고정, 시스템이 모든 프레임 프롬프트에 자동 삽입): ' + project.subject_anchor.trim() + '. 씬 묘사에서 외형을 다시 설명하지 말고 같은 대상이 일관되게 등장한다는 전제로 행동과 구도만 쓰세요.'
-      : '- 주인공/제품이 반복 등장하면 subject_anchor에 영문 외형 키워드(성별·연령·의상·색·재질)를 한 번만 정의하세요. 시스템이 모든 프레임 프롬프트에 자동 삽입해 씬마다 외형이 달라지지 않게 합니다.';
+    const assetRule = assetRuleText(project);
     const fmt = cfg.formats[m.format || ''];
     const formatBlock = fmt ? '- 트렌드 포맷 적용: ' + fmt.name + ' (' + fmt.keywords + ') - ' + fmt.guide : '';
     const ctaBlock = shop ? '- [쇼핑 카테고리 전용 필수 규칙] Scene 06의 마지막 beat에 다음 의미의 제휴 전환 문구를 ' + lang.name + '로 자연스럽게 넣을 것: "' + lang.cta + '"' : '';
@@ -224,7 +284,7 @@
     return fill(cfg.master_template, {
       task_line: task, length_rule: lang.length_rule, lang_desc: lang.desc, crop_scale: String(spec.crop_scale),
       safe_pct: String(spec.safe_zone_pct), margin_pct: String(spec.margin_pct), cut_plan: cutPlan, camera_lib: cameraLib,
-      style_name: style.number + '. ' + style.name + ' (' + style.name_en + ')', subject_rule: subjectRule,
+      style_name: style.number + '. ' + style.name + ' (' + style.name_en + ')', asset_rule: assetRule,
       structure: structure(cfg, bp1, bp2, !!src), format_block: formatBlock, cta_block: ctaBlock, topic: m.topic || '(미지정 - 원본과 겹치지 않는 새 소재를 직접 정해 주세요)',
       category_line: categoryLine, source_line: sourceLine, source_block: sourceBlock, schema
     });
@@ -234,6 +294,76 @@
     const m = project.meta;
     if (m.category2 && m.category2 !== m.category) return cfg.models.crossover;
     return cfg.models.default;
+  }
+
+  // ------------------------------------------------------------------ 기준 이미지(등장 대상) 분석
+  function buildAssetPrompt(cfg, project) {
+    const st = cfg.styles[project.meta.style];
+    const existing = (project.assets || []).length
+      ? '- 이미 정의된 asset(유지하고 필요한 것만 추가): ' + project.assets.map((a) => a.id + '=' + (a.label || a.name)).join(', ') : '';
+    const lines = [];
+    project.scenes.forEach((sc, i) => {
+      lines.push('Scene ' + pad2(i + 1) + ': ' + sceneText(sc));
+      lines.push('  frame1: ' + sc.frame1);
+      lines.push('  frame2: ' + sc.frame2);
+      lines.push('  cuts: ' + sc.cuts.filter((c) => c.prompt.trim()).map((c) => c.prompt).join(' / '));
+    });
+    return fill(cfg.asset_template, { style_name: st.number + '. ' + st.name + ' (' + st.name_en + ')', existing_assets: existing, scenes_text: lines.join('\n') });
+  }
+  function parseAssetsResponse(text, cfg) {
+    const data = extractJson(text);
+    if (!data || typeof data !== 'object' || !Array.isArray(data.assets)) throw new Error('응답에서 assets 배열이 있는 JSON 을 찾지 못했습니다.');
+    const refs = {};
+    const sr = data.scene_refs;
+    if (sr && typeof sr === 'object' && !Array.isArray(sr)) {
+      Object.keys(sr).forEach((k) => {
+        if (!/^\s*\d+\s*$/.test(k)) return;
+        const i = parseInt(k, 10);
+        if (i >= 1 && i <= cfg.spec.scenes && Array.isArray(sr[k])) refs[String(i)] = sr[k].map((x) => String(x));
+      });
+    }
+    return { assets: normalizeAssets(data.assets), scene_refs: refs };
+  }
+  function applyAssets(project, parsed) {
+    const p = clone(project);
+    const done = {};
+    (p.assets || []).forEach((a) => { done[a.id] = a.done; });
+    p.assets = parsed.assets.map((a) => Object.assign({}, a, { done: !!(has(done, a.id) ? done[a.id] : a.done) }));
+    const ids = p.assets.map((a) => a.id);
+    p.scenes.forEach((sc, idx) => {
+      const k = String(idx + 1);
+      const src = has(parsed.scene_refs || {}, k) ? parsed.scene_refs[k] : (sc.refs || []);
+      sc.refs = uniq(src).filter((r) => ids.indexOf(r) >= 0);
+    });
+    return p;
+  }
+  function assetTokens(a) {
+    return [a.name, a.label].concat(a.keywords.split(/[,\n]+/)).map((t) => t.trim().toLowerCase()).filter((t) => Array.from(t).length >= 2);
+  }
+  function linkAssets(project) {
+    const p = clone(project);
+    p.scenes.forEach((sc) => {
+      const hay = [sceneText(sc), sc.frame1, sc.frame2].concat(sc.cuts.map((c) => c.prompt)).join(' ').toLowerCase();
+      sc.refs = p.assets.filter((a) => (sc.refs || []).indexOf(a.id) >= 0 || assetTokens(a).some((t) => hay.indexOf(t) >= 0)).map((a) => a.id);
+    });
+    return p;
+  }
+  function suggestRecurring(cfg, project, minScenes, limit) {
+    minScenes = minScenes || 3; limit = limit || 12;
+    const stop = new Set(cfg.recurring_stop_words || []);
+    const covered = new Set();
+    (project.assets || []).forEach((a) => assetTokens(a).forEach((t) => (t.match(/[a-z]{4,}/g) || []).forEach((w) => covered.add(w))));
+    const counts = {};
+    project.scenes.forEach((sc) => {
+      const words = new Set();
+      [sc.frame1, sc.frame2].concat(sc.cuts.map((c) => c.prompt)).forEach((txt) => {
+        (String(txt || '').toLowerCase().match(/[a-z]{4,}/g) || []).forEach((w) => { if (!stop.has(w) && !covered.has(w)) words.add(w); });
+      });
+      words.forEach((w) => { counts[w] = (counts[w] || 0) + 1; });
+    });
+    const items = Object.keys(counts).filter((w) => counts[w] >= minScenes).map((w) => ({ word: w, scenes: counts[w] }));
+    items.sort((a, b) => (b.scenes - a.scenes) || (a.word < b.word ? -1 : a.word > b.word ? 1 : 0));
+    return items.slice(0, limit);
   }
 
   // ------------------------------------------------------------------ metadata prompt
@@ -267,7 +397,12 @@
     const out = { scenes: data.scenes.slice(0, cfg.spec.scenes).map((s, i) => normalizeScene(s && typeof s === 'object' ? s : {}, i + 1)) };
     while (out.scenes.length < cfg.spec.scenes) out.scenes.push(emptyScene(out.scenes.length + 1));
     ['analysis', 'plan'].forEach((k) => { if (data[k] && typeof data[k] === 'object') out[k] = data[k]; });
-    ['top_title', 'subject_anchor'].forEach((k) => { if (typeof data[k] === 'string') out[k] = data[k].trim(); });
+    if (typeof data.top_title === 'string') out.top_title = data.top_title.trim();
+    if (Array.isArray(data.assets)) out.assets = normalizeAssets(data.assets);
+    else if (typeof data.subject_anchor === 'string' && data.subject_anchor.trim()) {   // 옛 형식
+      out.assets = normalizeAssets([{ id: 'main', type: 'character', name: '주인공/핵심 대상', appearance: data.subject_anchor }]);
+      out.scenes.forEach((sc) => { sc.refs = ['main']; });
+    }
     return out;
   }
   function applyResponse(project, parsed) {
@@ -275,7 +410,13 @@
     p.scenes = parsed.scenes;
     ['analysis', 'plan'].forEach((k) => { if (parsed[k]) Object.assign(p[k], parsed[k]); });
     if (parsed.top_title) p.meta.top_title = parsed.top_title;
-    if (parsed.subject_anchor) p.subject_anchor = parsed.subject_anchor;
+    if ('assets' in parsed) {
+      const done = {};
+      (p.assets || []).forEach((a) => { done[a.id] = a.done; });
+      p.assets = parsed.assets.map((a) => Object.assign({}, a, { done: !!(has(done, a.id) ? done[a.id] : a.done) }));
+    }
+    const ids = (p.assets || []).map((a) => a.id);
+    p.scenes.forEach((sc) => { sc.refs = uniq(sc.refs || []).filter((r) => ids.indexOf(r) >= 0); });
     return p;
   }
   function injectCta(cfg, project) {
@@ -323,6 +464,16 @@
       });
     });
 
+    const linked = new Set();
+    project.scenes.forEach((sc) => (sc.refs || []).forEach((r) => linked.add(r)));
+    (project.assets || []).forEach((a) => {
+      const nm = a.name || a.id;
+      if (!a.appearance.trim()) add('warn', 'asset_empty', "기준 이미지 '" + nm + "': 외형 묘사(appearance)가 비어 있습니다.");
+      if (CJK_RE.test(a.appearance) || CJK_RE.test(a.label)) add('error', 'asset_cjk', "기준 이미지 '" + nm + "': 외형/라벨은 영문만 허용(Zero-Text).");
+      if (!linked.has(a.id)) add('warn', 'asset_unlinked', "기준 이미지 '" + nm + "'이(가) 어느 씬에도 연결되지 않았습니다.");
+    });
+    if (!(project.assets || []).length && project.scenes.some((sc) => sc.frame1.trim())) add('warn', 'no_assets', "등장인물/사물 기준 이미지가 없습니다. '기준 이미지' 단계에서 대본을 분석해 정의하세요(씬마다 외형이 달라지는 원인).");
+
     if (isShopping(project, cfg) && n) {
       const last = sceneText(project.scenes[n - 1]).toLowerCase();
       if (!lang.cta_markers.every((mk) => last.indexOf(mk.toLowerCase()) >= 0)) add('error', 'cta', '쇼핑 카테고리인데 Scene 06에 쇼핑 CTA(' + lang.cta + ')가 없습니다.');
@@ -334,7 +485,8 @@
 
   return {
     fill, defaultStyleId, emptyScene, defaultProject, normalizeProject, normalizeScene, stripTimeMarker, stripSuffix,
-    sceneText, countUnits, totalUnits, isShopping, composeFrame, composeOmni, scenePackage, allPromptsText,
+    sceneText, countUnits, totalUnits, isShopping, composeFrame, composeOmni, composeReference, referencePrompts, sceneAssets, normalizeAssets,
+    buildAssetPrompt, parseAssetsResponse, applyAssets, linkAssets, suggestRecurring, scenePackage, allPromptsText,
     buildMasterPrompt, recommendedModel, buildMetadataPrompt, extractJson, parseClaudeResponse, applyResponse,
     injectCta, validateProject
   };

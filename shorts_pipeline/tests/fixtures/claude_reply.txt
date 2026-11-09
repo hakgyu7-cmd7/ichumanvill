@@ -24,7 +24,32 @@
   ]
  },
  "top_title": "라면 물 조절 실패하는 사람 필독",
- "subject_anchor": "a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama",
+ "assets": [
+  {
+   "id": "hero",
+   "type": "character",
+   "name": "주인공 피규어",
+   "label": "the deadpan PVC man figure",
+   "appearance": "a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
+   "keywords": "남자, 주인공, 사람, 나"
+  },
+  {
+   "id": "pot",
+   "type": "object",
+   "name": "냄비",
+   "label": "the small silver pot",
+   "appearance": "a small round stainless-steel cooking pot with two black side handles and a clear glass lid",
+   "keywords": "냄비, 물, 라면"
+  },
+  {
+   "id": "kitchen",
+   "type": "place",
+   "name": "주방",
+   "label": "the tiny apartment kitchen",
+   "appearance": "a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove",
+   "keywords": "주방, 싱크대, 부엌, 방"
+  }
+ ],
  "scenes": [
   {
    "id": 1,
@@ -32,6 +57,11 @@
     "[0.0~2.5s] 라면 끓일 때마다 물 맞추기 실패한다면",
     "[2.5~5.0s] 눈대중 대신 냄비 위에",
     "[5.0~7.5s] 정밀 유량 조절기를 달면 됩니다."
+   ],
+   "refs": [
+    "hero",
+    "pot",
+    "kitchen"
    ],
    "frame1": "medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter --no text --ar 9:16",
    "frame2": "low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim",
@@ -57,6 +87,11 @@
     "[2.5~5.0s] 항공기용 유압 펌프를 붙였더니",
     "[5.0~7.5s] 무게 때문에 싱크대가 주저앉았죠."
    ],
+   "refs": [
+    "hero",
+    "pot",
+    "kitchen"
+   ],
    "frame1": "medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections --no text --ar 9:16",
    "frame2": "Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight",
    "cuts": [
@@ -80,6 +115,10 @@
     "[0.0~2.5s] 붕괴를 막으려 바닥에 철골 기둥을 세우고",
     "[2.5~5.0s] 증발량 계산용 레이저 센서를",
     "[5.0~7.5s] 천장 위에도 따로 설치했습니다."
+   ],
+   "refs": [
+    "hero",
+    "pot"
    ],
    "frame1": "low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below --no text --ar 9:16",
    "frame2": "medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface",
@@ -105,6 +144,10 @@
     "[2.5~5.0s] 0.1ml 단위까지 회수했더니",
     "[5.0~7.5s] 오차율 0%, 550ml가 완성됐죠."
    ],
+   "refs": [
+    "hero",
+    "pot"
+   ],
    "frame1": "medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling --no text --ar 9:16",
    "frame2": "medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting",
    "cuts": [
@@ -129,6 +172,11 @@
     "[2.5~5.0s] 순식간에 사우나 수준인 60도까지",
     "[5.0~7.5s] 올라간다는 겁니다."
    ],
+   "refs": [
+    "hero",
+    "pot",
+    "kitchen"
+   ],
    "frame1": "eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura --no text --ar 9:16",
    "frame2": "close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama",
    "cuts": [
@@ -152,6 +200,10 @@
     "[0.0~2.5s] 결국 땀 뻘뻘 흘리며 뚜껑을 열었더니",
     "[2.5~5.0s] 스프 넣는 걸 깜빡했더라고요.",
     "[5.0~7.5s] 그러니까 그냥 눈대중으로 드세요."
+   ],
+   "refs": [
+    "hero",
+    "pot"
    ],
    "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth --no text --ar 9:16",
    "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",

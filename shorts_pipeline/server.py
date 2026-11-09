@@ -37,6 +37,8 @@ STATIC = {"/": "web_dashboard.html", "/web_dashboard.html": "web_dashboard.html"
 MAX_JSON = 8 * 1024 * 1024
 MAX_UPLOAD = 2 * 1024 * 1024 * 1024
 NAME_RE = re.compile(r"^[\w가-힣\-. ]{1,60}$")
+REF_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+REF_ID_RE = re.compile(r"^[a-z0-9_]{1,30}$")
 mimetypes.add_type("text/javascript", ".js")  # Windows 레지스트리가 .js 를 text/plain 으로 돌려주는 문제 방지
 mimetypes.add_type("video/mp4", ".mp4")
 
@@ -54,7 +56,8 @@ class AppState:
         self.output_dir = self.base / "output"
         self.assets_dir = self.base / "assets"
         self.projects_dir = self.base / "projects"
-        for d in (self.input_dir, self.output_dir, self.projects_dir):
+        self.refs_dir = self.input_dir / "refs"
+        for d in (self.input_dir, self.output_dir, self.projects_dir, self.refs_dir):
             d.mkdir(parents=True, exist_ok=True)
         self.cfg = pe.load_config(self.base / "config.json")
         self.lock = threading.Lock()
@@ -84,7 +87,9 @@ class AppState:
         voice = st.find_voice(self.input_dir)
         raw = next((p for e in audio_tools.AUDIO_EXTS for p in [self.input_dir / f"voice_raw{e}"] if p.exists()), None)
         out = self.output_dir / "final_shorts.mp4"
+        refs = {p.stem: p.name for p in sorted(self.refs_dir.iterdir()) if p.suffix.lower() in REF_EXTS and REF_ID_RE.match(p.stem)}
         return {
+            "refs": refs,
             "clips": clips, "missing_clips": pf["missing_clips"],
             "voice": {"name": voice.name, "duration": audio_tools.probe_duration(voice)} if voice else None,
             "voice_raw": raw.name if raw else None,
@@ -238,6 +243,9 @@ class Handler(BaseHTTPRequestHandler):
                 if not p.exists():
                     raise ApiError("프로젝트가 없습니다.", 404)
                 return self._json(json.loads(p.read_text(encoding="utf-8")))
+            m = re.fullmatch(r"/media/refs/([a-z0-9_]{1,30}\.(?:png|jpg|jpeg|webp))", u.path)
+            if m:
+                return self._file(app.refs_dir / m.group(1))
             m = re.fullmatch(r"/media/(input|output)/([\w.\-]+)", u.path)
             if m:
                 d = app.input_dir if m.group(1) == "input" else app.output_dir
@@ -360,8 +368,15 @@ class Handler(BaseHTTPRequestHandler):
             for e in audio_tools.AUDIO_EXTS:
                 (app.input_dir / f"{kind}{e}").unlink(missing_ok=True)
             dest = app.input_dir / f"{kind}{ext}"
+        elif kind == "ref":
+            rid = q.get("id", "")
+            if not REF_ID_RE.match(rid) or ext not in REF_EXTS:
+                raise ApiError("기준 이미지 id(영문 소문자/숫자/_)와 이미지 확장자(png/jpg/webp)를 확인하세요.")
+            for e in REF_EXTS:
+                (app.refs_dir / f"{rid}{e}").unlink(missing_ok=True)
+            dest = app.refs_dir / f"{rid}{ext}"
         else:
-            raise ApiError("kind 는 clip / voice / voice_raw 중 하나여야 합니다.")
+            raise ApiError("kind 는 clip / voice / voice_raw / ref 중 하나여야 합니다.")
         tmp = dest.with_suffix(dest.suffix + ".part")
         left = n
         with open(tmp, "wb") as f:
@@ -395,8 +410,17 @@ class Handler(BaseHTTPRequestHandler):
                 if p.exists():
                     p.unlink()
                     removed.append(p.name)
+        elif kind == "ref":
+            rid = str(b.get("id", ""))
+            if not REF_ID_RE.match(rid):
+                raise ApiError("잘못된 기준 이미지 id")
+            for e in REF_EXTS:
+                p = app.refs_dir / f"{rid}{e}"
+                if p.exists():
+                    p.unlink()
+                    removed.append(p.name)
         else:
-            raise ApiError("kind 는 clip / voice / voice_raw")
+            raise ApiError("kind 는 clip / voice / voice_raw / ref")
         return {"removed": removed}
 
 

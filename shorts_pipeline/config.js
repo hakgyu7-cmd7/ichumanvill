@@ -15,7 +15,8 @@ window.PIPELINE_CONFIG = {
  "default_category": "general",
  "suffix": {
   "zero_text": "--no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16",
-  "safe_margin": "subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up"
+  "safe_margin": "subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up",
+  "zero_text_core": "--no text, letters, words, typography, subtitles, font, signage, watermark"
  },
  "cut_connectors": [
   "Start from Frame 1.",
@@ -579,9 +580,9 @@ window.PIPELINE_CONFIG = {
   "- 카메라 키워드 라이브러리:",
   "{{camera_lib}}",
   "",
-  "## 5. 화풍 일관성 (전 씬 단일 화풍)",
+  "## 5. 화풍 일관성 & 기준 이미지(등장인물·사물)",
   "- 선택된 화풍: {{style_name}}. 화풍 앵커는 시스템이 모든 프레임 프롬프트 앞에 자동 삽입합니다. 분위기가 반전되어도(예: B급 병맛) 만화/애니메이션 등 다른 화풍 키워드를 쓰지 말고, 같은 화풍 안에서 표정 연기와 상황 연출로만 표현합니다.",
-  "{{subject_rule}}",
+  "{{asset_rule}}",
   "",
   "## 6. 스토리 아키텍처 (총 45초 / 6씬)",
   "{{structure}}",
@@ -603,11 +604,15 @@ window.PIPELINE_CONFIG = {
   "  \"analysis\": {\"hook_technique\": \"원본(또는 카테고리 뼈대)의 후킹 기법\", \"retention_psychology\": \"시청자 유지 심리 기법\", \"skeleton\": \"차용할 핵심 리듬(구조)\"},",
   "  \"plan\": {\"titles\": [\"후킹 제목 후보 1\", \"후보 2\", \"후보 3\"], \"description\": \"유튜브 설명란\", \"hashtags\": [\"#해시태그\"]},",
   "  \"top_title\": \"상단 노란 타이틀 배너 문구 (15자 내외, 후킹)\",",
-  "  \"subject_anchor\": \"전 씬에서 외형을 고정할 주인공/제품 영문 키워드 (예: a 30-year-old Korean man in a dusty grey hoodie)\",",
+  "  \"assets\": [",
+  "    {\"id\": \"hero\", \"type\": \"character\", \"name\": \"주인공(한국어 이름)\", \"label\": \"the deadpan PVC man figure\", \"appearance\": \"영문 외형 고정 키워드 (성별·연령·체형·의상·색·재질·특징. 배경/동작/화각 제외)\", \"keywords\": \"남자, 주인공, 그\"},",
+  "    {\"id\": \"pot\", \"type\": \"object\", \"name\": \"냄비\", \"label\": \"the silver pot\", \"appearance\": \"...\", \"keywords\": \"냄비, 솥\"}",
+  "  ],",
   "  \"scenes\": [",
   "    {",
   "      \"id\": 1,",
   "      \"beats\": [\"[0.0~2.5s] 대사\", \"[2.5~5.0s] 대사\", \"[5.0~7.5s] 대사\"],",
+  "      \"refs\": [\"hero\", \"pot\"],",
   "      \"frame1\": \"영문: 0s 시작 기준 이미지 묘사 (피사체·구도·조명만)\",",
   "      \"frame2\": \"영문: 2.5s 전환 기준 이미지 묘사 (frame1과 다른 화각)\",",
   "      \"cuts\": [",
@@ -620,7 +625,8 @@ window.PIPELINE_CONFIG = {
   "}",
   "```",
   "- scenes는 정확히 6개(id 1~6), 각 씬의 beats는 정확히 3개입니다. beats 문자열 앞의 [시간] 표기는 생략해도 됩니다.",
-  "- 대사(beats)는 {{lang_name}}로, 나머지 모든 prompt/type/subject_anchor는 영문으로만 작성합니다."
+  "- assets 는 2개 이상의 씬에 등장하거나 스토리 핵심인 인물·사물·장소만 정의하고, 각 씬의 refs 에는 그 씬에 등장하는 asset id 를 넣습니다(없으면 빈 배열). frame1/frame2/cuts 에서는 asset 의 외형을 다시 설명하지 말고 label 로만 지칭합니다.",
+  "- 대사(beats)는 {{lang_name}}로, 나머지 모든 prompt/type/label/appearance는 영문으로만 작성합니다."
  ],
  "metadata_template": [
   "# [메타데이터 생성 지침] 숏폼 다국어 로컬라이징 & 플랫폼 최적화",
@@ -640,6 +646,242 @@ window.PIPELINE_CONFIG = {
   "{ \"ko\": { \"youtube\": {\"title\": \"\", \"caption\": \"\", \"pinned\": \"\"}, \"instagram\": {\"title\": \"\", \"caption\": \"\", \"pinned\": \"\"}, \"tiktok\": {\"title\": \"\", \"caption\": \"\", \"pinned\": \"\"} }, \"en\": { ... 동일 구조 ... } }",
   "```",
   "- 요청한 언어 키만 포함합니다. caption에는 해시태그를 포함하고, 줄바꿈은 \\n으로 씁니다."
+ ],
+ "reference": {
+  "ar_main": "9:16",
+  "ar_sheet": "16:9",
+  "types": {
+   "character": {
+    "name": "인물",
+    "main": "full-body character reference image, standing in a neutral relaxed pose facing the camera, centered, plain seamless neutral studio background, even soft lighting, every costume and body detail clearly visible, generous empty margin around the subject",
+    "sheet": "character turnaround reference sheet showing the same character in three views (front view, three-quarter view, side view) standing in a neutral pose side by side, plain seamless neutral background, identical proportions, costume and colors in every view"
+   },
+   "object": {
+    "name": "사물",
+    "main": "single hero object reference image, centered, shown from a clear three-quarter front angle, plain seamless neutral studio background, even soft lighting, every material, shape and color detail clearly visible, generous empty margin around the object",
+    "sheet": "object turnaround reference sheet showing the same object in three views (front view, three-quarter view, side view) side by side, plain seamless neutral background, identical shape, material and colors in every view"
+   },
+   "place": {
+    "name": "장소",
+    "main": "wide establishing reference image of the location, empty of people, eye-level view, even soft lighting, all architectural and prop details clearly visible, centered composition with generous margins",
+    "sheet": "location reference sheet showing the same place from three angles (wide front view, left corner view, right corner view), empty of people, even soft lighting, identical layout, materials and colors in every view"
+   }
+  }
+ },
+ "asset_template": [
+  "# [기준 이미지 분석 지침] 등장인물·사물 일관성 확보",
+  "아래 [6씬 대본과 장면 묘사]를 분석해, 영상 전체에서 반복 등장하거나 스토리 핵심인 인물·사물·장소를 찾아 '기준 이미지'용 asset 으로 정의하세요.",
+  "- 2개 이상의 씬에 등장하거나 핵심 소품인 대상만 포함합니다(한 번 스치는 배경 물건은 제외).",
+  "- 선택된 화풍: {{style_name}} (화풍 키워드는 appearance 에 쓰지 않습니다. 시스템이 화풍 앵커를 자동 삽입합니다.)",
+  "- id: 영문 소문자·숫자·_ / type: character | object | place / name: 한국어 이름 / label: 영문 짧은 호칭(예: the plastic cook figure)",
+  "- appearance: 영문 외형 고정 키워드(성별·연령·체형·의상·색·재질·크기·특징 등을 구체적으로, 40단어 이내). 배경·동작·화각은 제외하고, 한글/글자/간판/로고 묘사는 금지합니다.",
+  "- keywords: 한국어 대본이나 묘사에서 이 대상을 가리키는 단어들을 쉼표로 나열합니다.",
+  "{{existing_assets}}",
+  "",
+  "## 6씬 대본과 장면 묘사",
+  "{{scenes_text}}",
+  "",
+  "## 출력 포맷 (JSON 하나만 ```json 코드블록으로, 설명 문장 금지)",
+  "```json",
+  "{",
+  "  \"assets\": [",
+  "    {\"id\": \"hero\", \"type\": \"character\", \"name\": \"주인공\", \"label\": \"the deadpan PVC man figure\", \"appearance\": \"...\", \"keywords\": \"남자, 주인공, 그\"}",
+  "  ],",
+  "  \"scene_refs\": {\"1\": [\"hero\"], \"2\": [\"hero\"], \"3\": [], \"4\": [], \"5\": [], \"6\": []}",
+  "}",
+  "```",
+  "- scene_refs 의 키는 1~6, 값은 그 씬에 등장하는 asset id 배열입니다."
+ ],
+ "recurring_stop_words": [
+  "shot",
+  "view",
+  "angle",
+  "close",
+  "closeup",
+  "camera",
+  "zoom",
+  "push",
+  "pull",
+  "whip",
+  "pan",
+  "hard",
+  "cut",
+  "slow",
+  "slowly",
+  "fast",
+  "tracking",
+  "track",
+  "back",
+  "with",
+  "from",
+  "into",
+  "that",
+  "this",
+  "their",
+  "there",
+  "while",
+  "toward",
+  "towards",
+  "across",
+  "through",
+  "under",
+  "over",
+  "onto",
+  "upon",
+  "about",
+  "after",
+  "before",
+  "between",
+  "around",
+  "inside",
+  "outside",
+  "above",
+  "below",
+  "behind",
+  "frame",
+  "scene",
+  "clip",
+  "focus",
+  "freeze",
+  "snap",
+  "rapid",
+  "smooth",
+  "sudden",
+  "instant",
+  "dynamic",
+  "micro",
+  "shake",
+  "light",
+  "lighting",
+  "soft",
+  "wide",
+  "medium",
+  "centered",
+  "negative",
+  "space",
+  "margin",
+  "area",
+  "safe",
+  "pulled",
+  "framing",
+  "extreme",
+  "tilt",
+  "dutch",
+  "level",
+  "side",
+  "profile",
+  "down",
+  "upward",
+  "downward",
+  "single",
+  "very",
+  "each",
+  "other",
+  "same",
+  "tiny",
+  "small",
+  "large",
+  "huge",
+  "massive",
+  "miniature",
+  "studio",
+  "macro",
+  "detailed",
+  "hyper",
+  "collectible",
+  "premium",
+  "resin",
+  "statue",
+  "texture",
+  "visible",
+  "seams",
+  "matte",
+  "paint",
+  "finish",
+  "diorama",
+  "shift",
+  "photography",
+  "hands",
+  "hand",
+  "face",
+  "head",
+  "eyes",
+  "lens",
+  "whole",
+  "entire",
+  "both",
+  "being",
+  "then",
+  "than",
+  "them",
+  "they",
+  "those",
+  "these",
+  "just",
+  "like",
+  "more",
+  "most",
+  "some",
+  "such",
+  "only",
+  "also",
+  "even",
+  "still",
+  "where",
+  "which",
+  "what",
+  "when",
+  "against",
+  "along",
+  "among",
+  "beside",
+  "beyond",
+  "during",
+  "except",
+  "until",
+  "within",
+  "without",
+  "again",
+  "almost",
+  "already",
+  "always",
+  "ever",
+  "never",
+  "once",
+  "twice",
+  "quickly",
+  "gently",
+  "softly",
+  "slightly",
+  "sharply",
+  "suddenly",
+  "directly",
+  "smoothly",
+  "moving",
+  "revealing",
+  "showing",
+  "holding",
+  "standing",
+  "sitting",
+  "looking",
+  "turning",
+  "rising",
+  "falling",
+  "dripping",
+  "flowing",
+  "glowing",
+  "gleaming",
+  "shimmering",
+  "snappy",
+  "clean",
+  "dirty",
+  "greasy",
+  "bright",
+  "warm",
+  "dark",
+  "heavy",
+  "sharp",
+  "tight"
  ]
 };
 window.PIPELINE_SEED = {
@@ -849,7 +1091,35 @@ window.PIPELINE_SAMPLES = {
    "zero_text": true,
    "safe_margin": true
   },
-  "subject_anchor": "a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves, a small PVC figure of a home cook in a cream apron",
+  "assets": [
+   {
+    "id": "pot",
+    "type": "object",
+    "name": "실리콘 팟",
+    "label": "the sage-green silicone pot",
+    "appearance": "a pastel sage-green platinum silicone round air fryer divider pot with radial wave grooves on the bottom and a central divider wall",
+    "keywords": "팟, 실리콘, 디바이더, 이거",
+    "done": false
+   },
+   {
+    "id": "cook",
+    "type": "character",
+    "name": "요리하는 주인공",
+    "label": "the PVC home cook figure",
+    "appearance": "a small PVC figure of a home cook with short brown hair and a cream apron",
+    "keywords": "손목, 설거지, 나, 사람",
+    "done": false
+   },
+   {
+    "id": "fryer",
+    "type": "object",
+    "name": "에어프라이어",
+    "label": "the black air fryer",
+    "appearance": "a compact round black basket-style air fryer with a silver handle",
+    "keywords": "에어프라이어, 기계, 바스켓",
+    "done": false
+   }
+  ],
   "analysis": {
    "hook_technique": "",
    "retention_psychology": "",
@@ -880,6 +1150,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium shot of a dirty greasy air fryer basket with burnt paper foil smoking slightly, dim moody kitchen lighting",
     "frame2": "low-angle shot of the frustrated PVC cook waving both hands in despair beside the messy air fryer",
+    "refs": [
+     "cook",
+     "fryer"
+    ],
     "cuts": [
      {
       "type": "Medium Close-up",
@@ -904,6 +1178,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "top-down view of peeled non-stick coating flakes and a harsh metallic sponge scrubbing the basket surface",
     "frame2": "45-degree view of a worn-out cooking basket covered in scratch marks under harsh kitchen side lighting",
+    "refs": [
+     "cook",
+     "fryer"
+    ],
     "cuts": [
      {
       "type": "Top-down POV",
@@ -928,6 +1206,9 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "front hero shot of the pastel sage-green silicone pot dropping gracefully into the center of the clean air fryer basket, studio spotlight",
     "frame2": "medium close-up of the grooved wave bottom ridges of the silicone pot with wide negative space around it",
+    "refs": [
+     "pot"
+    ],
     "cuts": [
      {
       "type": "Front Center Hero",
@@ -952,6 +1233,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "high-angle shot showing the center divider separating sizzling crispy pork belly on one side and golden french fries on the other",
     "frame2": "medium close-up of hot golden oil draining cleanly down the radial wave grooves away from the food",
+    "refs": [
+     "pot",
+     "fryer"
+    ],
     "cuts": [
      {
       "type": "Split-focus Top Angle",
@@ -976,6 +1261,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium shot of the PVC cook flipping the flexible silicone pot inside-out with an effortless snap, pristine clean surface",
     "frame2": "medium close-up of a crystal clear water stream splashing over the non-stick surface while oil slides off",
+    "refs": [
+     "pot",
+     "cook"
+    ],
     "cuts": [
      {
       "type": "Dynamic Action Angle",
@@ -1000,6 +1289,9 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "wide beauty shot of neatly stacked sage green, cream and blush pink silicone pots on a modern clean kitchen island, empty space in the lower area",
     "frame2": "medium shot of a cute miniature wooden pointing arrow indicating downward toward the lower safe area",
+    "refs": [
+     "pot"
+    ],
     "cuts": [
      {
       "type": "Commercial Hero Display",
@@ -1076,7 +1368,35 @@ window.PIPELINE_SAMPLES = {
    "zero_text": true,
    "safe_margin": true
   },
-  "subject_anchor": "a male PVC figure with a deadpan painted face wearing a plain white t-shirt, tiny miniature kitchen apartment diorama",
+  "assets": [
+   {
+    "id": "hero",
+    "type": "character",
+    "name": "주인공 피규어",
+    "label": "the deadpan PVC man figure",
+    "appearance": "a male PVC figure with a deadpan painted face, short black hair, wearing a plain white t-shirt and grey shorts",
+    "keywords": "남자, 주인공, 사람, 나",
+    "done": false
+   },
+   {
+    "id": "pot",
+    "type": "object",
+    "name": "냄비",
+    "label": "the small silver pot",
+    "appearance": "a small round stainless-steel cooking pot with two black side handles and a clear glass lid",
+    "keywords": "냄비, 물, 라면",
+    "done": false
+   },
+   {
+    "id": "kitchen",
+    "type": "place",
+    "name": "주방",
+    "label": "the tiny apartment kitchen",
+    "appearance": "a tiny miniature studio-apartment kitchen diorama with white tile walls, a light wooden counter and a small gas stove",
+    "keywords": "주방, 싱크대, 부엌, 방",
+    "done": false
+   }
+  ],
   "analysis": {
    "hook_technique": "\"우산을 써도 다리가 젖는다\"는 100% 공감 가능한 사소한 불편으로 1초 만에 시선 확보",
    "retention_psychology": "해결 장치를 하나 더할 때마다 새 문제가 생기는 점진적 과장(Escalation)을 극도로 진지한 톤으로 전개",
@@ -1108,6 +1428,11 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium macro shot of the male PVC figure staring blankly at a miniature silver pot overflowing with clear water on a tiny kitchen counter",
     "frame2": "low-angle shot of a miniature stainless steel IV drip regulator with precision brass dials clamping onto the pot rim",
+    "refs": [
+     "hero",
+     "pot",
+     "kitchen"
+    ],
     "cuts": [
      {
       "type": "Medium Close-up",
@@ -1132,6 +1457,11 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium shot of heavy miniature hydraulic tubes and an industrial steel pump humming beside the small pot, metallic reflections",
     "frame2": "Dutch angle wide shot of the miniature kitchen counter cracking and tilting downward under immense heavy machinery weight",
+    "refs": [
+     "hero",
+     "pot",
+     "kitchen"
+    ],
     "cuts": [
      {
       "type": "Tracking Medium Shot",
@@ -1156,6 +1486,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "low-angle shot of sturdy red industrial H-beam miniature steel pillars supporting the cracked counter from below",
     "frame2": "medium close-up of a ceiling-mounted miniature laser emitter projecting a glowing circular grid downward onto the pot surface",
+    "refs": [
+     "hero",
+     "pot"
+    ],
     "cuts": [
      {
       "type": "Low-angle Tilt",
@@ -1180,6 +1514,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium shot of a massive spherical glass condenser dome descending mechanically over the bubbling pot, frosty white vapor curling",
     "frame2": "medium close-up of a tiny glowing cyan liquid droplet falling into a calibrated glass chamber, soft rim lighting",
+    "refs": [
+     "hero",
+     "pot"
+    ],
     "cuts": [
      {
       "type": "Dramatic Rush Down",
@@ -1204,6 +1542,11 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "eye-level wide shot of the entire kitchen transformed into a sprawling industrial chemical plant diorama, glowing orange heat aura",
     "frame2": "close-up of the male PVC figure sweating painted sweat droplets, holding chopsticks weakly in the melting kitchen diorama",
+    "refs": [
+     "hero",
+     "pot",
+     "kitchen"
+    ],
     "cuts": [
      {
       "type": "Slow Pull-back",
@@ -1228,6 +1571,10 @@ window.PIPELINE_SAMPLES = {
     ],
     "frame1": "medium shot of the PVC figure opening the pot lid, showing completely clear plain water with naked yellow noodles and zero soup broth",
     "frame2": "close-up of an unopened silver seasoning packet resting on the counter while the figure stares directly at camera in frozen despair",
+    "refs": [
+     "hero",
+     "pot"
+    ],
     "cuts": [
      {
       "type": "Tracking Forward",

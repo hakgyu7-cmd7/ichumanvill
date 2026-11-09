@@ -1,0 +1,52 @@
+분석 결과입니다.
+```json
+{
+ "assets": [
+  {
+   "id": "Hero Man",
+   "type": "character",
+   "name": "주인공",
+   "label": "the deadpan man figure",
+   "appearance": "a male figure with short black hair --no text",
+   "keywords": [
+    "남자",
+    "주인공"
+   ]
+  },
+  {
+   "id": "pot",
+   "type": "thing",
+   "name": "냄비",
+   "label": "the pot",
+   "appearance": "a small silver pot",
+   "keywords": "냄비, 물"
+  },
+  {
+   "id": "pot",
+   "type": "place",
+   "name": "주방",
+   "label": "the kitchen",
+   "appearance": "a tiny kitchen",
+   "keywords": "주방"
+  }
+ ],
+ "scene_refs": {
+  "1": [
+   "hero_man",
+   "pot",
+   "ghost"
+  ],
+  "2": [
+   "pot",
+   "pot"
+  ],
+  "9": [
+   "pot"
+  ],
+  "x": [
+   "pot"
+  ],
+  "3": "bad"
+ }
+}
+```
