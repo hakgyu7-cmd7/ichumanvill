@@ -184,10 +184,12 @@ def parse_vtt(text: str) -> str:
     return " ".join(lines)
 
 
-def _via_transcript_api(vid: str, langs: List[str]) -> Optional[Dict[str, str]]:
+def _via_transcript_api(vid: str, langs: List[str], errs: Optional[List[str]] = None) -> Optional[Dict[str, str]]:
+    errs = errs if errs is not None else []
     try:
         import youtube_transcript_api as yta  # type: ignore
     except ImportError:
+        errs.append("youtube-transcript-api: 이 Python(%s)에 설치되어 있지 않음" % sys.executable)
         return None
     try:
         api_cls = yta.YouTubeTranscriptApi
@@ -195,12 +197,21 @@ def _via_transcript_api(vid: str, langs: List[str]) -> Optional[Dict[str, str]]:
             segs = api_cls.get_transcript(vid, languages=langs)
             text = " ".join(s["text"].replace("\n", " ") for s in segs)
         else:  # 1.x
-            fetched = api_cls().fetch(vid, languages=langs)
+            api = api_cls()
+            try:
+                fetched = api.fetch(vid, languages=langs)
+            except Exception:
+                # 지정 언어가 없으면 있는 자막 아무거나 (자동번역 아님)
+                tl = api.list(vid)
+                fetched = next(iter(tl)).fetch()
             text = " ".join(getattr(s, "text", "") for s in fetched)
         text = re.sub(r"\s+", " ", text).strip()
-        return {"text": text, "method": "youtube-transcript-api"} if text else None
-    except Exception:
-        return None
+        if text:
+            return {"text": text, "method": "youtube-transcript-api"}
+        errs.append("youtube-transcript-api: 자막이 비어 있음")
+    except Exception as e:  # noqa: BLE001
+        errs.append(f"youtube-transcript-api: {type(e).__name__}: {str(e).strip().splitlines()[0][:160] if str(e).strip() else ''}")
+    return None
 
 
 def _ytdlp_cmd() -> Optional[List[str]]:
@@ -214,25 +225,30 @@ def _ytdlp_cmd() -> Optional[List[str]]:
         return None
 
 
-def _via_ytdlp_subs(url: str, langs: List[str]) -> Optional[Dict[str, str]]:
+def _via_ytdlp_subs(url: str, langs: List[str], errs: Optional[List[str]] = None) -> Optional[Dict[str, str]]:
+    errs = errs if errs is not None else []
     cmd = _ytdlp_cmd()
     if not cmd:
+        errs.append("yt-dlp: 이 Python(%s)에서 찾을 수 없음" % sys.executable)
         return None
     with tempfile.TemporaryDirectory() as td:
         pat = ",".join(f"{l}.*" for l in langs) + "," + ",".join(langs)
         args = cmd + ["--skip-download", "--write-subs", "--write-auto-subs", "--sub-langs", pat, "--sub-format", "vtt",
                       "--no-warnings", "-o", os.path.join(td, "%(id)s"), url]
         try:
-            subprocess.run(args, capture_output=True, text=True, timeout=120)
-        except (OSError, subprocess.TimeoutExpired):
+            r = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            errs.append(f"yt-dlp: 실행 실패 {e}")
             return None
+
         def lang_rank(p: Path) -> int:
             return next((i for i, l in enumerate(langs) if f".{l}" in p.name), len(langs))
-        files = sorted(Path(td).glob("*.vtt"), key=lang_rank)
-        for f in files:
+        for f in sorted(Path(td).glob("*.vtt"), key=lang_rank):
             text = parse_vtt(f.read_text(encoding="utf-8", errors="replace"))
             if text:
                 return {"text": text, "method": "yt-dlp 자막"}
+        last = [l for l in (r.stderr or "").strip().splitlines() if l.strip()]
+        errs.append("yt-dlp: 자막 파일을 받지 못함" + (f" ({last[-1][:200]})" if last else " (해당 언어 자막 없음)"))
     return None
 
 
@@ -258,22 +274,28 @@ def _via_whisper(url: str, langs: List[str], model_size: str = "small") -> Optio
 
 
 def fetch_transcript(url: str, langs: Optional[List[str]] = None, use_whisper: bool = True) -> Dict[str, str]:
-    """영상 URL -> {'text', 'method', 'video_id'}. 모두 실패하면 SourceError (수동 붙여넣기 안내 포함)."""
+    """영상 URL -> {'text', 'method', 'video_id'}. 모두 실패하면 방법별 실패 사유가 담긴 SourceError."""
     langs = langs or ["ko", "en"]
     vid = extract_video_id(url)
     if not vid:
         raise SourceError("유효한 YouTube 링크가 아닙니다 (youtu.be / youtube.com/watch / shorts 지원).")
-    for fn in (lambda: _via_transcript_api(vid, langs), lambda: _via_ytdlp_subs(url, langs),
-               (lambda: _via_whisper(url, langs)) if use_whisper else (lambda: None)):
+    errs: List[str] = []
+    steps = [lambda: _via_transcript_api(vid, langs, errs), lambda: _via_ytdlp_subs(url, langs, errs)]
+    if use_whisper:
+        steps.append(lambda: _via_whisper(url, langs))
+    for fn in steps:
         res = fn()
         if res:
             res["video_id"] = vid
             return res
     raise SourceError(
-        "자막을 자동으로 가져오지 못했습니다. 아래 중 하나를 사용하세요:\n"
-        "  1) pip install youtube-transcript-api yt-dlp  (자동 자막 추출)\n"
-        "  2) 유튜브 영상 > 설명 더보기 > 스크립트 표시 후 텍스트를 직접 복사해서 붙여넣기\n"
-        "  3) pip install faster-whisper  (음성 인식, 자막 없는 영상)")
+        "자막을 자동으로 가져오지 못했습니다.\n\n[방법별 실패 사유]\n  - " + "\n  - ".join(errs or ["(사유 없음)"]) +
+        "\n\n[해결]\n"
+        "  1) 설치했는데 '설치되어 있지 않음'이 나오면 pip 와 서버가 서로 다른 Python 입니다. 아래 명령으로 서버와 같은 Python 에 설치하세요:\n"
+        f"     \"{sys.executable}\" -m pip install -U youtube-transcript-api yt-dlp\n"
+        "  2) 'Blocked/IP' 계열 오류는 유튜브가 요청을 막은 것입니다 (잠시 후 재시도하거나 다른 네트워크 사용).\n"
+        "  3) 자막이 없는 영상이면: 유튜브 설명 더보기 > 스크립트 표시 후 텍스트를 직접 붙여넣기\n"
+        "  4) 음성 인식: pip install faster-whisper")
 
 
 def tool_status() -> Dict[str, Any]:
