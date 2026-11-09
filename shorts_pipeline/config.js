@@ -12,6 +12,7 @@ window.PIPELINE_CONFIG = {
   "safe_zone_pct": 70,
   "margin_pct": 15
  },
+ "default_category": "general",
  "suffix": {
   "zero_text": "--no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16",
   "safe_margin": "subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up"
@@ -176,6 +177,25 @@ window.PIPELINE_CONFIG = {
   }
  },
  "categories": {
+  "general": {
+   "num": 0,
+   "name": "자유 주제 (레퍼런스 구조 재구성)",
+   "name_en": "Free Topic / Reference Remake",
+   "hook": "시선을 1초 만에 붙잡는 충격/의문/반전 선언 (레퍼런스의 훅 문법 우선)",
+   "problem": "상황과 문제를 구체적으로 심화해 궁금증을 키움",
+   "mechanism": "핵심 원리·원인·전개를 한 단계씩 보여줌 (레퍼런스의 전개 리듬 우선)",
+   "climax": "가장 강렬한 장면 또는 결정적 순간 (절정)",
+   "punchline": "예상을 뒤집는 반전 또는 서늘한 한마디",
+   "action": "마무리 한 줄 + 댓글/공유를 부르는 질문",
+   "flow": "[레퍼런스 훅 구조] → [문제 심화] → [원리/전개] → [절정] → [반전 펀치라인]",
+   "psychology": "레퍼런스가 떡상한 이유(후킹·시청 유지·반전)를 그대로 계승",
+   "sourcing": "떡상 영상(V/S 10배 이상), 레딧, 위키/다큐 등 무엇이든",
+   "styles": [
+    "diorama",
+    "cinematic",
+    "hyperreal_3d"
+   ]
+  },
   "shopping": {
    "num": 8,
    "name": "소비 심리 저격 쇼핑 (꿀템)",
@@ -781,6 +801,11 @@ window.PIPELINE_SEED = {
   "bgrade": [
    "mildlyinteresting",
    "Showerthoughts"
+  ],
+  "general": [
+   "Damnthatsinteresting",
+   "todayilearned",
+   "interestingasfuck"
   ]
  },
  "manual_links": [

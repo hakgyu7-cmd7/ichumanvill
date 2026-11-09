@@ -1,43 +1,189 @@
 {
   "_note": "오프라인/수집 실패 시 쓰는 '샘플' 목록입니다. 실제 트렌드가 아니라 아이디어 예시이므로 대시보드에서 [샘플] 배지로 표시됩니다. 자유롭게 수정하세요.",
   "items": [
-    {"platform": "쿠팡", "title": "차량용 초강력 무선 에어건 13만RPM", "keyword": "차량용 에어건", "cat": "shopping"},
-    {"platform": "쿠팡", "title": "모공 피지 흡입 초음파 워터 삭피기", "keyword": "초음파 삭피기", "cat": "shopping"},
-    {"platform": "쿠팡", "title": "접이식 캠핑 회전 릴렉스 의자", "keyword": "캠핑 의자", "cat": "shopping"},
-    {"platform": "쿠팡", "title": "에어프라이어 분할 실리콘 디바이더 팟", "keyword": "실리콘 팟", "cat": "shopping"},
-    {"platform": "쿠팡", "title": "다용도 실리콘 틈새 배수구 마개", "keyword": "배수구 마개", "cat": "shopping"},
-    {"platform": "틱톡", "title": "자가 발전 LED 실리콘 야간 러닝 밴드", "keyword": "야간 러닝 밴드", "cat": "shopping"},
-    {"platform": "틱톡", "title": "원터치 자동 진공 밀폐 음식 보관용기", "keyword": "자동 진공 보관기", "cat": "shopping"},
-    {"platform": "틱톡", "title": "마그네틱 다각도 접이식 스마트폰 거치대", "keyword": "자석 폰 거치대", "cat": "shopping"},
-    {"platform": "틱톡", "title": "휴대용 미니 열풍 열선 비닐 밀봉기", "keyword": "비닐 밀봉기", "cat": "shopping"},
-    {"platform": "토픽", "title": "지구 자전이 딱 1초 멈춘다면?", "keyword": "지구 자전 정지", "cat": "disaster"},
-    {"platform": "토픽", "title": "1939년 히틀러가 노벨 평화상 후보였던 이유", "keyword": "히틀러 노벨 평화상", "cat": "history"},
-    {"platform": "토픽", "title": "고대 로마 검투사의 땀과 때를 긁어 팔던 스트리길", "keyword": "스트리길", "cat": "history"},
-    {"platform": "토픽", "title": "규모 9.0 지진 직후 3분 생존 행동", "keyword": "대지진 생존", "cat": "disaster"},
-    {"platform": "토픽", "title": "모기 소리에 잠 못 드는 사람을 위한 궁극의 방어 시스템", "keyword": "모기 퇴치", "cat": "bgrade"},
-    {"platform": "토픽", "title": "월요일 아침 출근 3초 전 뇌내 상황", "keyword": "월요병", "cat": "bgrade"},
-    {"platform": "토픽", "title": "이 곤충은 뇌를 조종당합니다", "keyword": "좀비 곤충", "cat": "bizarre_nature"},
-    {"platform": "토픽", "title": "연봉 3억인데 아무도 안 하는 일", "keyword": "극한 직업", "cat": "extreme_jobs"},
-    {"platform": "토픽", "title": "상대방이 거짓말할 때 나오는 0.1초 반응", "keyword": "거짓말 심리", "cat": "psychology"}
+    {
+      "platform": "쿠팡",
+      "title": "차량용 초강력 무선 에어건 13만RPM",
+      "keyword": "차량용 에어건",
+      "cat": "shopping"
+    },
+    {
+      "platform": "쿠팡",
+      "title": "모공 피지 흡입 초음파 워터 삭피기",
+      "keyword": "초음파 삭피기",
+      "cat": "shopping"
+    },
+    {
+      "platform": "쿠팡",
+      "title": "접이식 캠핑 회전 릴렉스 의자",
+      "keyword": "캠핑 의자",
+      "cat": "shopping"
+    },
+    {
+      "platform": "쿠팡",
+      "title": "에어프라이어 분할 실리콘 디바이더 팟",
+      "keyword": "실리콘 팟",
+      "cat": "shopping"
+    },
+    {
+      "platform": "쿠팡",
+      "title": "다용도 실리콘 틈새 배수구 마개",
+      "keyword": "배수구 마개",
+      "cat": "shopping"
+    },
+    {
+      "platform": "틱톡",
+      "title": "자가 발전 LED 실리콘 야간 러닝 밴드",
+      "keyword": "야간 러닝 밴드",
+      "cat": "shopping"
+    },
+    {
+      "platform": "틱톡",
+      "title": "원터치 자동 진공 밀폐 음식 보관용기",
+      "keyword": "자동 진공 보관기",
+      "cat": "shopping"
+    },
+    {
+      "platform": "틱톡",
+      "title": "마그네틱 다각도 접이식 스마트폰 거치대",
+      "keyword": "자석 폰 거치대",
+      "cat": "shopping"
+    },
+    {
+      "platform": "틱톡",
+      "title": "휴대용 미니 열풍 열선 비닐 밀봉기",
+      "keyword": "비닐 밀봉기",
+      "cat": "shopping"
+    },
+    {
+      "platform": "토픽",
+      "title": "지구 자전이 딱 1초 멈춘다면?",
+      "keyword": "지구 자전 정지",
+      "cat": "disaster"
+    },
+    {
+      "platform": "토픽",
+      "title": "1939년 히틀러가 노벨 평화상 후보였던 이유",
+      "keyword": "히틀러 노벨 평화상",
+      "cat": "history"
+    },
+    {
+      "platform": "토픽",
+      "title": "고대 로마 검투사의 땀과 때를 긁어 팔던 스트리길",
+      "keyword": "스트리길",
+      "cat": "history"
+    },
+    {
+      "platform": "토픽",
+      "title": "규모 9.0 지진 직후 3분 생존 행동",
+      "keyword": "대지진 생존",
+      "cat": "disaster"
+    },
+    {
+      "platform": "토픽",
+      "title": "모기 소리에 잠 못 드는 사람을 위한 궁극의 방어 시스템",
+      "keyword": "모기 퇴치",
+      "cat": "bgrade"
+    },
+    {
+      "platform": "토픽",
+      "title": "월요일 아침 출근 3초 전 뇌내 상황",
+      "keyword": "월요병",
+      "cat": "bgrade"
+    },
+    {
+      "platform": "토픽",
+      "title": "이 곤충은 뇌를 조종당합니다",
+      "keyword": "좀비 곤충",
+      "cat": "bizarre_nature"
+    },
+    {
+      "platform": "토픽",
+      "title": "연봉 3억인데 아무도 안 하는 일",
+      "keyword": "극한 직업",
+      "cat": "extreme_jobs"
+    },
+    {
+      "platform": "토픽",
+      "title": "상대방이 거짓말할 때 나오는 0.1초 반응",
+      "keyword": "거짓말 심리",
+      "cat": "psychology"
+    }
   ],
   "reddit_subs": {
-    "history": ["todayilearned", "history"],
-    "disaster": ["Damnthatsinteresting", "interestingasfuck"],
-    "mystery": ["UnresolvedMysteries"],
-    "bizarre_nature": ["natureismetal", "Damnthatsinteresting"],
-    "deepsea_space": ["space", "deepsea"],
-    "body_brain": ["askscience", "todayilearned"],
-    "extreme_jobs": ["Damnthatsinteresting", "oddlysatisfying"],
-    "near_future": ["Futurology", "technology"],
-    "psychology": ["psychology", "todayilearned"],
-    "architecture": ["engineeringporn", "architecture"],
-    "shopping": ["gadgets", "mildlyinteresting"],
-    "bgrade": ["mildlyinteresting", "Showerthoughts"]
+    "history": [
+      "todayilearned",
+      "history"
+    ],
+    "disaster": [
+      "Damnthatsinteresting",
+      "interestingasfuck"
+    ],
+    "mystery": [
+      "UnresolvedMysteries"
+    ],
+    "bizarre_nature": [
+      "natureismetal",
+      "Damnthatsinteresting"
+    ],
+    "deepsea_space": [
+      "space",
+      "deepsea"
+    ],
+    "body_brain": [
+      "askscience",
+      "todayilearned"
+    ],
+    "extreme_jobs": [
+      "Damnthatsinteresting",
+      "oddlysatisfying"
+    ],
+    "near_future": [
+      "Futurology",
+      "technology"
+    ],
+    "psychology": [
+      "psychology",
+      "todayilearned"
+    ],
+    "architecture": [
+      "engineeringporn",
+      "architecture"
+    ],
+    "shopping": [
+      "gadgets",
+      "mildlyinteresting"
+    ],
+    "bgrade": [
+      "mildlyinteresting",
+      "Showerthoughts"
+    ],
+    "general": [
+      "Damnthatsinteresting",
+      "todayilearned",
+      "interestingasfuck"
+    ]
   },
   "manual_links": [
-    {"name": "TikTok Creative Center - Top Products", "url": "https://ads.tiktok.com/business/creativecenter/pc/en", "tip": "Inspiration > Top Products / Trending Videos, 국가 United States, 기간 Last 7 days 로 필터 (한국에 아직 안 넘어온 해외 꿀템 소스)"},
-    {"name": "쿠팡 베스트", "url": "https://www.coupang.com/np/best100", "tip": "카테고리별 실시간 베스트. 봇 차단이 잦으니 직접 보고 상품명을 [직접 추가]에 붙여넣는 방식이 가장 안정적"},
-    {"name": "YouTube 시크릿 검색", "url": "https://www.youtube.com/results?search_query=kitchen+gadget&sp=EgQIAxAB", "tip": "필터: 업로드 날짜 이번 달 / 구분 동영상(쇼츠 포함) / 정렬 조회수. 구독자 10만 이하인데 조회수 100만+ 영상만 URL 복사"},
-    {"name": "Reddit r/Damnthatsinteresting", "url": "https://www.reddit.com/r/Damnthatsinteresting/top/?t=week", "tip": "역사/재난/미스터리 텍스트·스토리 팩트 소재 발굴"}
+    {
+      "name": "TikTok Creative Center - Top Products",
+      "url": "https://ads.tiktok.com/business/creativecenter/pc/en",
+      "tip": "Inspiration > Top Products / Trending Videos, 국가 United States, 기간 Last 7 days 로 필터 (한국에 아직 안 넘어온 해외 꿀템 소스)"
+    },
+    {
+      "name": "쿠팡 베스트",
+      "url": "https://www.coupang.com/np/best100",
+      "tip": "카테고리별 실시간 베스트. 봇 차단이 잦으니 직접 보고 상품명을 [직접 추가]에 붙여넣는 방식이 가장 안정적"
+    },
+    {
+      "name": "YouTube 시크릿 검색",
+      "url": "https://www.youtube.com/results?search_query=kitchen+gadget&sp=EgQIAxAB",
+      "tip": "필터: 업로드 날짜 이번 달 / 구분 동영상(쇼츠 포함) / 정렬 조회수. 구독자 10만 이하인데 조회수 100만+ 영상만 URL 복사"
+    },
+    {
+      "name": "Reddit r/Damnthatsinteresting",
+      "url": "https://www.reddit.com/r/Damnthatsinteresting/top/?t=week",
+      "tip": "역사/재난/미스터리 텍스트·스토리 팩트 소재 발굴"
+    }
   ]
 }

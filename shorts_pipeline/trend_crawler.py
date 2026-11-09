@@ -47,7 +47,7 @@ class TrendCrawler:
         for it in load_seed()["items"]:
             if platforms and it["platform"] not in platforms:
                 continue
-            if cat and it["cat"] != cat:
+            if cat and cat != "general" and it["cat"] != cat:
                 continue
             out.append({**it, "live": False, "sample": True})
         return out

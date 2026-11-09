@@ -102,7 +102,7 @@ def default_project(cfg: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return {
         "version": 3,
         "meta": {
-            "topic": "", "top_title": "", "category": "shopping", "category2": "", "format": "",
+            "topic": "", "top_title": "", "category": cfg.get("default_category", "general"), "category2": "", "format": "",
             "style": default_style_id(cfg), "language": "ko", "source_url": "", "source_script": "",
         },
         "options": {"zero_text": True, "safe_margin": True},
@@ -134,7 +134,7 @@ def normalize_project(p: Dict[str, Any], cfg: Optional[Dict[str, Any]] = None) -
     if m["style"] not in cfg["styles"]:
         m["style"] = default_style_id(cfg)
     if m["category"] not in cfg["categories"]:
-        m["category"] = "shopping"
+        m["category"] = cfg.get("default_category", "general")
     if m["category2"] not in cfg["categories"]:
         m["category2"] = ""
     if m["language"] not in cfg["languages"]:
@@ -281,7 +281,7 @@ def all_prompts_text(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
 
 
 # --------------------------------------------------------------------------- master prompt
-def _structure(cfg: Dict[str, Any], bp1: Dict[str, Any], bp2: Optional[Dict[str, Any]]) -> str:
+def _structure(cfg: Dict[str, Any], bp1: Dict[str, Any], bp2: Optional[Dict[str, Any]], has_src: bool = False) -> str:
     keys = cfg["blueprint_keys"]
     roles = cfg["scene_roles"]
     lines = []
@@ -297,6 +297,8 @@ def _structure(cfg: Dict[str, Any], bp1: Dict[str, Any], bp2: Optional[Dict[str,
     if bp2 is not None:
         lines.append(f"* 연출 지침: 초반 22.5초까지는 '{bp1['name']}'의 톤으로 몰입시키고, "
                      f"22.5초 이후부터 '{bp2['name']}'의 문법으로 급커브를 틀어 시청자에게 강렬한 인상을 남길 것.")
+    if has_src:
+        lines.append("* 원본 대본의 구조적 리듬(훅 → 전개 → 반전)이 위 뼈대와 다르면 원본의 리듬을 우선하고, 위 뼈대는 보조 기준으로만 쓰세요.")
     return "\n".join(lines)
 
 
@@ -352,10 +354,10 @@ def build_master_prompt(cfg: Dict[str, Any], project: Dict[str, Any]) -> str:
         "camera_lib": camera_lib,
         "style_name": f"{style['number']}. {style['name']} ({style['name_en']})",
         "subject_rule": subject_rule,
-        "structure": _structure(cfg, bp1, bp2),
+        "structure": _structure(cfg, bp1, bp2, bool(src)),
         "format_block": format_block,
         "cta_block": cta_block,
-        "topic": m["topic"] or "(미입력)",
+        "topic": m["topic"] or "(미지정 - 원본과 겹치지 않는 새 소재를 직접 정해 주세요)",
         "category_line": category_line,
         "source_line": source_line,
         "source_block": source_block,

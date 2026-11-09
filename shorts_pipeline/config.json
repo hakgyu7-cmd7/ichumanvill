@@ -11,6 +11,7 @@
     "safe_zone_pct": 70,
     "margin_pct": 15
   },
+  "default_category": "general",
   "suffix": {
     "zero_text": "--no text, letters, words, typography, subtitles, font, signage, watermark --ar 9:16",
     "safe_margin": "subject centered within the central 70% safe area with 15% negative margin around all edges, pulled-back framing, no extreme close-up"
@@ -27,18 +28,74 @@
     "polish_safe": "subject stays centered in the safe zone",
     "polish_zero": "no text, letters or typography"
   },
-  "time_labels": ["[0.0s - 2.5s]", "[2.5s - 5.0s]", "[5.0s - 7.5s]"],
+  "time_labels": [
+    "[0.0s - 2.5s]",
+    "[2.5s - 5.0s]",
+    "[5.0s - 7.5s]"
+  ],
   "blueprint_keys": [
-    ["hook", "훅"], ["problem", "문제 심화"], ["mechanism", "원인·메커니즘"],
-    ["climax", "클라이맥스"], ["punchline", "반전 펀치라인"], ["action", "행동 유도"]
+    [
+      "hook",
+      "훅"
+    ],
+    [
+      "problem",
+      "문제 심화"
+    ],
+    [
+      "mechanism",
+      "원인·메커니즘"
+    ],
+    [
+      "climax",
+      "클라이맥스"
+    ],
+    [
+      "punchline",
+      "반전 펀치라인"
+    ],
+    [
+      "action",
+      "행동 유도"
+    ]
   ],
   "scene_roles": [
-    {"id": 1, "time": "0.0~7.5s", "role": "충격적 훅 (Hook)", "cuts": "[0-2.5s] 미디엄 줌 → [2.5-5s] 로우앵글 → [5-7.5s] 휩팬"},
-    {"id": 2, "time": "7.5~15.0s", "role": "문제 심화 / 기존 대안 실패", "cuts": "[0-2.5s] 탑다운 POV → [2.5-5s] 하드 컷 → [5-7.5s] 미디엄 트래킹"},
-    {"id": 3, "time": "15.0~22.5s", "role": "원인 해부 / 솔루션 등장", "cuts": "[0-2.5s] 매크로 클로즈업(여백 확보) → [2.5-5s] 앵글 틸트 → [5-7.5s] 스냅 줌"},
-    {"id": 4, "time": "22.5~30.0s", "role": "기능 검증 / 핵심 카타르시스", "cuts": "[0-2.5s] 고속 슬로모 → [2.5-5s] 충격 진동 컷 → [5-7.5s] 진짜 풀백"},
-    {"id": 5, "time": "30.0~37.5s", "role": "반전 펀치라인 / 극적 대비", "cuts": "[0-2.5s] 더치 앵글 → [2.5-5s] 시선 급반전 → [5-7.5s] 와이드 쇼크"},
-    {"id": 6, "time": "37.5~45.0s", "role": "결론 / 행동 유도 (CTA)", "cuts": "[0-2.5s] 제4의 벽 응시 → [2.5-5s] 포인트 컷 → [5-7.5s] 블랙아웃"}
+    {
+      "id": 1,
+      "time": "0.0~7.5s",
+      "role": "충격적 훅 (Hook)",
+      "cuts": "[0-2.5s] 미디엄 줌 → [2.5-5s] 로우앵글 → [5-7.5s] 휩팬"
+    },
+    {
+      "id": 2,
+      "time": "7.5~15.0s",
+      "role": "문제 심화 / 기존 대안 실패",
+      "cuts": "[0-2.5s] 탑다운 POV → [2.5-5s] 하드 컷 → [5-7.5s] 미디엄 트래킹"
+    },
+    {
+      "id": 3,
+      "time": "15.0~22.5s",
+      "role": "원인 해부 / 솔루션 등장",
+      "cuts": "[0-2.5s] 매크로 클로즈업(여백 확보) → [2.5-5s] 앵글 틸트 → [5-7.5s] 스냅 줌"
+    },
+    {
+      "id": 4,
+      "time": "22.5~30.0s",
+      "role": "기능 검증 / 핵심 카타르시스",
+      "cuts": "[0-2.5s] 고속 슬로모 → [2.5-5s] 충격 진동 컷 → [5-7.5s] 진짜 풀백"
+    },
+    {
+      "id": 5,
+      "time": "30.0~37.5s",
+      "role": "반전 펀치라인 / 극적 대비",
+      "cuts": "[0-2.5s] 더치 앵글 → [2.5-5s] 시선 급반전 → [5-7.5s] 와이드 쇼크"
+    },
+    {
+      "id": 6,
+      "time": "37.5~45.0s",
+      "role": "결론 / 행동 유도 (CTA)",
+      "cuts": "[0-2.5s] 제4의 벽 응시 → [2.5-5s] 포인트 컷 → [5-7.5s] 블랙아웃"
+    }
   ],
   "camera_library": [
     "초반 컷: Medium Close-up(안전 마진 확보) / Dutch Angle + Rapid push-in zoom, Macro focal switch",
@@ -47,7 +104,10 @@
   ],
   "styles": {
     "diorama": {
-      "number": 7, "name": "고정밀 피규어 & 디오라마", "name_en": "Detailed Figure & Diorama", "default": true,
+      "number": 7,
+      "name": "고정밀 피규어 & 디오라마",
+      "name_en": "Detailed Figure & Diorama",
+      "default": true,
       "desc": "레진 피규어 질감, 틸트시프트 접사, 미니어처 디오라마 스케일",
       "anchor": "Hyper-detailed collectible PVC figure, premium resin statue texture, visible mold seams, matte paint finish, miniature diorama set, studio macro lighting, tilt-shift photography",
       "video_feel": "Miniature stop-motion feel, precise macro depth of field, subtle plastic reflections, flawless scale consistency",
@@ -55,7 +115,9 @@
       "icon": "🧸"
     },
     "cinematic": {
-      "number": 1, "name": "시네마틱 실사 영화", "name_en": "Cinematic Live-Action",
+      "number": 1,
+      "name": "시네마틱 실사 영화",
+      "name_en": "Cinematic Live-Action",
       "desc": "35mm 렌즈, 자연광, 실사 영화·다큐 질감",
       "anchor": "Hyper-realistic cinematic film photography, 35mm lens, natural dynamic lighting, realistic skin and material textures, medium pulled-back framing",
       "video_feel": "Cinematic live-action movie aesthetic, natural camera motion blur, 24fps filmic shutter, consistent cinematic lighting across cuts",
@@ -63,7 +125,9 @@
       "icon": "🎬"
     },
     "claymation": {
-      "number": 2, "name": "스톱모션 클레이메이션", "name_en": "Handmade Claymation",
+      "number": 2,
+      "name": "스톱모션 클레이메이션",
+      "name_en": "Handmade Claymation",
       "desc": "수제 점토 질감, 지문 자국, 스톱모션 프레임",
       "anchor": "Handmade stop-motion claymation, detailed plasticine clay texture, fingerprint marks, miniature studio softbox lighting",
       "video_feel": "Authentic stop-motion frame jitter, tactile clay texture dynamics, fluid miniature animation",
@@ -71,7 +135,9 @@
       "icon": "🧱"
     },
     "hyperreal_3d": {
-      "number": 3, "name": "하이퍼리얼 3D CGI", "name_en": "Hyper-Realistic 3D CGI",
+      "number": 3,
+      "name": "하이퍼리얼 3D CGI",
+      "name_en": "Hyper-Realistic 3D CGI",
       "desc": "언리얼 엔진 5 렌더, 레이트레이싱 반사광",
       "anchor": "Ultra-detailed 3D CGI render, Unreal Engine 5 look, Octane Render, ray-tracing, crisp reflections, clean studio rim light",
       "video_feel": "Flawless smooth 3D camera pan, photorealistic physics, clean reflection tracking",
@@ -79,7 +145,9 @@
       "icon": "🧊"
     },
     "vintage_1930": {
-      "number": 4, "name": "1930s 빈티지 흑백 필름", "name_en": "Vintage Monochrome",
+      "number": 4,
+      "name": "1930s 빈티지 흑백 필름",
+      "name_en": "Vintage Monochrome",
       "desc": "모노크롬, 필름 그레인, 아카이브 다큐 질감",
       "anchor": "1930s authentic historical black-and-white film, monochrome, dramatic chiaroscuro harsh shadows, fine film grain",
       "video_feel": "Subtle vintage projector flicker, authentic archival documentary motion, high-contrast shadows",
@@ -87,7 +155,9 @@
       "icon": "🎞️"
     },
     "macro_medical": {
-      "number": 5, "name": "과학 메디컬 매크로", "name_en": "Microscopic Scientific",
+      "number": 5,
+      "name": "과학 메디컬 매크로",
+      "name_en": "Microscopic Scientific",
       "desc": "전자현미경 느낌, 투시 단면, 생체 발광",
       "anchor": "Microscopic macro scientific photography, scanning electron microscope aesthetic, translucent bioluminescence, sharp focal depth",
       "video_feel": "Smooth microscopic focus-pull, floating particle dynamics, fluid biological motion",
@@ -95,7 +165,9 @@
       "icon": "🔬"
     },
     "minimal_ad": {
-      "number": 6, "name": "미니멀 상업 광고", "name_en": "Clean Minimalist Ad",
+      "number": 6,
+      "name": "미니멀 상업 광고",
+      "name_en": "Clean Minimalist Ad",
       "desc": "파스텔 대리석, 소프트 스튜디오 조명, 플랫레이",
       "anchor": "Sleek minimalist commercial, clean pastel marble backdrop, bright aesthetic studio daylight, elegant flat-lay",
       "video_feel": "Smooth high-end commercial tracking shot, ultra-clean reflections, crisp elegant motion",
@@ -104,8 +176,30 @@
     }
   },
   "categories": {
+    "general": {
+      "num": 0,
+      "name": "자유 주제 (레퍼런스 구조 재구성)",
+      "name_en": "Free Topic / Reference Remake",
+      "hook": "시선을 1초 만에 붙잡는 충격/의문/반전 선언 (레퍼런스의 훅 문법 우선)",
+      "problem": "상황과 문제를 구체적으로 심화해 궁금증을 키움",
+      "mechanism": "핵심 원리·원인·전개를 한 단계씩 보여줌 (레퍼런스의 전개 리듬 우선)",
+      "climax": "가장 강렬한 장면 또는 결정적 순간 (절정)",
+      "punchline": "예상을 뒤집는 반전 또는 서늘한 한마디",
+      "action": "마무리 한 줄 + 댓글/공유를 부르는 질문",
+      "flow": "[레퍼런스 훅 구조] → [문제 심화] → [원리/전개] → [절정] → [반전 펀치라인]",
+      "psychology": "레퍼런스가 떡상한 이유(후킹·시청 유지·반전)를 그대로 계승",
+      "sourcing": "떡상 영상(V/S 10배 이상), 레딧, 위키/다큐 등 무엇이든",
+      "styles": [
+        "diorama",
+        "cinematic",
+        "hyperreal_3d"
+      ]
+    },
     "shopping": {
-      "num": 8, "name": "소비 심리 저격 쇼핑 (꿀템)", "name_en": "Lifehack Products", "shopping": true,
+      "num": 8,
+      "name": "소비 심리 저격 쇼핑 (꿀템)",
+      "name_en": "Lifehack Products",
+      "shopping": true,
       "hook": "기존 사용법의 충격적 낭비/불편/분노 지적",
       "problem": "기존 방식 또는 저가 제품의 치명적 결함 증명",
       "mechanism": "핵심 혁신 아이템 등장 및 스펙 조명",
@@ -115,10 +209,16 @@
       "flow": "[충격 결함/불편] → [기존 대안 실패] → [아이템 등장·기능 시각화] → [실사용 체감] → [가격/구매 팁]",
       "psychology": "\"돈 낭비 막아줌\" + \"나만 몰랐던 꿀템\" (손실 회피 심리)",
       "sourcing": "알리/아마존 신제품 랭킹, 크라우드펀딩 사이트, 쿠팡 베스트, 틱톡 크리에이티브 센터",
-      "styles": ["diorama", "minimal_ad", "hyperreal_3d"]
+      "styles": [
+        "diorama",
+        "minimal_ad",
+        "hyperreal_3d"
+      ]
     },
     "history": {
-      "num": 1, "name": "역발상 역사 & 인물 비화", "name_en": "Historical Reversals",
+      "num": 1,
+      "name": "역발상 역사 & 인물 비화",
+      "name_en": "Historical Reversals",
       "hook": "교과서 상식을 정면으로 부수는 인물/사건 충격 훅",
       "problem": "역사 기록 이면에 숨겨진 충격적인 진실",
       "mechanism": "사건을 파국 또는 반전으로 이끈 결정적 계기",
@@ -128,10 +228,15 @@
       "flow": "[위인의 숨겨진 악행/비참한 진실] → [교과서 왜곡 지적] → [결정적 사건 전말] → [허를 찌르는 교훈]",
       "psychology": "권위 파괴, 도덕적 충격, 댓글 논쟁 유도",
       "sourcing": "야사, 위키백과 미스터리, 해외 역사 다큐",
-      "styles": ["vintage_1930", "cinematic"]
+      "styles": [
+        "vintage_1930",
+        "cinematic"
+      ]
     },
     "disaster": {
-      "num": 3, "name": "'만약에' 극한 재난 시뮬레이션", "name_en": "What-If Extreme",
+      "num": 3,
+      "name": "'만약에' 극한 재난 시뮬레이션",
+      "name_en": "What-If Extreme",
       "hook": "일상적 물리 법칙의 즉각적 붕괴 선언",
       "problem": "초 단위로 이어지는 연쇄 물리 파괴",
       "mechanism": "수치와 시뮬레이션으로 보는 파국 메커니즘",
@@ -141,10 +246,15 @@
       "flow": "[\"내일 당장 지구 자전이 멈춘다면?\"] → [1초 뒤 충격] → [생태계 붕괴 단계] → [인류 생존 가능성]",
       "psychology": "극단적 호기심, CG/모션 시각 충격",
       "sourcing": "가상 시나리오, 물리 계산 논문, 재난 시뮬",
-      "styles": ["cinematic", "diorama"]
+      "styles": [
+        "cinematic",
+        "diorama"
+      ]
     },
     "bgrade": {
-      "num": 7, "name": "현대인 공감 B급 병맛 시트콤", "name_en": "Relatable Absurdism",
+      "num": 7,
+      "name": "현대인 공감 B급 병맛 시트콤",
+      "name_en": "Relatable Absurdism",
       "hook": "기괴하거나 지나치게 진지한 엉뚱한 의문 제시",
       "problem": "말도 안 되는 억지 논리를 극도로 진지하게 전개",
       "mechanism": "점점 꼬여가는 뇌내 회로와 갈등",
@@ -154,10 +264,15 @@
       "flow": "[\"월요일 아침 출근 3초 전 뇌내 상황\"] → [장기들의 파업 및 비상회의] → [카페인 투입 후 발작] → [결국 퇴사 상상으로 종료]",
       "psychology": "극도의 공감, 친구 태그, 킹받는 중독성",
       "sourcing": "직장인/일상 커뮤니티 밈, SNS 릴스 챌린지",
-      "styles": ["diorama", "claymation"]
+      "styles": [
+        "diorama",
+        "claymation"
+      ]
     },
     "body_brain": {
-      "num": 11, "name": "인체 공학 & 뇌과학 해부", "name_en": "Body & Brain Anatomy",
+      "num": 11,
+      "name": "인체 공학 & 뇌과학 해부",
+      "name_en": "Body & Brain Anatomy",
       "hook": "매일 겪는 신체 증상에 대한 충격적 반전 질문",
       "problem": "세포/신경/호르몬 단위의 미세 메커니즘 해부",
       "mechanism": "진화론적으로 뇌가 그렇게 설계된 진짜 이유",
@@ -167,10 +282,15 @@
       "flow": "[일상적 신체 증상 훅] → [현미경 메커니즘 해부] → [진화론적·신경학적 원인] → [행동 지침]",
       "psychology": "\"내 몸에 이런 일이?\" (경외감과 자기 관련성)",
       "sourcing": "의학 논문 초록, 뇌과학 유튜브, 해외 헬스 매체",
-      "styles": ["macro_medical", "hyperreal_3d"]
+      "styles": [
+        "macro_medical",
+        "hyperreal_3d"
+      ]
     },
     "architecture": {
-      "num": 12, "name": "건축 & 공간 역학 미스터리", "name_en": "Architecture & Structure",
+      "num": 12,
+      "name": "건축 & 공간 역학 미스터리",
+      "name_en": "Architecture & Structure",
       "hook": "불가능해 보이는 구조물/공간의 붕괴 미스터리 조명",
       "problem": "외력과 하중이 부딪히는 물리적 모순 시각화",
       "mechanism": "설계자가 숨겨둔 트러스/댐퍼/재료 역학적 비책",
@@ -180,10 +300,15 @@
       "flow": "[미스터리한 공간/구조 훅] → [설계적 결함 vs 의도] → [물리/하중 메커니즘] → [숨겨진 비밀 공개]",
       "psychology": "\"이 건물/다리가 왜 안 무너질까?\" (지적 호기심)",
       "sourcing": "건축 다큐, 공학 유튜브, 토목 사례집",
-      "styles": ["hyperreal_3d", "diorama"]
+      "styles": [
+        "hyperreal_3d",
+        "diorama"
+      ]
     },
     "deepsea_space": {
-      "num": 2, "name": "극한 심해 / 우주 미스터리", "name_en": "Cosmic & Deep Sea",
+      "num": 2,
+      "name": "극한 심해 / 우주 미스터리",
+      "name_en": "Cosmic & Deep Sea",
       "hook": "익숙한 공포(암흑/수압)를 정면으로 던지는 첫 장면",
       "problem": "실제 발견된 기괴한 생물/천체의 정체",
       "mechanism": "극한 환경이 만들어낸 과학적 불가사의 원리",
@@ -193,10 +318,15 @@
       "flow": "[익숙한 공포(암흑/수압)] → [실제 발견된 기괴한 생물/천체] → [과학적 불가사의] → [인간의 무력함 강조]",
       "psychology": "코스믹 호러, 시각적 압도감, 경외감",
       "sourcing": "NASA/NOAA 공개 데이터, 천문학 프리프린트",
-      "styles": ["cinematic", "hyperreal_3d"]
+      "styles": [
+        "cinematic",
+        "hyperreal_3d"
+      ]
     },
     "psychology": {
-      "num": 4, "name": "인간 심리 & 행동경제학 치트키", "name_en": "Dark Psychology & Bias",
+      "num": 4,
+      "name": "인간 심리 & 행동경제학 치트키",
+      "name_en": "Dark Psychology & Bias",
       "hook": "\"상대방이 거짓말할 때 0.1초 반응\" 같은 즉각 써먹는 훅",
       "problem": "심리학 실험을 재현하는 일상 장면",
       "mechanism": "무의식을 조종하는 인지 편향의 원리",
@@ -206,10 +336,15 @@
       "flow": "[\"상대방이 거짓말할 때 0.1초 반응\"] → [심리학 실험 재현] → [무의식 조종 원리] → [즉각 실전 적용법]",
       "psychology": "자기 투영, 저장 및 공유율(Share) 극대화",
       "sourcing": "심리학 학술지, FBI 심문 기술, 마케팅 서적",
-      "styles": ["diorama", "minimal_ad"]
+      "styles": [
+        "diorama",
+        "minimal_ad"
+      ]
     },
     "bizarre_nature": {
-      "num": 5, "name": "기괴한 생태계 / 잔혹 동화", "name_en": "Bizarre Nature",
+      "num": 5,
+      "name": "기괴한 생태계 / 잔혹 동화",
+      "name_en": "Bizarre Nature",
       "hook": "\"이 곤충은 뇌를 조종당합니다\" 같은 기이한 선언",
       "problem": "기생충·침입 과정의 단계적 묘사",
       "mechanism": "숙주의 기이한 행동이 만들어지는 원리",
@@ -219,10 +354,15 @@
       "flow": "[\"이 곤충은 뇌를 조종당합니다\"] → [기생충 침투 과정] → [숙주의 기이한 행동] → [자연의 잔혹한 룰]",
       "psychology": "도파민 자극, 기괴함(Uncanny), 끝까지 시청",
       "sourcing": "네이처/사이언스 생태 논문, 내셔널지오그래픽",
-      "styles": ["macro_medical", "cinematic"]
+      "styles": [
+        "macro_medical",
+        "cinematic"
+      ]
     },
     "extreme_jobs": {
-      "num": 6, "name": "기상천외한 극한 직업 & 산업", "name_en": "Extreme Engineering & Jobs",
+      "num": 6,
+      "name": "기상천외한 극한 직업 & 산업",
+      "name_en": "Extreme Engineering & Jobs",
       "hook": "\"연봉 3억인데 아무도 안 하는 일\" 같은 호기심 훅",
       "problem": "작업 환경의 치명적 위험",
       "mechanism": "특수 장비 작동 원리와 작업 방식",
@@ -232,10 +372,15 @@
       "flow": "[\"연봉 3억인데 아무도 안 하는 일\"] → [작업 환경의 치명적 위험] → [특수 장비 작동 원리] → [버티는 자들의 조건]",
       "psychology": "만족감(Satisfying), 직업적 호기심",
       "sourcing": "해외 르포, 중장비/특수 산업 커뮤니티",
-      "styles": ["cinematic", "hyperreal_3d"]
+      "styles": [
+        "cinematic",
+        "hyperreal_3d"
+      ]
     },
     "mystery": {
-      "num": 9, "name": "미해결 사건 & 미스터리 기행", "name_en": "Unsolved Paradox",
+      "num": 9,
+      "name": "미해결 사건 & 미스터리 기행",
+      "name_en": "Unsolved Paradox",
       "hook": "\"사진 1장 남기고 증발한 탐험대\" 같은 사건 선언",
       "problem": "현장에서 발견된 기이한 단서",
       "mechanism": "3가지 음모론/가설의 대립",
@@ -245,10 +390,15 @@
       "flow": "[\"사진 1장 남기고 증발한 탐험대\"] → [현장에서 발견된 기이한 단서] → [3가지 음모론 대립] → [소름 돋는 열린 결말]",
       "psychology": "추리 본능 자극, 댓글 토론 과열",
       "sourcing": "레딧(UnresolvedMysteries), 세계 기네스북",
-      "styles": ["vintage_1930", "cinematic"]
+      "styles": [
+        "vintage_1930",
+        "cinematic"
+      ]
     },
     "near_future": {
-      "num": 10, "name": "미래 기술 & 사이버펑크 유출", "name_en": "Near-Future Tech",
+      "num": 10,
+      "name": "미래 기술 & 사이버펑크 유출",
+      "name_en": "Near-Future Tech",
       "hook": "\"2030년 인간의 뇌에 칩이 심어지면?\" 같은 미래 선언",
       "problem": "기술이 작동하는 인터페이스 시각화",
       "mechanism": "예상되는 부작용과 통제 불가 시나리오",
@@ -258,75 +408,142 @@
       "flow": "[\"2030년 인간의 뇌에 칩이 심어지면?\"] → [기술 작동 인터페이스] → [예상되는 부작용과 통제] → [찬반 딜레마]",
       "psychology": "미래 공포(Technophobia), 기술적 신비감",
       "sourcing": "신기술 특허 문서, 테크 컨퍼런스 발표",
-      "styles": ["hyperreal_3d", "cinematic"]
+      "styles": [
+        "hyperreal_3d",
+        "cinematic"
+      ]
     }
   },
   "formats": {
     "satisfying_sim": {
-      "name": "시각적 만족 카타르시스", "name_en": "Ultra-Satisfying Simulation",
+      "name": "시각적 만족 카타르시스",
+      "name_en": "Ultra-Satisfying Simulation",
       "keywords": "3D Kinetic, Micro-mechanics, Fluid Dynamics",
       "guide": "나레이션은 팩트만 단문으로 치고, 화면은 2~3초마다 물성(금속→유리→점토)이 파괴되거나 정밀 결합하는 비주얼로 배치한다."
     },
     "moral_dilemma": {
-      "name": "딜레마 밸런스 게임", "name_en": "Moral Dilemmas / Choose Your Fate",
+      "name": "딜레마 밸런스 게임",
+      "name_en": "Moral Dilemmas / Choose Your Fate",
       "keywords": "Interactive Choice, Extreme Morality",
       "guide": "\"당신이라면 A(100억) vs B(수명 20년 연장) 중 무엇을 택하시겠습니까?\" 같은 극단적 선택지를 2~3초 컷으로 대비시키고 마지막은 댓글 투표로 닫는다."
     },
     "timelapse_evolution": {
-      "name": "타임랩스 역사/진화", "name_en": "Evolution in 30 Seconds",
+      "name": "타임랩스 역사/진화",
+      "name_en": "Evolution in 30 Seconds",
       "keywords": "1,000 Years Timelapse, Scale of Universe",
       "guide": "100년 전 → 50년 전 → 현재 → 100년 후를 2초 간격 줌아웃과 컷 전환으로 압축한다."
     },
     "unusual_top5": {
-      "name": "비공식 통계 / 순위 랭킹", "name_en": "Unusual Top 5",
+      "name": "비공식 통계 / 순위 랭킹",
+      "name_en": "Unusual Top 5",
       "keywords": "Shocking Global Stats, Secret Ranks",
       "guide": "전 세계에서 가장 이상한 법, 가장 위험한 도로 등 5위부터 2초 만에 보여주고 1위는 마지막 3초에 공개한다."
     }
   },
   "languages": {
     "ko": {
-      "name": "한국어", "unit": "chars", "min": 320, "max": 350, "scene_min": 50, "scene_max": 58,
+      "name": "한국어",
+      "unit": "chars",
+      "min": 320,
+      "max": 350,
+      "scene_min": 50,
+      "scene_max": 58,
       "desc": "한국어 (자연스러운 숏폼 구어체, 1.2배속 기준 공백 포함 320~350자)",
       "length_rule": "공백 포함 총 320~350자 엄수 (초당 약 7.5자), 씬당 50~58자.",
       "cta": "제품 정보는 하단 쇼핑 태그와 고정 댓글 확인!",
-      "cta_markers": ["쇼핑 태그", "고정 댓글"]
+      "cta_markers": [
+        "쇼핑 태그",
+        "고정 댓글"
+      ]
     },
     "en": {
-      "name": "English", "unit": "words", "min": 90, "max": 100, "scene_min": 14, "scene_max": 17,
+      "name": "English",
+      "unit": "words",
+      "min": 90,
+      "max": 100,
+      "scene_min": 14,
+      "scene_max": 17,
       "desc": "English (punchy, viral TikTok tone, 1.2x speech)",
       "length_rule": "총 90~100 words (씬당 14~17 words)",
       "cta": "Check the shopping tag below and the pinned comment for product info!",
-      "cta_markers": ["shopping tag", "pinned comment"]
+      "cta_markers": [
+        "shopping tag",
+        "pinned comment"
+      ]
     },
     "ja": {
-      "name": "日本語", "unit": "chars", "min": 300, "max": 330, "scene_min": 48, "scene_max": 56,
+      "name": "日本語",
+      "unit": "chars",
+      "min": 300,
+      "max": 330,
+      "scene_min": 48,
+      "scene_max": 56,
       "desc": "日本語 (テンポの良いショート動画口調, 現地化された自然な表現)",
       "length_rule": "공백 제외 총 300~330문자 (씬당 48~56문자)",
       "cta": "商品情報は下のショッピングタグと固定コメントをチェック！",
-      "cta_markers": ["ショッピングタグ", "固定コメント"]
+      "cta_markers": [
+        "ショッピングタグ",
+        "固定コメント"
+      ]
     },
     "zh": {
-      "name": "中文", "unit": "chars", "min": 280, "max": 310, "scene_min": 44, "scene_max": 52,
+      "name": "中文",
+      "unit": "chars",
+      "min": 280,
+      "max": 310,
+      "scene_min": 44,
+      "scene_max": 52,
       "desc": "中文 (快节奏短视频风格, 台湾/全球华语习惯用语)",
       "length_rule": "공백 제외 총 280~310자 (씬당 44~52자)",
       "cta": "商品資訊請看下方購物標籤與置頂留言！",
-      "cta_markers": ["購物標籤", "置頂留言"]
+      "cta_markers": [
+        "購物標籤",
+        "置頂留言"
+      ]
     }
   },
   "models": {
-    "default": {"name": "Claude Sonnet 5.5", "use": "메인 45초 대본 & Omni 1.2 프롬프트 생성 (속도·추론 밸런스, 화풍/글자수 제약 준수)"},
-    "crossover": {"name": "Claude Opus 5.5", "use": "합성(크로스오버) 카테고리·고난도 전환 설계, 병맛 펀치라인 정밀 설계"},
-    "metadata": {"name": "Claude Haiku 5.5", "use": "다국어(영/일/중) 초월 번역 & 플랫폼별 메타데이터 일괄 추출"}
+    "default": {
+      "name": "Claude Sonnet 5.5",
+      "use": "메인 45초 대본 & Omni 1.2 프롬프트 생성 (속도·추론 밸런스, 화풍/글자수 제약 준수)"
+    },
+    "crossover": {
+      "name": "Claude Opus 5.5",
+      "use": "합성(크로스오버) 카테고리·고난도 전환 설계, 병맛 펀치라인 정밀 설계"
+    },
+    "metadata": {
+      "name": "Claude Haiku 5.5",
+      "use": "다국어(영/일/중) 초월 번역 & 플랫폼별 메타데이터 일괄 추출"
+    }
   },
   "platforms": {
-    "youtube": {"name": "YouTube Shorts", "rule": "제목: 후킹 강한 60자 이내 / 설명란: 요약 3~5줄 + 해시태그(#shorts 포함) / 고정댓글: 시청자 반응 유도 질문{{shopping_pin}}"},
-    "instagram": {"name": "Instagram Reels", "rule": "제목(첫 줄 후킹 캡션) / 본문: 공감 유도 및 친구 태그 요청 + 해시태그 8~10개 / 고정댓글{{shopping_pin}}"},
-    "tiktok": {"name": "TikTok", "rule": "숏 캡션(이모지 포함) + 바이럴 해시태그(#fyp #viral 포함) / 고정댓글{{shopping_pin}}"}
+    "youtube": {
+      "name": "YouTube Shorts",
+      "rule": "제목: 후킹 강한 60자 이내 / 설명란: 요약 3~5줄 + 해시태그(#shorts 포함) / 고정댓글: 시청자 반응 유도 질문{{shopping_pin}}"
+    },
+    "instagram": {
+      "name": "Instagram Reels",
+      "rule": "제목(첫 줄 후킹 캡션) / 본문: 공감 유도 및 친구 태그 요청 + 해시태그 8~10개 / 고정댓글{{shopping_pin}}"
+    },
+    "tiktok": {
+      "name": "TikTok",
+      "rule": "숏 캡션(이모지 포함) + 바이럴 해시태그(#fyp #viral 포함) / 고정댓글{{shopping_pin}}"
+    }
   },
   "layout": {
-    "width": 1080, "height": 1920, "top_bar": 240, "video_h": 1280, "bottom_bar": 400,
-    "title_color": "FFE500", "title_size": 66, "title_chars_per_line": 15,
-    "sub_size": 52, "sub_chars_per_line": 18, "sub_bottom": 1500, "sub_box_alpha": 0.65, "sub_box_border": 14
+    "width": 1080,
+    "height": 1920,
+    "top_bar": 240,
+    "video_h": 1280,
+    "bottom_bar": 400,
+    "title_color": "FFE500",
+    "title_size": 66,
+    "title_chars_per_line": 15,
+    "sub_size": 52,
+    "sub_chars_per_line": 18,
+    "sub_bottom": 1500,
+    "sub_box_alpha": 0.65,
+    "sub_box_border": 14
   },
   "master_template": [
     "# [시스템 지침] 쇼츠 알고리즘 분석가 & 고성능 비주얼 디렉터",

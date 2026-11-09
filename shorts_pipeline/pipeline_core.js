@@ -54,7 +54,7 @@
     for (let i = 1; i <= cfg.spec.scenes; i++) scenes.push(emptyScene(i));
     return {
       version: 3,
-      meta: { topic: '', top_title: '', category: 'shopping', category2: '', format: '', style: defaultStyleId(cfg),
+      meta: { topic: '', top_title: '', category: cfg.default_category || 'general', category2: '', format: '', style: defaultStyleId(cfg),
         language: 'ko', source_url: '', source_script: '' },
       options: { zero_text: true, safe_margin: true },
       subject_anchor: '',
@@ -102,7 +102,7 @@
     m.category = LEGACY_CATEGORY_KEYS[m.category] || m.category;
     m.category2 = LEGACY_CATEGORY_KEYS[m.category2] || m.category2;
     if (!has(cfg.styles, m.style)) m.style = defaultStyleId(cfg);
-    if (!has(cfg.categories, m.category)) m.category = 'shopping';
+    if (!has(cfg.categories, m.category)) m.category = cfg.default_category || 'general';
     if (!has(cfg.categories, m.category2)) m.category2 = '';
     if (!has(cfg.languages, m.language)) m.language = 'ko';
     const scenes = Array.isArray(p.scenes) ? p.scenes : [];
@@ -184,7 +184,7 @@
   }
 
   // ------------------------------------------------------------------ master prompt
-  function structure(cfg, bp1, bp2) {
+  function structure(cfg, bp1, bp2, hasSrc) {
     const keys = cfg.blueprint_keys, roles = cfg.scene_roles, lines = [];
     keys.forEach((kv, i) => {
       const k = kv[0], label = kv[1], t = roles[i].time;
@@ -193,6 +193,7 @@
       else lines.push('- [Scene ' + pad2(i + 1) + ' / ' + t + ' (' + ['2차 전환', '2차 반전', '2차 착지'][i - 3] + ')] ' + label + ': ' + bp2[k]);
     });
     if (bp2) lines.push("* 연출 지침: 초반 22.5초까지는 '" + bp1.name + "'의 톤으로 몰입시키고, 22.5초 이후부터 '" + bp2.name + "'의 문법으로 급커브를 틀어 시청자에게 강렬한 인상을 남길 것.");
+    if (hasSrc) lines.push('* 원본 대본의 구조적 리듬(훅 → 전개 → 반전)이 위 뼈대와 다르면 원본의 리듬을 우선하고, 위 뼈대는 보조 기준으로만 쓰세요.');
     return lines.join('\n');
   }
   function buildMasterPrompt(cfg, project) {
@@ -224,7 +225,7 @@
       task_line: task, length_rule: lang.length_rule, lang_desc: lang.desc, crop_scale: String(spec.crop_scale),
       safe_pct: String(spec.safe_zone_pct), margin_pct: String(spec.margin_pct), cut_plan: cutPlan, camera_lib: cameraLib,
       style_name: style.number + '. ' + style.name + ' (' + style.name_en + ')', subject_rule: subjectRule,
-      structure: structure(cfg, bp1, bp2), format_block: formatBlock, cta_block: ctaBlock, topic: m.topic || '(미입력)',
+      structure: structure(cfg, bp1, bp2, !!src), format_block: formatBlock, cta_block: ctaBlock, topic: m.topic || '(미지정 - 원본과 겹치지 않는 새 소재를 직접 정해 주세요)',
       category_line: categoryLine, source_line: sourceLine, source_block: sourceBlock, schema
     });
   }

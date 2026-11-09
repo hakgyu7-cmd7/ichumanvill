@@ -112,17 +112,22 @@ table.tb{width:100%;border-collapse:collapse;font-size:12px}table.tb th{color:va
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
 details.acc>summary{cursor:pointer;color:var(--cy);font-size:12px;font-weight:600;margin:6px 0}
 .hide{display:none!important}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:none;border-radius:9px;padding:6px 14px;font-weight:700;font-size:13px;color:var(--mut)}
+.seg button.on.ref{background:linear-gradient(90deg,#14532d,#0e7490);color:#fff}
+.seg button.on.shop{background:linear-gradient(90deg,#92400e,#b45309);color:#fff}
 a{color:var(--cy)}
 </style>
 </head>
 <body>
 <header class="top"><div class="hrow">
   <div class="logo"><i>⚡</i><div><b>AI Shorts Pipeline Studio <span class="badge g mono">v3.0</span></b><small>1.2x · 45초 · 6씬 · 방법 B(18컷) · Zero-Text · 1.06x 크롭</small></div></div>
+  <div class="seg" id="mode-seg" title="제작 유형"></div>
   <div class="metrics">
     <div class="metric"><small>대본 분량</small><b id="m-chars" class="mono">0</b></div>
     <div class="metric"><small>예상 러닝타임</small><b id="m-run" class="mono">0.0초</b></div>
     <div class="metric"><small>Zero-Text</small><b id="m-zero" class="mono">-</b></div>
-    <div class="metric"><small>쇼핑 CTA</small><b id="m-cta" class="mono">-</b></div>
+    <div class="metric" id="m-cta-wrap"><small>쇼핑 CTA</small><b id="m-cta" class="mono">-</b></div>
     <div class="metric"><small>클립</small><b id="m-clips" class="mono">-</b></div>
   </div>
   <div class="hbtns">
@@ -176,14 +181,18 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const p2 = (n) => String(n).padStart(2, '0');
 const LS = 'shorts_pipeline_v3';
-const STEPS = [
-  { id: 'source', label: '소재 발굴', sub: '트렌드 · 떡상 · 벤치마킹', icon: '🔎' },
-  { id: 'script', label: '기획 · 대본', sub: '프롬프트 → Claude → 6씬', icon: '✍️' },
-  { id: 'visual', label: '이미지 · 영상', sub: 'Google Flow / Omni 1.2', icon: '🎬' },
-  { id: 'audio', label: '음성', sub: 'TTS · 1.2배속 · 무음 제거', icon: '🎙️' },
-  { id: 'render', label: '합성', sub: '레터박스 · 자막 · 렌더', icon: '🎞️' },
-  { id: 'meta', label: '메타데이터', sub: '3대 플랫폼 · 4개국어', icon: '🌐' }
-];
+const mode = () => (Core.isShopping(P, CFG) ? 'shopping' : 'reference');
+function stepList() {
+  const shop = mode() === 'shopping';
+  return [
+    { id: 'source', label: shop ? '소재 발굴' : '레퍼런스', sub: shop ? '쿠팡·틱톡 상품 · 떡상' : '떡상 링크 → 대본 추출', icon: '🔎' },
+    { id: 'script', label: shop ? '기획 · 대본' : '새 대본', sub: shop ? 'CTA 포함 6씬' : '역설계 → 새 주제 6씬', icon: '✍️' },
+    { id: 'visual', label: '이미지 · 영상', sub: 'Google Flow / Omni 1.2', icon: '🎬' },
+    { id: 'audio', label: '음성', sub: 'TTS · 1.2배속 · 무음 제거', icon: '🎙️' },
+    { id: 'render', label: '합성', sub: '레터박스 · 자막 · 렌더', icon: '🎞️' },
+    { id: 'meta', label: '메타데이터', sub: '3대 플랫폼 · 4개국어', icon: '🌐' }
+  ];
+}
 const ICONS = ['🔥', '💥', '🔧', '⚡', '🔄', '🛒'];
 const SHOP_PIN = {
   ko: { youtube: '🔥 영상 속 상품은 [하단 쇼핑 태그]와 이 고정 댓글 링크에서 확인하세요! 👇', instagram: '🛍️ 구매 정보: 프로필 링크에서 확인해 주세요!', tiktok: '좌측 하단 [노란색 장바구니]를 눌러 확인하세요! 🛒' },
@@ -195,7 +204,7 @@ const SHOP_PIN = {
 let P;                       // 현재 프로젝트
 const S = {                  // UI/세션 상태 (프로젝트 파일에는 저장하지 않음)
   tab: 'source', server: null, files: null, status: null, trends: null, outliers: null, trendSrc: { coupang: true, tiktok: true, reddit: true },
-  redditCat: 'history', manual: [], busy: {}, metaLang: 'ko', metaPlat: 'youtube', metaLangs: { ko: true, en: false, ja: false, zh: false },
+  redditCat: 'general', manual: [], busy: {}, metaLang: 'ko', metaPlat: 'youtube', metaLangs: { ko: true, en: false, ja: false, zh: false },
   pvScene: 0, pvT: 0, pvTimer: null, guides: true, job: null, ytKey: '', claudeReply: '', metaReply: '', ttsMode: 'beats', openScenes: { 0: true }
 };
 
@@ -229,7 +238,8 @@ const unitTxt = () => (lang().unit === 'words' ? '단어' : '자');
 const issues = () => Core.validateProject(CFG, P);
 let saveT = null;
 function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify({ project: P, ytKey: S.ytKey, metaLangs: S.metaLangs })); } catch (e) { /* 저장 불가 환경 */ } }, 300); }
-function setProject(p) { P = Core.normalizeProject(p, CFG); S.pvScene = 0; S.pvT = 0; save(); renderAll(); }
+function fixShape(p) { if (Core.isShopping(p, CFG) && p.meta.category !== 'shopping') { p.meta.category2 = p.meta.category; p.meta.category = 'shopping'; } return p; }
+function setProject(p) { P = fixShape(Core.normalizeProject(p, CFG)); S.pvScene = 0; S.pvT = 0; save(); renderAll(); }
 
 /* ------------------------------------------------------------------ header / stepper / side */
 function counts() {
@@ -240,7 +250,7 @@ function counts() {
 function stepStatus(id) {
   const is = issues(); const total = Core.totalUnits(P, CFG);
   const err = (codes) => is.some((i) => i.level === 'error' && codes.includes(i.code));
-  if (id === 'source') return P.meta.topic.trim() ? 'ok' : 'todo';
+  if (id === 'source') return (mode() === 'reference' ? (P.meta.source_script.trim() || P.meta.topic.trim()) : P.meta.topic.trim()) ? 'ok' : 'todo';
   if (id === 'script') { if (!total) return 'todo'; return err(['total_chars', 'beats', 'cta', 'scene_count']) ? 'warn' : 'ok'; }
   if (id === 'visual') {
     const filled = P.scenes.every((s) => s.frame1.trim() && s.frame2.trim() && s.cuts.every((c) => c.prompt.trim()));
@@ -253,7 +263,7 @@ function stepStatus(id) {
   return 'todo';
 }
 function renderStepper() {
-  $('#stepper').innerHTML = STEPS.map((s, i) => {
+  $('#stepper').innerHTML = stepList().map((s, i) => {
     const st = stepStatus(s.id);
     return `<button class="step ${S.tab === s.id ? 'act' : ''} ${st}" data-act="tab" data-id="${s.id}"><span class="n">${st === 'ok' ? '✓' : st === 'warn' ? '!' : i + 1}</span><span><b>${s.icon} ${s.label}</b><small>${s.sub}</small></span></button>`;
   }).join('');
@@ -335,58 +345,68 @@ function initPreview() {
 
 /* ------------------------------------------------------------------ tab: 1 소재 발굴 */
 function trendItems() {
-  const seedItems = (SEED.items || []).map((i) => ({ ...i, live: false, sample: true }));
-  const base = S.trends ? S.trends.items : seedItems.filter((i) => ['쿠팡', '틱톡'].includes(i.platform) ? true : i.cat === S.redditCat);
+  const shop = mode() === 'shopping', SH = ['쿠팡', '틱톡'];
+  let base = S.trends ? S.trends.items : (SEED.items || []).map((i) => ({ ...i, live: false, sample: true }));
+  base = base.filter((i) => (shop ? SH.includes(i.platform) : !SH.includes(i.platform)));
+  if (!shop && !S.trends && S.redditCat !== 'general') base = base.filter((i) => i.cat === S.redditCat);
   return base.concat(S.manual);
 }
-function tabSource() {
+function trendSources() { return mode() === 'shopping' ? ['coupang', 'tiktok'].filter((k) => S.trendSrc[k]) : ['reddit']; }
+function secReference(n, hero) {
+  const shop = mode() === 'shopping';
+  return `<section class="card" ${hero ? 'style="border-color:#14532d"' : ''}><h3>${n} 레퍼런스 영상 → 대본 추출 ${hero ? '<span class="badge g">핵심</span>' : ''}<span class="sp"></span><button class="btn sm pri" data-act="tab" data-id="script">다음: ${shop ? '기획·대본' : '새 대본 만들기'} →</button></h3>
+    <div class="hint">떡상한 영상의 링크를 넣으면 대본을 추출하고, 마스터 프롬프트가 그 대본의 <b>후킹 기법 · 시청 유지 심리 · 반전 구조(뼈대)만 역설계</b>해서 완전히 새로운 대본으로 재구성합니다(내용 복제 X). ${shop ? '비워 두면 카테고리 뼈대로 처음부터 설계합니다.' : ''}</div>
+    <div class="row"><input type="text" data-bind="meta.source_url" data-live value="${esc(P.meta.source_url)}" placeholder="https://www.youtube.com/shorts/…  (떡상 영상 링크)" style="flex:1;min-width:240px;font-size:14px;padding:10px 12px">
+      <button class="btn cy" data-act="fetchTranscript" ${S.busy.tr ? 'disabled' : ''}>${S.busy.tr ? '추출 중…' : '자막/대본 자동 추출'}</button></div>
+    <label class="f">레퍼런스 대본 텍스트 <span id="src-cnt" class="badge">${P.meta.source_script.length}자</span> <span class="hint">자동 추출이 안 되면 유튜브 설명 더보기 → 스크립트 표시 → 복사 후 직접 붙여넣기 (2~3줄만 붙여도 분석 가능)</span></label>
+    <textarea data-bind="meta.source_script" data-live rows="${hero ? 8 : 5}" placeholder="레퍼런스 영상의 자막/대본을 붙여넣으세요">${esc(P.meta.source_script)}</textarea>
+    ${hero ? `<label class="f">새로 만들 영상의 주제 <span class="hint">(레퍼런스와 다른 새 소재. 비워 두면 Claude가 같은 장르의 새 소재를 제안)</span></label><input type="text" data-bind="meta.topic" data-live value="${esc(P.meta.topic)}" placeholder="예) 지구 자전이 1초 멈춘다면? / 고대 로마 검투사의 비밀">` : `<div class="note">현재 소재: <b>${esc(P.meta.topic || '(미선택)')}</b></div>`}
+  </section>`;
+}
+function secTrends(n) {
+  const shop = mode() === 'shopping';
   const items = trendItems(), st = S.trends ? S.trends.status : null;
-  const links = (S.trends ? S.trends.manual_links : SEED.manual_links) || [];
-  const catOpts = Object.entries(CFG.categories).map(([k, c]) => `<option value="${k}" ${S.redditCat === k ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
-  return `
-  <section class="card"><h3>① 트렌드 소재 수집 <span class="sp"></span><span class="badge ${S.server ? 'g' : 'a'}">${S.server ? '서버 연결됨' : '오프라인: 샘플 표시'}</span></h3>
-    <div class="hint">쿠팡 베스트 · 틱톡 · 레딧에서 소재를 모읍니다. <b>실제로 수집에 성공한 것만 LIVE</b>로 표시하고, 실패/차단 시 샘플로 대체하면서 사유를 알려줍니다.</div>
+  const links = ((S.trends ? S.trends.manual_links : SEED.manual_links) || []).filter((l) => (shop ? /쿠팡|TikTok/.test(l.name) : !/쿠팡|TikTok/.test(l.name)));
+  const catOpts = Object.entries(CFG.categories).filter(([k]) => k !== 'shopping').map(([k, c]) => `<option value="${k}" ${S.redditCat === k ? 'selected' : ''}>${k === 'general' ? '전체' : esc(c.name)}</option>`).join('');
+  return `<section class="card"><h3>${n} ${shop ? '쇼핑 상품 트렌드 (쿠팡 · 틱톡)' : '소재 아이디어 (선택)'} <span class="sp"></span><span class="badge ${S.server ? 'g' : 'a'}">${S.server ? '서버 연결됨' : '오프라인: 샘플 표시'}</span></h3>
+    <div class="hint">${shop ? '쿠팡 베스트 · 틱톡 급상승 상품을 모읍니다.' : '레퍼런스 없이 새 주제가 필요할 때 레딧 인기글에서 소재를 찾습니다(영문 원문).'} <b>실제로 수집에 성공한 것만 LIVE</b>로 표시하고, 실패/차단 시 샘플로 대체하면서 사유를 알려줍니다.</div>
     <div class="row">
-      ${['coupang:쿠팡 베스트', 'tiktok:틱톡 급상승', 'reddit:레딧 토픽'].map((x) => { const [k, n] = x.split(':'); return `<label class="chip ${S.trendSrc[k] ? 'on' : ''}"><input type="checkbox" data-src="${k}" ${S.trendSrc[k] ? 'checked' : ''} class="hide">${n}</label>`; }).join('')}
-      <select id="reddit-cat" style="width:auto" title="레딧 토픽 카테고리">${catOpts}</select>
+      ${shop ? ['coupang:쿠팡 베스트', 'tiktok:틱톡 급상승'].map((x) => { const [k, nm] = x.split(':'); return `<label class="chip ${S.trendSrc[k] ? 'on' : ''}"><input type="checkbox" data-src="${k}" ${S.trendSrc[k] ? 'checked' : ''} class="hide">${nm}</label>`; }).join('') : `<select id="reddit-cat" style="width:auto" title="레딧 토픽 카테고리">${catOpts}</select>`}
       <button class="btn pri" data-act="fetchTrends" ${S.busy.trends ? 'disabled' : ''}>${S.busy.trends ? '수집 중…' : '수집 / 새로고침'}</button>
     </div>
     ${st ? '<div class="sub">' + Object.entries(st).map(([k, v]) => `<div class="iss ${v.live ? 'ok' : 'warn'}"><span>${v.live ? '🟢' : '🟡'}</span><span><b>${k}</b> (${v.count}건) - ${esc(v.note)}</span></div>`).join('') + '</div>' : ''}
     <div class="sub" id="trend-list">${items.length ? items.map((it, i) => `
       <div class="titem"><span class="badge ${it.live ? 'g' : 'a'}">${it.live ? 'LIVE' : '샘플'}</span>
         <div class="t"><b>${esc(it.title)}</b><small>${esc(it.platform)}${it.score ? ' · 점수 ' + it.score : ''}${it.cat && CFG.categories[it.cat] ? ' · ' + esc(CFG.categories[it.cat].name) : ''}${it.url ? ` · <a href="${esc(it.url)}" target="_blank" rel="noopener">원문</a>` : ''}</small></div>
-        <button class="btn sm pri" data-act="pickTopic" data-i="${i}">소재로 선택</button></div>`).join('') : '<div class="hint">항목이 없습니다.</div>'}</div>
-    <div class="sub"><label class="f">직접 추가 (한 줄에 하나, 쿠팡/틱톡에서 직접 확인한 상품명·키워드를 붙여넣기 - 가장 안정적인 방법)</label>
-      <div class="row"><textarea id="manual-add" rows="2" placeholder="예) 접이식 캠핑 회전 의자&#10;예) 원터치 진공 밀폐용기"></textarea><button class="btn" data-act="addManual">추가</button></div></div>
+        <button class="btn sm pri" data-act="pickTopic" data-i="${i}">${shop ? '상품으로 선택' : '주제로 선택'}</button></div>`).join('') : '<div class="hint">항목이 없습니다.</div>'}</div>
+    <div class="sub"><label class="f">직접 추가 (한 줄에 하나${shop ? ', 쿠팡/틱톡에서 직접 확인한 상품명 - 가장 안정적인 방법' : ''})</label>
+      <div class="row"><textarea id="manual-add" rows="2" placeholder="${shop ? '예) 접이식 캠핑 회전 의자' : '예) 고대 로마 검투사의 비밀'}"></textarea><button class="btn" data-act="addManual">추가</button></div></div>
     <details class="acc"><summary>수동 탐색 링크 & 가이드</summary>
       ${links.map((l) => `<div class="iss"><span>🔗</span><span><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a> - ${esc(l.tip)}</span></div>`).join('')}
     </details>
-  </section>
-
-  <section class="card"><h3>② 떡상(V/S 배율) 영상 탐색 <span class="sp"></span><span class="badge c">YouTube Data API v3</span></h3>
-    <div class="hint">구독자 수 대비 조회수가 폭발한 영상(= 기획력으로 터진 영상)만 골라냅니다. <b>V/S 배율 = 조회수 ÷ 구독자수</b> — 1 미만 제외 · 5배 이상 1차 후보 · <b>10배 이상 추천</b>.</div>
+  </section>`;
+}
+function secOutlier(n) {
+  return `<section class="card"><h3>${n} 떡상(V/S 배율) 영상 찾기 <span class="sp"></span><span class="badge c">YouTube Data API v3</span></h3>
+    <div class="hint">구독자 수 대비 조회수가 폭발한 영상(= 기획력으로 터진 영상)만 골라냅니다. <b>V/S 배율 = 조회수 ÷ 구독자수</b> — 1 미만 제외 · 5배 이상 1차 후보 · <b>10배 이상 추천</b>. 결과에서 [레퍼런스로 선택]을 누르면 링크와 대본이 바로 채워집니다.</div>
     <div class="grid4">
-      <div><label class="f">검색 키워드 (영문 권장)</label><input type="text" id="ol-q" placeholder="kitchen gadget / science simulation" value="${esc(S.olQ || '')}"></div>
+      <div><label class="f">검색 키워드 (영문 권장)</label><input type="text" id="ol-q" placeholder="science simulation / history facts" value="${esc(S.olQ || '')}"></div>
       <div><label class="f">기간</label><select id="ol-days"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option></select></div>
       <div><label class="f">최소 V/S 배율</label><select id="ol-ratio"><option value="5">5배 이상</option><option value="10" selected>10배 이상</option><option value="20">20배 이상</option></select></div>
       <div><label class="f">지역 (선택)</label><select id="ol-region"><option value="">전체</option><option value="US">미국</option><option value="KR">한국</option><option value="JP">일본</option><option value="TW">대만</option></select></div>
     </div>
     <div class="row" style="margin-top:8px"><input type="password" id="ol-key" placeholder="YouTube API 키 (서버에 YOUTUBE_API_KEY 환경변수가 있으면 비워도 됨)" value="${esc(S.ytKey)}" style="flex:1;min-width:220px">
       <button class="btn pri" data-act="searchOutliers" ${S.busy.ol ? 'disabled' : ''}>${S.busy.ol ? '탐색 중…' : '떡상 영상 탐색'}</button></div>
-    <div class="hint">API 키는 이 브라우저에만 저장됩니다. 호출 1회 ≈ 102 쿼터(무료 일 10,000). 키 발급: Google Cloud Console → YouTube Data API v3.</div>
+    <div class="hint">API 키는 이 브라우저에만 저장됩니다. 호출 1회 ≈ 102 쿼터(무료 일 10,000). 키 발급: Google Cloud Console → YouTube Data API v3. 키가 없으면 유튜브에서 직접 찾은 링크를 위 레퍼런스 칸에 넣으세요.</div>
     <div id="ol-res">${outlierTable()}</div>
     <div class="sub"><b style="font-size:12px">V/S 계산기 (직접 확인한 영상용)</b>
       <div class="row" style="margin-top:6px"><input type="number" id="vs-v" placeholder="조회수" style="width:140px"><span>÷</span><input type="number" id="vs-s" placeholder="구독자수" style="width:140px"><b id="vs-out" class="mono">-</b></div></div>
-  </section>
-
-  <section class="card"><h3>③ 벤치마킹 소스 (대본 역설계) <span class="sp"></span><button class="btn sm pri" data-act="tab" data-id="script">다음: 기획·대본 →</button></h3>
-    <div class="hint">원본 영상의 대본을 가져오면 마스터 프롬프트가 <b>후킹 기법 · 시청 유지 심리 · 반전 구조의 뼈대만 역설계</b>해서 새 소재로 재구성합니다(내용 복제 X). 비워 두면 카테고리 뼈대로 처음부터 설계합니다.</div>
-    <div class="row"><input type="text" data-bind="meta.source_url" data-live value="${esc(P.meta.source_url)}" placeholder="https://www.youtube.com/shorts/…" style="flex:1;min-width:240px">
-      <button class="btn cy" data-act="fetchTranscript" ${S.busy.tr ? 'disabled' : ''}>${S.busy.tr ? '추출 중…' : '자막/대본 자동 추출'}</button></div>
-    <label class="f">원본 대본 텍스트 <span id="src-cnt" class="badge">${P.meta.source_script.length}자</span> <span class="hint">자동 추출이 안 되면 유튜브 설명 더보기 → 스크립트 표시 → 복사 후 직접 붙여넣기</span></label>
-    <textarea data-bind="meta.source_script" data-live rows="6" placeholder="원본 영상의 자막/대본을 붙여넣으세요 (선택)">${esc(P.meta.source_script)}</textarea>
-    <div class="note">현재 소재: <b>${esc(P.meta.topic || '(미선택)')}</b> — 위 목록에서 [소재로 선택]하거나 다음 단계에서 직접 입력하세요. 유튜브 링크가 자막을 못 읽는 환경이면(API 제한 등) 자막 텍스트 2~3줄만 붙여도 분석 정확도가 충분합니다.</div>
   </section>`;
+}
+function tabSource() {
+  return mode() === 'shopping'
+    ? secTrends('①') + secOutlier('②') + secReference('③', false)
+    : secReference('①', true) + secOutlier('②') + secTrends('③');
 }
 function outlierTable() {
   if (!S.outliers) return '';
@@ -394,24 +414,30 @@ function outlierTable() {
   const gb = { viral: 'g', good: 'c', ok: '', normal: '' };
   return `<table class="tb" style="margin-top:10px"><tr><th>V/S</th><th>제목 / 채널</th><th>조회수 / 구독자</th><th></th></tr>${S.outliers.map((o, i) => `<tr>
     <td><span class="badge ${gb[o.grade] || ''} mono">${o.ratio}x</span></td><td><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.title)}</a><br><small style="color:var(--dim)">${esc(o.channel)}</small></td>
-    <td class="mono">${o.views.toLocaleString()} / ${o.subscribers.toLocaleString()}</td><td><button class="btn sm pri" data-act="pickOutlier" data-i="${i}">벤치마킹으로 선택</button></td></tr>`).join('')}</table>`;
+    <td class="mono">${o.views.toLocaleString()} / ${o.subscribers.toLocaleString()}</td><td><button class="btn sm pri" data-act="pickOutlier" data-i="${i}">레퍼런스로 선택</button></td></tr>`).join('')}</table>`;
 }
 
 /* ------------------------------------------------------------------ tab: 2 기획 · 대본 */
 function tabScript() {
-  const catOpt = (sel, withNone) => (withNone ? `<option value="" ${!sel ? 'selected' : ''}>없음 (단일 모드)</option>` : '') +
-    Object.entries(CFG.categories).map(([k, c]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${c.shopping ? '🛒 ' : ''}${esc(c.name)}</option>`).join('');
+  const shopMode = mode() === 'shopping';
+  const catOpt = (sel, withNone, only) => (withNone ? `<option value="" ${!sel ? 'selected' : ''}>없음 (단일 모드)</option>` : '') +
+    Object.entries(CFG.categories).filter(([k, c]) => (only ? k === only : !c.shopping)).map(([k, c]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${c.shopping ? '🛒 ' : ''}${esc(c.name)}</option>`).join('');
+  const hasSrc = !!P.meta.source_script.trim();
+  const refBanner = shopMode ? '' : (hasSrc
+    ? `<div class="note g">🎯 <b>레퍼런스 대본 ${P.meta.source_script.length}자</b>${P.meta.source_url ? ' · ' + esc(P.meta.source_url) : ''} — 이 대본의 구조(훅 → 전개 → 반전)를 역설계해 아래 새 주제로 <b>완전히 새 대본</b>을 만듭니다. <button class="btn sm" data-act="tab" data-id="source">레퍼런스 수정</button></div>`
+    : `<div class="note w">레퍼런스 대본이 없습니다. 1단계에서 떡상 영상 링크를 넣고 대본을 추출하면 그 구조를 역설계합니다(없어도 진행 가능: 카테고리 뼈대로 처음부터 설계). <button class="btn sm" data-act="tab" data-id="source">1단계로</button></div>`);
   const styleOpt = Object.entries(CFG.styles).sort((a, b) => a[1].number - b[1].number).map(([k, s]) => `<option value="${k}" ${P.meta.style === k ? 'selected' : ''}>${s.number}. ${esc(s.name)}${s.default ? ' (기본 권장)' : ''}</option>`).join('');
   const fmtOpt = '<option value="">없음</option>' + Object.entries(CFG.formats).map(([k, f]) => `<option value="${k}" ${P.meta.format === k ? 'selected' : ''}>${esc(f.name)}</option>`).join('');
   const langOpt = Object.entries(CFG.languages).map(([k, l]) => `<option value="${k}" ${P.meta.language === k ? 'selected' : ''}>${l.name} (${k})</option>`).join('');
   const m = Core.recommendedModel(CFG, P, 'script');
   return `
-  <section class="card"><h3>① 기획 설정</h3>
-    <div class="grid2"><div><label class="f">타깃 소재 / 상품명</label><input type="text" data-bind="meta.topic" data-live value="${esc(P.meta.topic)}" placeholder="예) 에어프라이어 실리콘 분할 팟"></div>
+  <section class="card"><h3>① 기획 설정 <span class="badge ${shopMode ? 'a' : 'g'}">${shopMode ? '🛒 쇼핑 쇼츠' : '🎬 레퍼런스 쇼츠'}</span></h3>
+    ${refBanner}
+    <div class="grid2"><div><label class="f">${shopMode ? '상품명 / 타깃 소재' : '새 영상 주제 (레퍼런스와 겹치지 않는 새 소재)'}</label><input type="text" data-bind="meta.topic" data-live value="${esc(P.meta.topic)}" placeholder="${shopMode ? '예) 에어프라이어 실리콘 분할 팟' : '예) 지구 자전이 1초 멈춘다면?'}"></div>
       <div><label class="f">상단 노란 타이틀 배너 문구 <span class="hint">(15자 내외 후킹 · 합성 단계에서 영상 위에 입혀짐)</span></label><input type="text" data-bind="meta.top_title" data-live value="${esc(P.meta.top_title)}" style="color:var(--am);font-weight:700"></div></div>
     <div class="grid3">
-      <div><label class="f">1차 카테고리 (훅 & 문제)</label><select data-bind="meta.category" data-re>${catOpt(P.meta.category, false)}</select></div>
-      <div><label class="f">2차 카테고리 (반전 & 결말) <span class="hint">선택 시 합성</span></label><select data-bind="meta.category2" data-re>${catOpt(P.meta.category2, true)}</select></div>
+      <div><label class="f">1차 카테고리 (훅 & 문제)</label><select data-bind="meta.category" data-re ${shopMode ? 'disabled' : ''}>${catOpt(P.meta.category, false, shopMode ? 'shopping' : '')}</select></div>
+      <div><label class="f">2차 카테고리 (반전 & 결말) <span class="hint">선택 시 합성</span></label><select data-bind="meta.category2" data-re>${catOpt(P.meta.category2, true, '')}</select></div>
       <div><label class="f">트렌드 포맷 (선택)</label><select data-bind="meta.format" data-re>${fmtOpt}</select></div>
     </div>
     <div class="note">${esc(CFG.categories[P.meta.category].flow)}<br><span style="opacity:.8">심리 트리거: ${esc(CFG.categories[P.meta.category].psychology)} · 소재 공급처: ${esc(CFG.categories[P.meta.category].sourcing)}</span></div>
@@ -422,7 +448,7 @@ function tabScript() {
     </div>
     <div class="row sub"><label class="row"><input type="checkbox" data-check="options.zero_text" data-re ${P.options.zero_text ? 'checked' : ''}> Zero-Text 네거티브 접미사 자동 삽입</label>
       <label class="row"><input type="checkbox" data-check="options.safe_margin" data-re ${P.options.safe_margin ? 'checked' : ''}> 워터마크 크롭 안전 마진(중앙 70% · 여백 15%) 문구 삽입</label>
-      <span class="badge ${Core.isShopping(P, CFG) ? 'a' : ''}">${Core.isShopping(P, CFG) ? '🛒 쇼핑 카테고리 → Scene 06 제휴 CTA 강제' : '쇼핑 CTA 해당 없음'}</span></div>
+      ${shopMode ? '<span class="badge a">🛒 Scene 06 제휴 CTA 강제</span>' : ''}</div>
   </section>
 
   <section class="card"><h3>② 마스터 프롬프트 → Claude <span class="sp"></span><span class="badge p">권장 모델: ${esc(m.name)}</span></h3>
@@ -435,7 +461,7 @@ function tabScript() {
 
   <section class="card"><h3>③ Claude 응답 붙여넣기 → 씬 가져오기</h3>
     <textarea id="claude-reply" class="mono" rows="5" placeholder="Claude 가 출력한 json 코드블록 응답 전체를 붙여넣으세요 (앞뒤 설명 문장이 있어도 됩니다)">${esc(S.claudeReply)}</textarea>
-    <div class="row" style="margin-top:8px"><button class="btn pri" data-act="importReply">씬 가져오기 (6씬 · 프롬프트 · 분석 · 제목 후보)</button><button class="btn" data-act="injectCta">Scene 06 CTA 자동 삽입</button></div>
+    <div class="row" style="margin-top:8px"><button class="btn pri" data-act="importReply">씬 가져오기 (6씬 · 프롬프트 · 분석 · 제목 후보)</button>${shopMode ? '<button class="btn" data-act="injectCta">Scene 06 CTA 자동 삽입</button>' : ''}</div>
     ${analysisBlock()}
   </section>
 
@@ -634,7 +660,8 @@ function tabMeta() {
 /* ------------------------------------------------------------------ router / render */
 const TABS = { source: tabSource, script: tabScript, visual: tabVisual, audio: tabAudio, render: tabRender, meta: tabMeta };
 function renderTab() { $('#content').innerHTML = TABS[S.tab](); const f = LIVE[S.tab]; if (f) f(); }
-function renderAll() { renderStepper(); renderTab(); renderMetrics(); renderIssues(); renderPreview(); }
+function renderMode() { const sh = mode() === 'shopping'; $('#mode-seg').innerHTML = `<button class="ref ${sh ? '' : 'on'}" data-act="setMode" data-m="reference">🎬 레퍼런스 쇼츠</button><button class="shop ${sh ? 'on' : ''}" data-act="setMode" data-m="shopping">🛒 쇼핑 쇼츠</button>`; $('#m-cta-wrap').classList.toggle('hide', !sh); }
+function renderAll() { renderMode(); renderStepper(); renderTab(); renderMetrics(); renderIssues(); renderPreview(); }
 function gotoTab(id) { S.tab = id; renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (id === 'visual' || id === 'render' || id === 'audio') refreshFiles(); }
 
 /* ------------------------------------------------------------------ server calls */
@@ -673,6 +700,12 @@ async function pollRender() {
 /* ------------------------------------------------------------------ actions */
 const ACT = {
   tab: (d) => gotoTab(d.id),
+  setMode: (d) => {
+    const m = P.meta, def = CFG.default_category;
+    if (d.m === 'shopping' && mode() !== 'shopping') { const old = m.category; m.category = 'shopping'; m.category2 = old && old !== def && old !== 'shopping' ? old : ''; }
+    else if (d.m !== 'shopping' && mode() === 'shopping') { m.category = m.category2 && m.category2 !== 'shopping' ? m.category2 : def; m.category2 = ''; }
+    S.trends = null; save(); renderAll(); toast(d.m === 'shopping' ? '🛒 쇼핑 쇼츠 모드: 쇼핑 카테고리·Scene 06 CTA·고정댓글 구매 문구가 적용됩니다.' : '🎬 레퍼런스 쇼츠 모드로 전환했습니다.');
+  },
   toggleGuide: () => { S.guides = !S.guides; renderPreview(); },
   pvPlay: () => {
     if (S.pvTimer) { clearInterval(S.pvTimer); S.pvTimer = null; $('#pv-play').textContent = '▶ 재생'; return; }
@@ -688,14 +721,14 @@ const ACT = {
   // --- source
   fetchTrends: async () => {
     S.busy.trends = true; renderTab();
-    try { const src = Object.keys(S.trendSrc).filter((k) => S.trendSrc[k]).join(','); S.trends = await api(`/api/trends?sources=${src}&cat=${S.redditCat}`); }
+    try { const src = trendSources().join(','); S.trends = await api(`/api/trends?sources=${src}&cat=${S.redditCat}`); }
     catch (e) { toast(e.message, 'e'); }
     S.busy.trends = false; renderTab();
   },
   pickTopic: (d) => {
     const it = trendItems()[Number(d.i)]; if (!it) return;
-    P.meta.topic = it.title; if (it.cat && CFG.categories[it.cat]) P.meta.category = it.cat; if (it.url && /youtu/.test(it.url)) P.meta.source_url = it.url;
-    toast(`소재 선택: ${it.title}`); save(); gotoTab('script');
+    P.meta.topic = it.title; if (mode() === 'reference' && it.cat && CFG.categories[it.cat] && it.cat !== 'shopping') P.meta.category = it.cat; if (it.url && /youtu/.test(it.url)) P.meta.source_url = it.url;
+    toast(`선택: ${it.title}`); save(); gotoTab(mode() === 'shopping' ? 'script' : 'source');
   },
   addManual: () => {
     const lines = $('#manual-add').value.split('\n').map((x) => x.trim()).filter(Boolean);
@@ -708,7 +741,7 @@ const ACT = {
     S.busy.ol = false; renderTab();
   },
   pickOutlier: async (d) => {
-    const o = S.outliers[Number(d.i)]; P.meta.source_url = o.url; renderTab(); save(); toast(`벤치마킹 선택 (V/S ${o.ratio}x) - 자막 추출 시도`); ACT.fetchTranscript();
+    const o = S.outliers[Number(d.i)]; P.meta.source_url = o.url; renderTab(); save(); toast(`레퍼런스 선택 (V/S ${o.ratio}x) - 대본 추출 시도`); ACT.fetchTranscript();
   },
   fetchTranscript: async () => {
     const url = P.meta.source_url.trim(); if (!url) return toast('유튜브 링크를 입력하세요.', 'w');
@@ -847,7 +880,8 @@ function convertLegacy(j) {   // 제미나이가 만든 v2.6 대시보드 JSON -
 (function boot() {
   let saved = null; try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* ignore */ }
   if (saved && saved.project) { P = Core.normalizeProject(saved.project, CFG); S.ytKey = saved.ytKey || ''; if (saved.metaLangs) S.metaLangs = saved.metaLangs; }
-  else P = Core.normalizeProject(clone(SAMPLES.airfryer_shopping || {}), CFG);
+  else P = Core.normalizeProject(clone(SAMPLES.ramen_bgrade || {}), CFG);
+  P = fixShape(P);
   $('#sample-sel').innerHTML = '<option value="">샘플…</option>' + Object.entries(SAMPLES).map(([k, s]) => `<option value="${k}">${esc(s.meta.topic)}</option>`).join('');
   initPreview(); renderAll(); detectServer();
 })();

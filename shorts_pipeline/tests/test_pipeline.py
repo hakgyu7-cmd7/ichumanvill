@@ -61,7 +61,7 @@ def variants():
 class ConfigTests(unittest.TestCase):
     def test_counts(self):
         self.assertEqual(len(CFG["styles"]), 7)
-        self.assertEqual(len(CFG["categories"]), 12)
+        self.assertEqual(len(CFG["categories"]), 13)
         self.assertEqual(len(CFG["formats"]), 4)
         self.assertEqual(set(CFG["languages"]), {"ko", "en", "ja", "zh"})
         self.assertEqual(len(CFG["scene_roles"]), 6)
